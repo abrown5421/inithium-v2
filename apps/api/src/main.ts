@@ -1,11 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import cookieParser from 'cookie-parser';
 import { parseEnv, createCorsOptions } from '@inithium/config';
 import { connectToDatabase } from '@inithium/db';
 import { createAuthenticateMiddleware, createRequireRoleMiddleware } from '@inithium/auth';
 import { createUserCollection } from '@inithium/collections';
-import { createAuthRouter, createHealthRouter } from '@inithium/routes';
+import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
+import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 
 const bootstrap = async (): Promise<void> => {
   const envResult = parseEnv(process.env);
@@ -28,6 +31,13 @@ const bootstrap = async (): Promise<void> => {
   app.use(cors(createCorsOptions(env.CORS_ORIGINS)));
   app.use(express.json());
   app.use(cookieParser());
+  app.use(express.json({ limit: `${env.FILE_UPLOAD_MAX_SIZE_MB}mb` }));
+  app.use(cookieParser());
+
+  const fileManagerRootDir = path.resolve(env.APP_FILE_ROOT);
+  await fs.mkdir(fileManagerRootDir, { recursive: true });
+  const fileRepository = createFileRepository();
+  const fileManagerService = createFileManagerService(fileRepository, { rootDir: fileManagerRootDir });
 
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
@@ -49,6 +59,8 @@ const bootstrap = async (): Promise<void> => {
   );
 
   app.use('/users', userCollection.router);
+  app.use('/users', userCollection.router);
+  app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
 
   app.listen(env.PORT, () => {
     console.log(`Application online on port ${env.PORT}`);

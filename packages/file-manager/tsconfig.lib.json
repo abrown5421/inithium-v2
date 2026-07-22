@@ -11,19 +11,10 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
-      "path": "../file-manager/tsconfig.lib.json"
-    },
-    {
-      "path": "../auth/tsconfig.lib.json"
-    },
-    {
-      "path": "../services/tsconfig.lib.json"
+      "path": "../validators/tsconfig.lib.json"
     },
     {
       "path": "../types/tsconfig.lib.json"
-    },
-    {
-      "path": "../crud-engine/tsconfig.lib.json"
     }
   ]
 }
