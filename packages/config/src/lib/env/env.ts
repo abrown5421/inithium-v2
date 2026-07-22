@@ -11,7 +11,9 @@ export const envSchema = z.object({
   JWT_REFRESH_SECRET: z.string().min(32),
   JWT_REFRESH_EXPIRY: z.string().default('7d'),
   COOKIE_SECURE: z.string().default('false').transform((val) => val === 'true'),
-  COOKIE_DOMAIN: z.string().optional()
+  COOKIE_DOMAIN: z.string().optional(),
+  APP_FILE_ROOT: z.string().min(1),
+  FILE_UPLOAD_MAX_SIZE_MB: z.string().default('10').transform((val) => parseInt(val, 10))
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

@@ -41,6 +41,9 @@
     },
     {
       "path": "./packages/auth"
+    },
+    {
+      "path": "./packages/file-manager"
     }
   ],
   "compilerOptions": {}
