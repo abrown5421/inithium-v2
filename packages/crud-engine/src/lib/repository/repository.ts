@@ -1,4 +1,4 @@
-import { Db, Filter, UpdateFilter, OptionalUnlessRequiredId } from 'mongodb';
+import { Db, Filter, UpdateFilter, OptionalUnlessRequiredId, ObjectId } from 'mongodb';
 import { ResultAsync } from 'neverthrow';
 import { AppError, BaseEntity, PaginatedResult, createDatabaseError, createNotFoundError } from '@inithium/types';
 
@@ -13,6 +13,10 @@ export interface CrudRepository<T extends BaseEntity> {
   readonly deleteOne: (id: string) => ResultAsync<void, AppError>;
   readonly deleteMany: (ids: readonly string[]) => ResultAsync<number, AppError>;
 }
+
+const toObjectId = (id: string): ObjectId => {
+  return ObjectId.isValid(id) ? new ObjectId(id) : (id as unknown as ObjectId);
+};
 
 export const createRepository = <T extends BaseEntity>(db: Db, collectionName: string): CrudRepository<T> => {
   const collection = db.collection<T>(collectionName);
@@ -39,7 +43,7 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     },
 
     readOne: (id) => {
-      const filter = { _id: id } as Filter<T>;
+      const filter = { _id: toObjectId(id) } as unknown as Filter<T>;
       return ResultAsync.fromPromise(
         collection.findOne(filter),
         (err) => createDatabaseError(`Error finding document ${id} in ${collectionName}`, err)
@@ -50,7 +54,8 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     },
 
     readMany: (ids) => {
-      const filter = { _id: { $in: ids } } as Filter<T>;
+      const objectIds = ids.map(toObjectId);
+      const filter = { _id: { $in: objectIds } } as unknown as Filter<T>;
       return ResultAsync.fromPromise(
         collection.find(filter).toArray(),
         (err) => createDatabaseError(`Error reading documents from ${collectionName}`, err)
@@ -77,7 +82,7 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     },
 
     updateOne: (id, update) => {
-      const filter = { _id: id } as Filter<T>;
+      const filter = { _id: toObjectId(id) } as unknown as Filter<T>;
       const payload = { $set: { ...update, updatedAt: new Date() } } as UpdateFilter<T>;
       return ResultAsync.fromPromise(
         collection.findOneAndUpdate(filter, payload, { returnDocument: 'after' }),
@@ -91,7 +96,7 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     updateMany: (items) => {
       const operations = items.map((item) => ({
         updateOne: {
-          filter: { _id: item.id } as Filter<T>,
+          filter: { _id: toObjectId(item.id) } as unknown as Filter<T>,
           update: { $set: { ...item.data, updatedAt: new Date() } } as UpdateFilter<T>
         }
       }));
@@ -99,8 +104,8 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
         collection.bulkWrite(operations),
         (err) => createDatabaseError(`Error batch updating in ${collectionName}`, err)
       ).andThen(() => {
-        const ids = items.map((i) => i.id);
-        const filter = { _id: { $in: ids } } as Filter<T>;
+        const objectIds = items.map((i) => toObjectId(i.id));
+        const filter = { _id: { $in: objectIds } } as unknown as Filter<T>;
         return ResultAsync.fromPromise(
           collection.find(filter).toArray(),
           (err) => createDatabaseError(`Error fetching updated records from ${collectionName}`, err)
@@ -109,7 +114,7 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     },
 
     deleteOne: (id) => {
-      const filter = { _id: id } as Filter<T>;
+      const filter = { _id: toObjectId(id) } as unknown as Filter<T>;
       return ResultAsync.fromPromise(
         collection.deleteOne(filter),
         (err) => createDatabaseError(`Error deleting document ${id} from ${collectionName}`, err)
@@ -122,7 +127,8 @@ export const createRepository = <T extends BaseEntity>(db: Db, collectionName: s
     },
 
     deleteMany: (ids) => {
-      const filter = { _id: { $in: ids } } as Filter<T>;
+      const objectIds = ids.map(toObjectId);
+      const filter = { _id: { $in: objectIds } } as unknown as Filter<T>;
       return ResultAsync.fromPromise(
         collection.deleteMany(filter),
         (err) => createDatabaseError(`Error batch deleting from ${collectionName}`, err)

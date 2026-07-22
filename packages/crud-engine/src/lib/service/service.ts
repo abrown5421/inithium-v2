@@ -21,6 +21,13 @@ export const createService = <T extends BaseEntity, CreateDTO, UpdateDTO>(
   createSchema: z.ZodSchema<CreateDTO>,
   updateSchema: z.ZodSchema<UpdateDTO>
 ): CrudService<T, CreateDTO, UpdateDTO> => {
+  const batchUpdateSchema = z.array(
+    z.object({
+      id: z.string(),
+      data: updateSchema
+    })
+  );
+
   return {
     createOne: (dto) =>
       validateDoc(createSchema)(dto).asyncAndThen((valid) =>
@@ -43,16 +50,14 @@ export const createService = <T extends BaseEntity, CreateDTO, UpdateDTO>(
         repo.updateOne(id, valid as Partial<Omit<T, '_id' | 'createdAt' | 'updatedAt'>>)
       ),
 
-    updateMany: (items) => {
-      const dataSet = items.map((i) => i.data);
-      return validateManyDocs(updateSchema)(dataSet).asyncAndThen((validList) => {
-        const validatedItems = items.map((item, idx) => ({
+    updateMany: (items) =>
+      validateDoc(batchUpdateSchema)(items).asyncAndThen((validItems) => {
+        const payload = validItems.map((item) => ({
           id: item.id,
-          data: validList[idx] as Partial<Omit<T, '_id' | 'createdAt' | 'updatedAt'>>
+          data: item.data as Partial<Omit<T, '_id' | 'createdAt' | 'updatedAt'>>
         }));
-        return repo.updateMany(validatedItems);
-      });
-    },
+        return repo.updateMany(payload);
+      }),
 
     deleteOne: (id) => repo.deleteOne(id),
 
