@@ -1,22 +1,44 @@
 {
-  "name": "@org/source",
+  "name": "@inithium/source",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {},
   "private": true,
-  "dependencies": {},
   "devDependencies": {
+    "@nx/esbuild": "23.1.0",
     "@nx/js": "23.1.0",
+    "@nx/node": "^23.1.0",
+    "@nx/react": "^23.1.0",
+    "@nx/vite": "^23.1.0",
+    "@nx/web": "23.1.0",
     "@swc-node/register": "1.11.1",
     "@swc/core": "1.15.8",
     "@swc/helpers": "0.5.18",
-    "@types/node": "^24.0.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "esbuild": "^0.27.0",
+    "jiti": "2.4.2",
     "nx": "23.1.0",
     "prettier": "^3.8.1",
     "tslib": "^2.3.0",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vite": "^8.0.0"
   },
   "workspaces": [
-    "packages/*"
-  ]
+    "packages/*",
+    "apps/*"
+  ],
+  "dependencies": {
+    "@reduxjs/toolkit": "^2.12.0",
+    "express": "^5.1.0",
+    "mongoose": "^9.8.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-redux": "^9.3.0",
+    "react-router-dom": "6.30.3"
+  }
 }
