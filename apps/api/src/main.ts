@@ -5,7 +5,7 @@ import { parseEnv, createCorsOptions } from '@inithium/config';
 import { connectToDatabase } from '@inithium/db';
 import { createAuthenticateMiddleware, createRequireRoleMiddleware } from '@inithium/auth';
 import { createUserCollection } from '@inithium/collections';
-import { createAuthRouter } from '@inithium/routes';
+import { createAuthRouter, createHealthRouter } from '@inithium/routes';
 
 const bootstrap = async (): Promise<void> => {
   const envResult = parseEnv(process.env);
@@ -34,6 +34,7 @@ const bootstrap = async (): Promise<void> => {
 
   const userCollection = createUserCollection(db, { authenticate, requireAdmin });
 
+  app.use('/health', createHealthRouter());
   app.use(
     '/auth',
     createAuthRouter(userCollection.service, {
