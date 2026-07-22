@@ -9,5 +9,12 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts"],
-  "references": []
+  "references": [
+    {
+      "path": "../services/tsconfig.lib.json"
+    },
+    {
+      "path": "../crud-engine/tsconfig.lib.json"
+    }
+  ]
 }

@@ -1,1 +1,1 @@
-export * from './lib/routes.js';
+export * from './lib/products/index.js';

@@ -34,6 +34,7 @@
   ],
   "dependencies": {
     "@reduxjs/toolkit": "^2.12.0",
+    "cors": "^2.8.6",
     "express": "^5.1.0",
     "mongoose": "^9.8.0",
     "neverthrow": "^8.2.0",

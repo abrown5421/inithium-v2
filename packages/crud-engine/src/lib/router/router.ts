@@ -27,25 +27,29 @@ export const createCrudRouter = <T extends BaseEntity, CreateDTO, UpdateDTO>(
 ): Router => {
   const router = Router();
 
-  router.post('/', async (req: Request, res: Response) => {
-    const result = await service.createOne(req.body);
-    handleResult(res, result, 201);
-  });
-
   router.post('/batch', async (req: Request, res: Response) => {
     const result = await service.createMany(req.body);
     handleResult(res, result, 201);
   });
 
-  router.get('/:id', async (req: Request, res: Response) => {
-    const id = String(req.params['id']);
-    const result = await service.readOne(id);
-    handleResult(res, result);
-  });
-
   router.post('/query', async (req: Request, res: Response) => {
     const result = await service.readMany(req.body.ids);
     handleResult(res, result);
+  });
+
+  router.put('/batch', async (req: Request, res: Response) => {
+    const result = await service.updateMany(req.body);
+    handleResult(res, result);
+  });
+
+  router.delete('/batch', async (req: Request, res: Response) => {
+    const result = await service.deleteMany(req.body.ids);
+    handleResult(res, result);
+  });
+
+  router.post('/', async (req: Request, res: Response) => {
+    const result = await service.createOne(req.body);
+    handleResult(res, result, 201);
   });
 
   router.get('/', async (req: Request, res: Response) => {
@@ -55,26 +59,22 @@ export const createCrudRouter = <T extends BaseEntity, CreateDTO, UpdateDTO>(
     handleResult(res, result);
   });
 
+  router.get('/:id', async (req: Request, res: Response) => {
+    const id = String(req.params['id']);
+    const result = await service.readOne(id);
+    handleResult(res, result);
+  });
+
   router.put('/:id', async (req: Request, res: Response) => {
     const id = String(req.params['id']);
     const result = await service.updateOne(id, req.body);
     handleResult(res, result);
   });
 
-  router.put('/batch', async (req: Request, res: Response) => {
-    const result = await service.updateMany(req.body);
-    handleResult(res, result);
-  });
-
   router.delete('/:id', async (req: Request, res: Response) => {
     const id = String(req.params['id']);
     const result = await service.deleteOne(id);
-    handleResult(res, result, 204);
-  });
-
-  router.delete('/batch', async (req: Request, res: Response) => {
-    const result = await service.deleteMany(req.body.ids);
-    handleResult(res, result);
+    handleResult(res, result.map(() => ({ id, deleted: true })), 200);
   });
 
   return router;
