@@ -49,3 +49,6 @@ Thumbs.db
 .nx/self-healing
 .nx/migrate-runs
 vite.config.*.timestamp*
+
+.env
+*.zip
