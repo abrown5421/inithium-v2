@@ -10,7 +10,13 @@
   "exclude": [],
   "references": [
     {
+      "path": "../../packages/routes/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/collections/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/auth/tsconfig.lib.json"
     },
     {
       "path": "../../packages/db/tsconfig.lib.json"

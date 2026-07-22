@@ -38,6 +38,9 @@
     },
     {
       "path": "./packages/collections"
+    },
+    {
+      "path": "./packages/auth"
     }
   ],
   "compilerOptions": {}
