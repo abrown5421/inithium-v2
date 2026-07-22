@@ -2,6 +2,8 @@ export type AppError =
   | { readonly type: 'VALIDATION_ERROR'; readonly message: string; readonly details?: unknown }
   | { readonly type: 'NOT_FOUND_ERROR'; readonly message: string }
   | { readonly type: 'CONFLICT_ERROR'; readonly message: string }
+  | { readonly type: 'UNAUTHORIZED_ERROR'; readonly message: string }
+  | { readonly type: 'FORBIDDEN_ERROR'; readonly message: string }
   | { readonly type: 'DATABASE_ERROR'; readonly message: string; readonly cause?: unknown }
   | { readonly type: 'INTERNAL_ERROR'; readonly message: string };
 
@@ -18,6 +20,16 @@ export const createNotFoundError = (message: string): AppError => ({
 
 export const createConflictError = (message: string): AppError => ({
   type: 'CONFLICT_ERROR',
+  message
+});
+
+export const createUnauthorizedError = (message: string): AppError => ({
+  type: 'UNAUTHORIZED_ERROR',
+  message
+});
+
+export const createForbiddenError = (message: string): AppError => ({
+  type: 'FORBIDDEN_ERROR',
   message
 });
 

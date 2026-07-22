@@ -5,7 +5,13 @@ import { AppError, createValidationError } from '@inithium/types';
 export const envSchema = z.object({
   MONGO_URI: z.string().url(),
   PORT: z.string().default('3000').transform((val) => parseInt(val, 10)),
-  CORS_ORIGINS: z.string().transform((val) => val.split(',').map((s) => s.trim()))
+  CORS_ORIGINS: z.string().transform((val) => val.split(',').map((s) => s.trim())),
+  JWT_ACCESS_SECRET: z.string().min(32),
+  JWT_ACCESS_EXPIRY: z.string().default('15m'),
+  JWT_REFRESH_SECRET: z.string().min(32),
+  JWT_REFRESH_EXPIRY: z.string().default('7d'),
+  COOKIE_SECURE: z.string().default('false').transform((val) => val === 'true'),
+  COOKIE_DOMAIN: z.string().optional()
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
