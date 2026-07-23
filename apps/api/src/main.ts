@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser';
 import { parseEnv, createCorsOptions } from '@inithium/config';
 import { connectToDatabase } from '@inithium/db';
 import { createAuthenticateMiddleware, createRequireRoleMiddleware } from '@inithium/auth';
-import { createUserCollection } from '@inithium/collections';
+import { createAssetCollection, createUserCollection, ensureAssetIndices } from '@inithium/collections';
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 
@@ -32,7 +32,6 @@ const bootstrap = async (): Promise<void> => {
   app.use(express.json());
   app.use(cookieParser());
   app.use(express.json({ limit: `${env.FILE_UPLOAD_MAX_SIZE_MB}mb` }));
-  app.use(cookieParser());
 
   const fileManagerRootDir = path.resolve(env.APP_FILE_ROOT);
   await fs.mkdir(fileManagerRootDir, { recursive: true });
@@ -43,6 +42,24 @@ const bootstrap = async (): Promise<void> => {
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
   const userCollection = createUserCollection(db, { authenticate, requireAdmin });
+
+  const assetRootDir = path.resolve(env.APP_FILE_ROOT);
+  await fs.mkdir(assetRootDir, { recursive: true });
+  const assetFileManagerService = createFileManagerService(fileRepository, { rootDir: assetRootDir });
+
+  const assetIndexResult = await ensureAssetIndices(db);
+  if (assetIndexResult.isErr()) {
+    console.error(assetIndexResult.error);
+    process.exit(1);
+  }
+
+  const assetCollection = createAssetCollection(db, {
+    fileManagerService: assetFileManagerService,
+    authenticate,
+    requireAdmin,
+    maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB,
+    publicAssetBaseUrl: env.API_PUBLIC_ORIGIN
+  });
 
   app.use('/health', createHealthRouter());
   app.use(
@@ -59,7 +76,7 @@ const bootstrap = async (): Promise<void> => {
   );
 
   app.use('/users', userCollection.router);
-  app.use('/users', userCollection.router);
+  app.use('/assets', assetCollection.router);
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
 
   app.listen(env.PORT, () => {
