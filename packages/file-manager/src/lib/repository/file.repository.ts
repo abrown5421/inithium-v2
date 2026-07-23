@@ -22,6 +22,7 @@ export interface FileRepository {
   readonly updateFile: (targetPath: string, content: Buffer) => ResultAsync<void, AppError>;
   readonly deleteFile: (targetPath: string) => ResultAsync<void, AppError>;
   readonly moveFile: (sourcePath: string, targetPath: string) => ResultAsync<void, AppError>;
+  readonly resolveExistingFile: (targetPath: string) => ResultAsync<{ absolutePath: string }, AppError>;
 }
 
 export const createFileRepository = (): FileRepository => ({
@@ -70,6 +71,17 @@ export const createFileRepository = (): FileRepository => ({
         }
         await fs.mkdir(path.dirname(targetPath), { recursive: true });
         await fs.rename(sourcePath, targetPath);
+      })(),
+      asAppError
+    ),
+
+  resolveExistingFile: (targetPath) =>
+    ResultAsync.fromPromise(
+      (async () => {
+        if (!(await pathExists(targetPath))) {
+          throw createNotFoundError('No file found at the given filePath');
+        }
+        return { absolutePath: targetPath };
       })(),
       asAppError
     )

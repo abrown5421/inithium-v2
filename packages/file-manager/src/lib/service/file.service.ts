@@ -24,6 +24,7 @@ export interface FileManagerService {
   readonly updateFile: (dto: UpdateFileDTO) => ResultAsync<{ filePath: string }, AppError>;
   readonly deleteFile: (dto: DeleteFileDTO) => ResultAsync<{ filePath: string }, AppError>;
   readonly moveFile: (dto: MoveFileDTO) => ResultAsync<{ sourcePath: string; targetPath: string }, AppError>;
+  readonly resolveExistingFile: (dto: { filePath: string }) => ResultAsync<{ absolutePath: string }, AppError>;
 }
 
 export const createFileManagerService = (repo: FileRepository, config: FileManagerConfig): FileManagerService => ({
@@ -59,5 +60,10 @@ export const createFileManagerService = (repo: FileRepository, config: FileManag
           repo.moveFile(resolvedSource, resolvedTarget).map(() => ({ sourcePath, targetPath }))
         )
       )
+    ),
+
+  resolveExistingFile: (dto) =>
+    resolveSafePath(config.rootDir, dto.filePath).asyncAndThen((resolvedPath) =>
+      repo.resolveExistingFile(resolvedPath)
     )
 });
