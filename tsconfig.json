@@ -47,6 +47,9 @@
     },
     {
       "path": "./packages/collection-generator"
+    },
+    {
+      "path": "./packages/ui"
     }
   ],
   "compilerOptions": {}
