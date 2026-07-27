@@ -6,9 +6,16 @@ import cookieParser from 'cookie-parser';
 import { parseEnv, createCorsOptions } from '@inithium/config';
 import { connectToDatabase } from '@inithium/db';
 import { createAuthenticateMiddleware, createRequireRoleMiddleware } from '@inithium/auth';
-import { createAssetCollection, createUserCollection, ensureAssetIndices } from '@inithium/collections';
+import {
+  createAssetCollection,
+  createUserCollection,
+  ensureAssetIndices,
+  createCollectionDefinitionCollection,
+  ensureCollectionDefinitionIndices
+} from '@inithium/collections';
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
+// collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
   const envResult = parseEnv(process.env);
@@ -38,6 +45,9 @@ const bootstrap = async (): Promise<void> => {
   const fileRepository = createFileRepository();
   const fileManagerService = createFileManagerService(fileRepository, { rootDir: fileManagerRootDir });
 
+  const workspaceRootDir = path.resolve(env.WORKSPACE_ROOT); // error here
+  const workspaceFileManagerService = createFileManagerService(fileRepository, { rootDir: workspaceRootDir });
+
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
@@ -61,6 +71,20 @@ const bootstrap = async (): Promise<void> => {
     publicAssetBaseUrl: env.API_PUBLIC_ORIGIN
   });
 
+  const collectionDefinitionIndexResult = await ensureCollectionDefinitionIndices(db);
+  if (collectionDefinitionIndexResult.isErr()) {
+    console.error(collectionDefinitionIndexResult.error);
+    process.exit(1);
+  }
+
+  const collectionDefinitionCollection = createCollectionDefinitionCollection(db, {
+    authenticate,
+    protectedMiddleware: [requireAdmin],
+    generatorConfig: { fileManagerService: workspaceFileManagerService }
+  });
+
+// collection-generator:instances
+
   app.use('/health', createHealthRouter());
   app.use(
     '/auth',
@@ -77,7 +101,9 @@ const bootstrap = async (): Promise<void> => {
 
   app.use('/users', userCollection.router);
   app.use('/assets', assetCollection.router);
+  app.use('/collection-definitions', collectionDefinitionCollection.router);
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
+// collection-generator:routes
 
   app.listen(env.PORT, () => {
     console.log(`Application online on port ${env.PORT}`);

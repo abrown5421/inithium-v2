@@ -44,6 +44,9 @@
     },
     {
       "path": "./packages/file-manager"
+    },
+    {
+      "path": "./packages/collection-generator"
     }
   ],
   "compilerOptions": {}
