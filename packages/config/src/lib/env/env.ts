@@ -14,7 +14,8 @@ export const envSchema = z.object({
   COOKIE_DOMAIN: z.string().optional(),
   APP_FILE_ROOT: z.string().min(1),
   FILE_UPLOAD_MAX_SIZE_MB: z.string().default('10').transform((val) => parseInt(val, 10)),
-  API_PUBLIC_ORIGIN: z.string().url()
+  API_PUBLIC_ORIGIN: z.string().url(),
+  WORKSPACE_ROOT: z.string().min(1)
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;
