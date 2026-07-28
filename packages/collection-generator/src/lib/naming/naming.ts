@@ -14,11 +14,15 @@ export interface CollectionNames {
   readonly pascalName: string;
   readonly camelName: string;
   readonly pluralKebabName: string;
+  readonly pluralPascalName: string;
+  readonly pluralCamelName: string;
 }
 
 export const buildCollectionNames = (name: string, pluralName: string): CollectionNames => ({
   kebabName: name,
   pascalName: toPascalCase(name),
   camelName: toCamelCase(name),
-  pluralKebabName: pluralName
+  pluralKebabName: pluralName,
+  pluralPascalName: toPascalCase(pluralName),
+  pluralCamelName: toCamelCase(pluralName)
 });

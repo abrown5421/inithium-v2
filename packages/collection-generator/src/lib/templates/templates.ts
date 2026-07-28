@@ -78,4 +78,35 @@ export const create${names.pascalName}Collection = (db: Db, config: CrudRouterOp
 };
 `;
 
+export const buildRtkQueryApiFileContent = (names: CollectionNames): string => `import { createApi } from '@reduxjs/toolkit/query/react';
+import type { Create${names.pascalName}DTO, Update${names.pascalName}DTO } from '@inithium/validators';
+import type { ${names.pascalName} } from '@inithium/models';
+import { unwrappingBaseQuery } from './base-query.js';
+import { createCrudEndpoints } from './crud-endpoints.js';
+
+export const ${names.camelName}Api = createApi({
+  reducerPath: '${names.camelName}Api',
+  baseQuery: unwrappingBaseQuery,
+  tagTypes: ['${names.pascalName}'],
+  endpoints: (builder) =>
+    createCrudEndpoints<${names.pascalName}, Create${names.pascalName}DTO, Update${names.pascalName}DTO, '${names.pascalName}', '${names.camelName}Api'>(
+      builder,
+      '${names.pluralKebabName}',
+      '${names.pascalName}'
+    )
+});
+
+export const {
+  useReadAllQuery: useReadAll${names.pluralPascalName}Query,
+  useReadOneQuery: useRead${names.pascalName}Query,
+  useReadManyQuery: useRead${names.pluralPascalName}ByIdsQuery,
+  useCreateOneMutation: useCreate${names.pascalName}Mutation,
+  useCreateManyMutation: useCreate${names.pluralPascalName}Mutation,
+  useUpdateOneMutation: useUpdate${names.pascalName}Mutation,
+  useUpdateManyMutation: useUpdate${names.pluralPascalName}Mutation,
+  useDeleteOneMutation: useDelete${names.pascalName}Mutation,
+  useDeleteManyMutation: useDelete${names.pluralPascalName}Mutation
+} = ${names.camelName}Api;
+`;
+
 export const buildBarrelIndexContent = (fileName: string): string => `export * from './${fileName}';\n`;
