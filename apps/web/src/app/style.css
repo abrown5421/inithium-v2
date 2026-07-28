@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #ebf5f9;
+  --color-primary-100: #cce6f0;
+  --color-primary-200: #99cce0;
+  --color-primary-300: #66b3d1;
+  --color-primary-400: #3399c2;
+  --color-primary-500: #115e7a;
+  --color-primary-600: #0e4b62;
+  --color-primary-700: #0a3849;
+  --color-primary-800: #072631;
+  --color-primary-900: #031318;
+  --color-primary-950: #02090c;
+
+  --color-secondary-50: #ebf5f5;
+  --color-secondary-100: #cce6e6;
+  --color-secondary-200: #99cccc;
+  --color-secondary-300: #66b3b3;
+  --color-secondary-400: #339999;
+  --color-secondary-500: #0f6666;
+  --color-secondary-600: #0c5252;
+  --color-secondary-700: #093d3d;
+  --color-secondary-800: #062929;
+  --color-secondary-900: #031414;
+  --color-secondary-950: #010a0a;
+
+  --color-accent-50: #fef6eb;
+  --color-accent-100: #fde8cc;
+  --color-accent-200: #facb99;
+  --color-accent-300: #f8af66;
+  --color-accent-400: #f59333;
+  --color-accent-500: #f2a65a;
+  --color-accent-600: #c28548;
+  --color-accent-700: #916436;
+  --color-accent-800: #614224;
+  --color-accent-900: #302112;
+  --color-accent-950: #181109;
+
+  --color-surface-50: #ffffff;
+  --color-surface-100: #fafcfd;
+  --color-surface-200: #f5fafb;
+  --color-surface-300: #f0f7f9;
+  --color-surface-400: #ebf5f7;
+  --color-surface-500: #e6f2f5;
+  --color-surface-600: #b8c2c4;
+  --color-surface-700: #8a9193;
+  --color-surface-800: #5c6162;
+  --color-surface-900: #2e3031;
+  --color-surface-950: #000000;
+
+  --color-surface-contrast-50: #000000;
+  --color-surface-contrast-100: #060606;
+  --color-surface-contrast-200: #0c0c0c;
+  --color-surface-contrast-300: #131312;
+  --color-surface-contrast-400: #191918;
+  --color-surface-contrast-500: #1f1f1e;
+  --color-surface-contrast-600: #4c4c4b;
+  --color-surface-contrast-700: #797978;
+  --color-surface-contrast-800: #a5a5a5;
+  --color-surface-contrast-900: #d2d2d2;
+  --color-surface-contrast-950: #ffffff;
+}
+
+@source inline("{bg,text,border,outline,ring}-{primary,secondary,accent,surface,surface-contrast,red,emerald,amber,sky}-{50,100,200,300,400,500,600,700,800,900,950}");
