@@ -1,1 +1,2 @@
-export * from './lib/animation/animation.constants.js'
+export * from './lib/animation/index.js'
+export * from './lib/theme/index.js'
