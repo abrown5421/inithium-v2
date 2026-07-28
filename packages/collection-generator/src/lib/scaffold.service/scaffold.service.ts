@@ -3,7 +3,13 @@ import { AppError } from '@inithium/types';
 import { FileManagerService } from '@inithium/file-manager';
 import { CollectionDefinition } from '@inithium/models';
 import { buildCollectionNames, CollectionNames } from '../naming/naming.js';
-import { buildBarrelIndexContent, buildCollectionFileContent, buildModelFileContent, buildValidatorsFileContent } from '../templates/templates.js';
+import {
+  buildBarrelIndexContent,
+  buildCollectionFileContent,
+  buildModelFileContent,
+  buildRtkQueryApiFileContent,
+  buildValidatorsFileContent
+} from '../templates/templates.js';
 import { appendLine, insertBeforeMarker, removeLineContaining } from '../file-patcher/file-patcher.js';
 
 export interface CollectionGeneratorConfig {
@@ -14,10 +20,15 @@ const MAIN_TS_PATH = 'apps/api/src/main.ts';
 const MODELS_BARREL_PATH = 'packages/models/src/index.ts';
 const VALIDATORS_BARREL_PATH = 'packages/validators/src/index.ts';
 const COLLECTIONS_BARREL_PATH = 'packages/collections/src/index.ts';
+const STORE_API_BARREL_PATH = 'packages/store/src/lib/api/index.ts';
+const STORE_INDEX_PATH = 'packages/store/src/lib/store/index.ts';
 
 const IMPORTS_MARKER = '// collection-generator:imports';
 const INSTANCES_MARKER = '// collection-generator:instances';
 const ROUTES_MARKER = '// collection-generator:routes';
+const STORE_IMPORTS_MARKER = '// collection-generator:imports';
+const STORE_REDUCERS_MARKER = '// collection-generator:reducers';
+const STORE_MIDDLEWARE_MARKER = '// collection-generator:middleware';
 
 const modelFilePath = (names: CollectionNames): string => `packages/models/src/lib/${names.kebabName}/${names.kebabName}.model.ts`;
 const modelIndexPath = (names: CollectionNames): string => `packages/models/src/lib/${names.kebabName}/index.ts`;
@@ -25,6 +36,7 @@ const validatorsFilePath = (names: CollectionNames): string => `packages/validat
 const validatorsIndexPath = (names: CollectionNames): string => `packages/validators/src/lib/${names.kebabName}/index.ts`;
 const collectionFilePath = (names: CollectionNames): string => `packages/collections/src/lib/${names.kebabName}/${names.kebabName}.collection.ts`;
 const collectionIndexPath = (names: CollectionNames): string => `packages/collections/src/lib/${names.kebabName}/index.ts`;
+const rtkQueryApiFilePath = (names: CollectionNames): string => `packages/store/src/lib/api/${names.kebabName}.api.ts`;
 
 const toBase64 = (content: string): string => Buffer.from(content).toString('base64');
 
@@ -64,9 +76,40 @@ export const scaffoldCollection = (
         fileContent: toBase64(buildBarrelIndexContent(`${names.kebabName}.collection.js`))
       })
     )
+    .andThen(() =>
+      fileManagerService.createFile({
+        filePath: rtkQueryApiFilePath(names),
+        fileContent: toBase64(buildRtkQueryApiFileContent(names))
+      })
+    )
     .andThen(() => appendLine(fileManagerService, MODELS_BARREL_PATH, `export * from './lib/${names.kebabName}/index.js';`))
     .andThen(() => appendLine(fileManagerService, VALIDATORS_BARREL_PATH, `export * from './lib/${names.kebabName}/index.js';`))
     .andThen(() => appendLine(fileManagerService, COLLECTIONS_BARREL_PATH, `export * from './lib/${names.kebabName}/index.js';`))
+    .andThen(() => appendLine(fileManagerService, STORE_API_BARREL_PATH, `export * from './${names.kebabName}.api.js';`))
+    .andThen(() =>
+      insertBeforeMarker(
+        fileManagerService,
+        STORE_INDEX_PATH,
+        STORE_IMPORTS_MARKER,
+        `import { ${names.camelName}Api } from '../api/${names.kebabName}.api.js';`
+      )
+    )
+    .andThen(() =>
+      insertBeforeMarker(
+        fileManagerService,
+        STORE_INDEX_PATH,
+        STORE_REDUCERS_MARKER,
+        `    [${names.camelName}Api.reducerPath]: ${names.camelName}Api.reducer,`
+      )
+    )
+    .andThen(() =>
+      insertBeforeMarker(
+        fileManagerService,
+        STORE_INDEX_PATH,
+        STORE_MIDDLEWARE_MARKER,
+        `      ${names.camelName}Api.middleware,`
+      )
+    )
     .andThen(() =>
       insertBeforeMarker(fileManagerService, MAIN_TS_PATH, IMPORTS_MARKER, `import { create${names.pascalName}Collection } from '@inithium/collections';`)
     )
@@ -115,9 +158,12 @@ export const unscaffoldCollection = (
     .andThen(() => fileManagerService.deleteFile({ filePath: validatorsIndexPath(names) }))
     .andThen(() => fileManagerService.deleteFile({ filePath: collectionFilePath(names) }))
     .andThen(() => fileManagerService.deleteFile({ filePath: collectionIndexPath(names) }))
+    .andThen(() => fileManagerService.deleteFile({ filePath: rtkQueryApiFilePath(names) }))
     .andThen(() => removeLineContaining(fileManagerService, MODELS_BARREL_PATH, `/${names.kebabName}/index.js`))
     .andThen(() => removeLineContaining(fileManagerService, VALIDATORS_BARREL_PATH, `/${names.kebabName}/index.js`))
     .andThen(() => removeLineContaining(fileManagerService, COLLECTIONS_BARREL_PATH, `/${names.kebabName}/index.js`))
+    .andThen(() => removeLineContaining(fileManagerService, STORE_API_BARREL_PATH, `${names.kebabName}.api.js`))
+    .andThen(() => removeLineContaining(fileManagerService, STORE_INDEX_PATH, `${names.camelName}Api`))
     .andThen(() => removeLineContaining(fileManagerService, MAIN_TS_PATH, `create${names.pascalName}Collection`))
     .andThen(() => removeLineContaining(fileManagerService, MAIN_TS_PATH, `${names.camelName}Collection`));
 };
