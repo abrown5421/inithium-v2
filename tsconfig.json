@@ -50,6 +50,9 @@
     },
     {
       "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/store"
     }
   ],
   "compilerOptions": {}
