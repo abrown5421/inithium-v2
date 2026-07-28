@@ -6,12 +6,9 @@
     "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
     "emitDeclarationOnly": false,
     "forceConsistentCasingInFileNames": true,
+    "jsx": "react-jsx",
     "types": ["node"]
   },
-  "include": ["src/**/*.ts"],
-  "references": [
-    {
-      "path": "../types/tsconfig.lib.json"
-    }
-  ]
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": []
 }

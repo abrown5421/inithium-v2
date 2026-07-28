@@ -3,7 +3,9 @@ import 'animate.css';
 
 const App: React.FC = () => {
   return (
-    <div>app</div>
+    <div>
+      web
+    </div>
   )
 }
 
