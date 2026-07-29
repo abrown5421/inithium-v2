@@ -1,5 +1,12 @@
 {
   "name": "@inithium/web",
   "version": "0.0.1",
-  "private": true
+  "private": true,
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "@inithium/ui": "^0.0.1"
+  }
 }

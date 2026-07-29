@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '@inithium/ui/styles.css';
+
+/* Tailwind's v4 auto-detection skips node_modules, so explicitly point it at
+   the workspace-linked @inithium/ui source for class scanning. */
+@source '../../../packages/ui/src';
