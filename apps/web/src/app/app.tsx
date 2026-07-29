@@ -1,9 +1,9 @@
+import { Button } from '@inithium/ui';
 import React from 'react';
-import 'animate.css';
 
 const App: React.FC = () => {
   return (
-    <div>app</div>
+    <Button color='destructive'>test</Button>
   )
 }
 
