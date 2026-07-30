@@ -1,0 +1,2283 @@
+{
+  "info": {
+    "_postman_id": "d158393b-59a9-44c3-ad36-c8c0ed551697",
+    "name": "Inithium API",
+    "description": "CRUD engine API covering auth, file management, and the users / assets / collection-definitions / pages collections. Run \"Auth > Admin Login\" first to populate the auth_cookie collection variable used by every other authenticated request.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        },
+        "description": "Verifies the API process is up and can respond to requests. No authentication required."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('API is healthy', function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "description": "Authentication and session endpoints.",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticates an admin user and captures the access_token cookie into the auth_cookie collection variable for use by every other request in this collection.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@inithium.dev\",\n  \"password\": \"ChangeMe123!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// The API issues httpOnly \"access_token\" / \"refresh_token\" cookies via",
+                  "// Set-Cookie headers rather than returning them in the JSON body.",
+                  "// Pull the access token out of the raw Set-Cookie header(s) first (works",
+                  "// even when Postman's cookie jar is disabled or the domain doesn't",
+                  "// match), falling back to the cookie jar if it is enabled.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "let accessToken = null;",
+                  "",
+                  "const setCookieHeaders = pm.response.headers.all().filter(",
+                  "    (h) => h.key.toLowerCase() === 'set-cookie'",
+                  ");",
+                  "",
+                  "for (const header of setCookieHeaders) {",
+                  "    const match = header.value.match(/access_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        accessToken = match[1];",
+                  "        break;",
+                  "    }",
+                  "}",
+                  "",
+                  "if (!accessToken && pm.cookies.has('access_token')) {",
+                  "    accessToken = pm.cookies.get('access_token');",
+                  "}",
+                  "",
+                  "pm.test('Login succeeded and access token was captured', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(accessToken).to.not.be.null;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set('auth_cookie', accessToken);",
+                  "    console.log('Stored auth_cookie =', accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Self-service registration. Issues the same auth cookies as Admin Login on success.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new.user@example.com\",\n  \"password\": \"ChangeMe123!\",\n  \"first_name\": \"New\",\n  \"last_name\": \"User\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Relies on the httpOnly refresh_token cookie set at login, so it only works when Postman's cookie jar has captured it (this collection captures access_token explicitly; refresh_token is left to Postman's cookie jar)."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Returns the authenticated user derived from the access_token cookie."
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Clears the auth cookies server-side."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "File Management",
+      "description": "Admin-only file system operations against the managed workspace root.",
+      "item": [
+        {
+          "name": "Create File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/files",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "files"
+              ]
+            },
+            "description": "Creates a file within the managed file root.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"relativePath\": \"workspace/notes/readme.txt\",\n  \"contentBase64\": \"SGVsbG8gZnJvbSBQb3N0bWFuIQ==\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('File created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update File",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/files",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "files"
+              ]
+            },
+            "description": "Overwrites the contents of an existing managed file.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"relativePath\": \"workspace/notes/readme.txt\",\n  \"contentBase64\": \"VXBkYXRlZCBjb250ZW50IGZyb20gUG9zdG1hbiE=\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/files",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "files"
+              ]
+            },
+            "description": "Deletes a file within the managed file root.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"relativePath\": \"workspace/notes/readme.txt\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Move File",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/files/move",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "files",
+                "move"
+              ]
+            },
+            "description": "Moves/renames a file within the managed file root.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fromPath\": \"workspace/notes/readme.txt\",\n  \"toPath\": \"workspace/archive/readme.txt\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "CRUD engine routes for the users collection. All routes require an authenticated admin.",
+      "item": [
+        {
+          "name": "Create One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ]
+            },
+            "description": "Creates a single user and stores its _id in the user_id collection variable.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"jane.doe@example.com\",\n  \"password\": \"SuperSecure123!\",\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Doe\",\n  \"role\": \"user\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Parse the response, verify creation succeeded, and capture the new",
+                  "// entity's Mongo _id into the \"user_id\" collection variable so",
+                  "// subsequent single-entity requests in this folder can chain off it.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('user created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('_id');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('user_id', jsonData.data._id);",
+                  "    console.log('Stored user_id =', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "batch"
+              ]
+            },
+            "description": "Bulk-creates multiple user records in a single request.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"email\": \"alex.kim@example.com\",\n    \"password\": \"SuperSecure123!\",\n    \"first_name\": \"Alex\",\n    \"last_name\": \"Kim\",\n    \"role\": \"user\"\n  },\n  {\n    \"email\": \"sam.rivera@example.com\",\n    \"password\": \"SuperSecure123!\",\n    \"first_name\": \"Sam\",\n    \"last_name\": \"Rivera\",\n    \"role\": \"editor\"\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user batch created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Fetches a single user by id, using the id captured by Create One."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/query",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "query"
+              ]
+            },
+            "description": "Fetches multiple user records by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{user_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user batch fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read All (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Fetches a paginated list of user records."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update One",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Updates a single user by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"first_name\": \"Janet\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Many",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "batch"
+              ]
+            },
+            "description": "Bulk-updates multiple user records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"{{user_id}}\",\n    \"data\": {\n      \"role\": \"editor\"\n    }\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user batch updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete One",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Deletes a single user by id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Many",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "users",
+                "batch"
+              ]
+            },
+            "description": "Bulk-deletes multiple user records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{user_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('user batch deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Assets",
+      "description": "CRUD engine routes for the assets collection. All routes require an authenticated admin.",
+      "item": [
+        {
+          "name": "Create One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets"
+              ]
+            },
+            "description": "Creates a single asset and stores its _id in the asset_id collection variable.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"key\": \"images/sample-image.png\",\n  \"originalName\": \"sample-image.png\",\n  \"filePath\": \"/uploads/images/sample-image.png\",\n  \"mimeType\": \"image/png\",\n  \"sizeBytes\": 204800,\n  \"uploadedBy\": \"{{user_id}}\",\n  \"isSystem\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Parse the response, verify creation succeeded, and capture the new",
+                  "// entity's Mongo _id into the \"asset_id\" collection variable so",
+                  "// subsequent single-entity requests in this folder can chain off it.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('asset created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('_id');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('asset_id', jsonData.data._id);",
+                  "    console.log('Stored asset_id =', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "batch"
+              ]
+            },
+            "description": "Bulk-creates multiple asset records in a single request.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"key\": \"images/logo.svg\",\n    \"originalName\": \"logo.svg\",\n    \"filePath\": \"/uploads/images/logo.svg\",\n    \"mimeType\": \"image/svg+xml\",\n    \"sizeBytes\": 10240,\n    \"uploadedBy\": \"{{user_id}}\",\n    \"isSystem\": true\n  },\n  {\n    \"key\": \"pdfs/invoice.pdf\",\n    \"originalName\": \"invoice.pdf\",\n    \"filePath\": \"/uploads/pdfs/invoice.pdf\",\n    \"mimeType\": \"application/pdf\",\n    \"sizeBytes\": 51200,\n    \"uploadedBy\": \"{{user_id}}\",\n    \"isSystem\": false\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset batch created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/{{asset_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "{{asset_id}}"
+              ]
+            },
+            "description": "Fetches a single asset by id, using the id captured by Create One."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/query",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "query"
+              ]
+            },
+            "description": "Fetches multiple asset records by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{asset_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset batch fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read All (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Fetches a paginated list of asset records."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update One",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/{{asset_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "{{asset_id}}"
+              ]
+            },
+            "description": "Updates a single asset by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalName\": \"renamed-image.png\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Many",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "batch"
+              ]
+            },
+            "description": "Bulk-updates multiple asset records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"{{asset_id}}\",\n    \"data\": {\n      \"originalName\": \"batch-renamed-asset.png\"\n    }\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset batch updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete One",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/{{asset_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "{{asset_id}}"
+              ]
+            },
+            "description": "Deletes a single asset by id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Many",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/assets/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "assets",
+                "batch"
+              ]
+            },
+            "description": "Bulk-deletes multiple asset records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{asset_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('asset batch deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Collection Definitions",
+      "description": "CRUD engine routes for dynamically generated collection definitions. All routes require an authenticated admin.",
+      "item": [
+        {
+          "name": "Create One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions"
+              ]
+            },
+            "description": "Creates a single collection definition and stores its _id in the collection_definition_id collection variable.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"product\",\n  \"pluralName\": \"products\",\n  \"fields\": [\n    {\n      \"name\": \"title\",\n      \"type\": \"string\",\n      \"required\": true\n    },\n    {\n      \"name\": \"price\",\n      \"type\": \"number\",\n      \"required\": true\n    },\n    {\n      \"name\": \"inStock\",\n      \"type\": \"boolean\",\n      \"required\": false\n    }\n  ],\n  \"publicRoutes\": [\n    \"readOne\",\n    \"readAll\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Parse the response, verify creation succeeded, and capture the new",
+                  "// entity's Mongo _id into the \"collection_definition_id\" collection variable so",
+                  "// subsequent single-entity requests in this folder can chain off it.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('collection definition created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('_id');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('collection_definition_id', jsonData.data._id);",
+                  "    console.log('Stored collection_definition_id =', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "batch"
+              ]
+            },
+            "description": "Bulk-creates multiple collection definition records in a single request.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"name\": \"category\",\n    \"pluralName\": \"categories\",\n    \"fields\": [\n      {\n        \"name\": \"label\",\n        \"type\": \"string\",\n        \"required\": true\n      }\n    ],\n    \"publicRoutes\": [\n      \"readAll\"\n    ]\n  },\n  {\n    \"name\": \"review\",\n    \"pluralName\": \"reviews\",\n    \"fields\": [\n      {\n        \"name\": \"rating\",\n        \"type\": \"number\",\n        \"required\": true\n      },\n      {\n        \"name\": \"comment\",\n        \"type\": \"string\",\n        \"required\": false\n      }\n    ]\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition batch created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/{{collection_definition_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "{{collection_definition_id}}"
+              ]
+            },
+            "description": "Fetches a single collection definition by id, using the id captured by Create One."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/query",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "query"
+              ]
+            },
+            "description": "Fetches multiple collection definition records by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{collection_definition_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition batch fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read All (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Fetches a paginated list of collection definition records."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update One",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/{{collection_definition_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "{{collection_definition_id}}"
+              ]
+            },
+            "description": "Updates a single collection definition by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publicRoutes\": [\n    \"readOne\",\n    \"readAll\",\n    \"readMany\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Many",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "batch"
+              ]
+            },
+            "description": "Bulk-updates multiple collection definition records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"{{collection_definition_id}}\",\n    \"data\": {\n      \"publicRoutes\": [\n        \"readAll\"\n      ]\n    }\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition batch updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete One",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/{{collection_definition_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "{{collection_definition_id}}"
+              ]
+            },
+            "description": "Deletes a single collection definition by id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Many",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/collection-definitions/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "collection-definitions",
+                "batch"
+              ]
+            },
+            "description": "Bulk-deletes multiple collection definition records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{collection_definition_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('collection definition batch deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pages",
+      "description": "CRUD engine routes for CMS pages. Read routes (readOne/readMany/readAll) are public; write routes require an authenticated admin.",
+      "item": [
+        {
+          "name": "Create One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages"
+              ]
+            },
+            "description": "Creates a single page and stores its _id in the page_id collection variable.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"home-page\",\n  \"pageName\": \"Home Page\",\n  \"route\": \"/home\",\n  \"app\": \"web\",\n  \"theme\": {\n    \"backgroundColor\": \"background\",\n    \"foregroundColor\": \"foreground\"\n  },\n  \"animations\": {\n    \"entrance\": \"fadeIn\",\n    \"exit\": \"fadeOut\"\n  },\n  \"accessControl\": {\n    \"authenticated\": false,\n    \"anonymousOnly\": false,\n    \"roles\": [\n      \"admin\"\n    ]\n  },\n  \"flags\": {\n    \"isActive\": true,\n    \"isSystem\": false\n  },\n  \"metadata\": {\n    \"title\": \"Home\",\n    \"description\": \"Landing page\",\n    \"layout\": \"default\"\n  },\n  \"navigation\": [\n    {\n      \"label\": \"Home\",\n      \"location\": \"main\",\n      \"order\": 1,\n      \"isButton\": false,\n      \"resolveNavPath\": null\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Parse the response, verify creation succeeded, and capture the new",
+                  "// entity's Mongo _id into the \"page_id\" collection variable so",
+                  "// subsequent single-entity requests in this folder can chain off it.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('page created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('_id');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('page_id', jsonData.data._id);",
+                  "    console.log('Stored page_id =', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "batch"
+              ]
+            },
+            "description": "Bulk-creates multiple page records in a single request.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"about-page\",\n    \"pageName\": \"About Page\",\n    \"route\": \"/about\",\n    \"app\": \"web\",\n    \"theme\": {\n      \"backgroundColor\": \"background\",\n      \"foregroundColor\": \"foreground\"\n    },\n    \"animations\": {\n      \"entrance\": \"fadeInUp\",\n      \"exit\": \"fadeOutDown\"\n    },\n    \"accessControl\": {\n      \"authenticated\": false,\n      \"anonymousOnly\": false,\n      \"roles\": []\n    },\n    \"flags\": {\n      \"isActive\": true,\n      \"isSystem\": false\n    },\n    \"metadata\": {\n      \"title\": \"About\",\n      \"description\": \"About us page\",\n      \"layout\": \"default\"\n    },\n    \"navigation\": [\n      {\n        \"label\": \"About\",\n        \"location\": \"main\",\n        \"order\": 2,\n        \"isButton\": false,\n        \"resolveNavPath\": null\n      }\n    ]\n  },\n  {\n    \"id\": \"admin-dashboard\",\n    \"pageName\": \"Admin Dashboard\",\n    \"route\": \"/admin/dashboard\",\n    \"app\": \"cms\",\n    \"theme\": {\n      \"backgroundColor\": \"card\",\n      \"foregroundColor\": \"card-foreground\"\n    },\n    \"animations\": {\n      \"entrance\": \"zoomIn\",\n      \"exit\": \"zoomOut\"\n    },\n    \"accessControl\": {\n      \"authenticated\": true,\n      \"anonymousOnly\": false,\n      \"roles\": [\n        \"admin\",\n        \"super-admin\"\n      ]\n    },\n    \"flags\": {\n      \"isActive\": true,\n      \"isSystem\": true\n    },\n    \"metadata\": {\n      \"title\": \"Dashboard\",\n      \"description\": \"Admin control panel\",\n      \"layout\": \"sidebar\"\n    },\n    \"navigation\": [\n      {\n        \"label\": \"Dashboard\",\n        \"location\": \"cms\",\n        \"order\": 1,\n        \"isButton\": false,\n        \"resolveNavPath\": null\n      }\n    ]\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page batch created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/{{page_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "{{page_id}}"
+              ]
+            },
+            "description": "Fetches a single page by id, using the id captured by Create One."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/query",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "query"
+              ]
+            },
+            "description": "Fetches multiple page records by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{page_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page batch fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read All (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Fetches a paginated list of page records."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update One",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/{{page_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "{{page_id}}"
+              ]
+            },
+            "description": "Updates a single page by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"metadata\": {\n    \"title\": \"Updated Home\",\n    \"description\": \"Updated landing page\",\n    \"layout\": \"default\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Many",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "batch"
+              ]
+            },
+            "description": "Bulk-updates multiple page records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"{{page_id}}\",\n    \"data\": {\n      \"flags\": {\n        \"isActive\": false,\n        \"isSystem\": false\n      }\n    }\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page batch updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete One",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/{{page_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "{{page_id}}"
+              ]
+            },
+            "description": "Deletes a single page by id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Many",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/pages/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "pages",
+                "batch"
+              ]
+            },
+            "description": "Bulk-deletes multiple page records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{page_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('page batch deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "auth_cookie",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "asset_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "collection_definition_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "page_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

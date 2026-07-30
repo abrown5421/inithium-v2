@@ -15,6 +15,7 @@ import {
 } from '@inithium/collections';
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
+import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -83,6 +84,17 @@ const bootstrap = async (): Promise<void> => {
     generatorConfig: { fileManagerService: workspaceFileManagerService }
   });
 
+  const pageIndexResult = await ensurePageIndices(db);
+  if (pageIndexResult.isErr()) {
+    console.error(pageIndexResult.error);
+    process.exit(1);
+  }
+
+  const pageCollection = createPageCollection(db, {
+    authenticate,
+    publicRoutes: ['readAll', 'readOne', 'readMany'],
+    protectedMiddleware: [requireAdmin]
+  });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
@@ -103,6 +115,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/assets', assetCollection.router);
   app.use('/collection-definitions', collectionDefinitionCollection.router);
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
+  app.use('/pages', pageCollection.router);
 // collection-generator:routes
 
   app.listen(env.PORT, () => {

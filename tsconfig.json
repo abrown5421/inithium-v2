@@ -53,6 +53,9 @@
     },
     {
       "path": "./packages/store"
+    },
+    {
+      "path": "./packages/pages"
     }
   ],
   "compilerOptions": {}

@@ -6,6 +6,9 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/cms',
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   server: {
     port: 8080,
     host: 'localhost',
