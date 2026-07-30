@@ -24,7 +24,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ page, children }
   }, [page._id]);
 
   return (
-    <div ref={localRef} style={resolvePageThemeStyle(page.theme)}>
+    <div ref={localRef} className="flex flex-1 flex-col" style={resolvePageThemeStyle(page.theme)}>
       {children}
     </div>
   );
