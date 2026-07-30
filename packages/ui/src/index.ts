@@ -57,3 +57,7 @@ export * from './primitives/spinner.js';
 export * from './primitives/alert.js';
 export * from './primitives/toast.js';
 export * from './primitives/toaster.js';
+
+// Composites
+export * from './composites/Navbar/index.js';
+export * from './composites/AppShell/index.js';

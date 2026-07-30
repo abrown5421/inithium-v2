@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@inithium/ui": "^0.0.1",
-    "@inithium/pages": "^0.0.1"
+    "@inithium/pages": "^0.0.1",
+    "@inithium/cms-pages": "^0.0.1"
   }
 }
