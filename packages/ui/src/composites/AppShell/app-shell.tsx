@@ -8,7 +8,7 @@ export interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ navbar, children, className }) => (
-  <div data-slot="app-shell" className={cn('flex min-h-dvh flex-col', className)}>
+  <div data-slot="app-shell" className={cn('flex min-h-dvh flex-col bg-foreground', className)}>
     {navbar ? (
       <div data-slot="app-shell-navbar" className="sticky top-0 z-40">
         {navbar}
