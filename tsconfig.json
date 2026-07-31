@@ -43,6 +43,9 @@
       "path": "./packages/auth"
     },
     {
+      "path": "./packages/pubsub"
+    },
+    {
       "path": "./packages/file-manager"
     },
     {

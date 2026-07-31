@@ -2246,6 +2246,747 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Pub/Sub",
+      "description": "Exercises the @inithium/pubsub real-time engine wired directly into the API (apps/api/src/pubsub.ts) end to end over plain HTTP. Postman cannot import or export native Socket.IO requests, so these requests instead talk to a small HTTP test harness (packages/pubsub/examples/http-test-harness.mjs) that holds real Socket.IO client connections open on your behalf and exposes them as REST endpoints: connect, emit, poll received events, and disconnect. The pub/sub gateway shares the API's real HTTP server and its real JWT cookie auth — there is no separate pub/sub-only server or fake auth. Before running this folder: 1) make sure the API is running on base_url (`nx serve api`), 2) start the harness with `node packages/pubsub/examples/http-test-harness.mjs` (listens on :4500 and proxies Socket.IO connections to base_url). Run the requests in order top to bottom: the two Register & Get Token requests create disposable real users and capture their access tokens, Connect Client A / Connect Client B use those tokens to open real authenticated sockets and populate pubsub_session_a / pubsub_session_b, and Disconnect Client A / Disconnect Client B should run last to close the sockets cleanly. The 'Poll For ...' requests long-poll the harness (waitMs query param) instead of returning immediately, so they are safe to run back-to-back with no manual delay even under Collection Runner.",
+      "item": [
+        {
+          "name": "Client A: Register & Get Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a disposable real user (unique email via Postman's {{$guid}} dynamic variable, so this is safe to re-run) and captures its access_token cookie into pubsub_token_a, the same way Auth > Admin Login captures auth_cookie. This is a real, Mongo-backed user — the pub/sub gateway authenticates its socket connection with the exact same JWT verification the REST API uses.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pubsub-a-{{$guid}}@example.com\",\n  \"password\": \"ChangeMe123!\",\n  \"first_name\": \"PubSub\",\n  \"last_name\": \"ClientA\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "let accessToken = null;",
+                  "",
+                  "const setCookieHeaders = pm.response.headers.all().filter(",
+                  "    (h) => h.key.toLowerCase() === 'set-cookie'",
+                  ");",
+                  "",
+                  "for (const header of setCookieHeaders) {",
+                  "    const match = header.value.match(/access_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        accessToken = match[1];",
+                  "        break;",
+                  "    }",
+                  "}",
+                  "",
+                  "if (!accessToken && pm.cookies.has('access_token')) {",
+                  "    accessToken = pm.cookies.get('access_token');",
+                  "}",
+                  "",
+                  "pm.test('Client A registered and access token was captured', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(accessToken).to.not.be.null;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set('pubsub_token_a', accessToken);",
+                  "    console.log('Stored pubsub_token_a =', accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client B: Register & Get Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registers a second disposable real user so the broadcast and room requests below have someone other than Client A to fan out to. Captures its access_token cookie into pubsub_token_b.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"pubsub-b-{{$guid}}@example.com\",\n  \"password\": \"ChangeMe123!\",\n  \"first_name\": \"PubSub\",\n  \"last_name\": \"ClientB\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "let accessToken = null;",
+                  "",
+                  "const setCookieHeaders = pm.response.headers.all().filter(",
+                  "    (h) => h.key.toLowerCase() === 'set-cookie'",
+                  ");",
+                  "",
+                  "for (const header of setCookieHeaders) {",
+                  "    const match = header.value.match(/access_token=([^;]+)/);",
+                  "    if (match) {",
+                  "        accessToken = match[1];",
+                  "        break;",
+                  "    }",
+                  "}",
+                  "",
+                  "if (!accessToken && pm.cookies.has('access_token')) {",
+                  "    accessToken = pm.cookies.get('access_token');",
+                  "}",
+                  "",
+                  "pm.test('Client B registered and access token was captured', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(accessToken).to.not.be.null;",
+                  "});",
+                  "",
+                  "if (accessToken) {",
+                  "    pm.collectionVariables.set('pubsub_token_b', accessToken);",
+                  "    console.log('Stored pubsub_token_b =', accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Connect Client A",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions"
+              ]
+            },
+            "description": "Opens a real Socket.IO connection to the API's pub/sub gateway through the HTTP test harness, forwarding pubsub_token_a as the access_token cookie on the handshake. The gateway verifies it exactly like an HTTP request (see apps/api/src/pubsub.ts) and auto-joins the user:<id> private channel. Stores the harness session id in pubsub_session_a and the decoded identity in pubsub_user_id_a / pubsub_email_a.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"{{pubsub_token_a}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Client A connected', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('sessionId');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data.sessionId) {",
+                  "    pm.collectionVariables.set('pubsub_session_a', jsonData.data.sessionId);",
+                  "    pm.collectionVariables.set('pubsub_user_id_a', jsonData.data.userId);",
+                  "    console.log('Stored pubsub_session_a =', jsonData.data.sessionId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Connect Client B",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions"
+              ]
+            },
+            "description": "Opens a second, independent authenticated Socket.IO connection as Client B, forwarding pubsub_token_b. Stores the harness session id in pubsub_session_b.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"{{pubsub_token_b}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('Client B connected', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('sessionId');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data.sessionId) {",
+                  "    pm.collectionVariables.set('pubsub_session_b', jsonData.data.sessionId);",
+                  "    console.log('Stored pubsub_session_b =', jsonData.data.sessionId);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Drain Welcome Event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/events?waitMs=2000",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "waitMs",
+                  "value": "2000"
+                }
+              ]
+            },
+            "description": "Drains events buffered for Client A since the last poll. The gateway pushes a server:welcome event straight to a newly authenticated socket (see ConnectedClient.emit in packages/pubsub/src/gateway/server.ts, wired up in apps/api/src/pubsub.ts), so this should immediately contain one."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const welcome = jsonData.data.events.find((e) => e.event === 'server:welcome');",
+                  "",
+                  "pm.test('Client A received server:welcome after connecting', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(welcome).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client B: Drain Welcome Event",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_b}}/events?waitMs=2000",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_b}}",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "waitMs",
+                  "value": "2000"
+                }
+              ]
+            },
+            "description": "Same as Client A's welcome drain, for Bob's connection."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const welcome = jsonData.data.events.find((e) => e.event === 'server:welcome');",
+                  "",
+                  "pm.test('Client B received server:welcome after connecting', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(welcome).to.not.be.undefined;",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Send Ping",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/emit",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "emit"
+              ]
+            },
+            "description": "Has Client A emit a 'ping' event on its socket. apps/api/src/pubsub.ts replies with server.unicast(userId, 'pong', ...), which round-trips through the pub/sub broker's dispatch channel even though the API currently runs a single-instance InMemoryAdapter.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"ping\",\n  \"payload\": {\n    \"hello\": \"world\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('ping accepted by the harness', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Poll For Pong (Unicast)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/events?waitMs=2000",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "waitMs",
+                  "value": "2000"
+                }
+              ]
+            },
+            "description": "Proves server.unicast() works: only Client A's socket should ever receive this pong, never Client B's."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const pong = jsonData.data.events.find((e) => e.event === 'pong');",
+                  "",
+                  "pm.test('Client A received pong via server.unicast()', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(pong).to.not.be.undefined;",
+                  "    pm.expect(pong.payload.echo).to.eql({ hello: 'world' });",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Send Chat Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/emit",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "emit"
+              ]
+            },
+            "description": "Has Client A emit 'chat:send'. apps/api/src/pubsub.ts relays it with server.broadcast('chat:message', ...), so every connected client (including Client B) should see it.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"chat:send\",\n  \"payload\": {\n    \"message\": \"hi bob, this is alice\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('chat:send accepted by the harness', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client B: Poll For Chat Message (Broadcast)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_b}}/events?waitMs=2000",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_b}}",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "waitMs",
+                  "value": "2000"
+                }
+              ]
+            },
+            "description": "Proves server.broadcast() works: Client B never subscribed to Client A directly, yet receives the chat:message fan-out."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const chatMessage = jsonData.data.events.find((e) => e.event === 'chat:message');",
+                  "const expectedUserId = pm.collectionVariables.get('pubsub_user_id_a');",
+                  "",
+                  "pm.test('Client B received the broadcast chat message from Client A', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(chatMessage).to.not.be.undefined;",
+                  "    pm.expect(chatMessage.payload.from).to.eql(expectedUserId);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Join Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/emit",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "emit"
+              ]
+            },
+            "description": "Has Client A emit 'room:join'. apps/api/src/pubsub.ts joins the room:lobby channel, atomically increments a StateStore counter, and pushes room:update to everyone in that channel via server.toChannel().",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"room:join\",\n  \"payload\": {\n    \"roomId\": \"lobby\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('room:join accepted by the harness', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client B: Join Room",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_b}}/emit",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_b}}",
+                "emit"
+              ]
+            },
+            "description": "Client B joins the same room, which should bump the StateStore-backed member count again.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event\": \"room:join\",\n  \"payload\": {\n    \"roomId\": \"lobby\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('room:join accepted by the harness', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Client A: Poll For Room Update (State Store)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}/events?waitMs=2000",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "waitMs",
+                  "value": "2000"
+                }
+              ]
+            },
+            "description": "Proves StateStore.update() + server.toChannel() work together: memberCount is computed atomically server-side and pushed to every room member, not just the one who joined. Note the count is cumulative for the lifetime of the running API process (in-memory state store), so it will not always be exactly 2 on repeat runs unless the API was just restarted."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const jsonData = pm.response.json();",
+                  "const roomUpdate = jsonData.data.events.filter((e) => e.event === 'room:update').pop();",
+                  "",
+                  "pm.test('Client A received a room:update with a numeric member count', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "    pm.expect(roomUpdate).to.not.be.undefined;",
+                  "    pm.expect(roomUpdate.payload.roomId).to.eql('lobby');",
+                  "    pm.expect(roomUpdate.payload.memberCount).to.be.a('number');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Disconnect Client A",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_a}}",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_a}}"
+              ]
+            },
+            "description": "Closes Client A's Socket.IO connection and removes the harness session."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Client A disconnected', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Disconnect Client B",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{pubsub_base_url}}/sessions/{{pubsub_session_b}}",
+              "host": [
+                "{{pubsub_base_url}}"
+              ],
+              "path": [
+                "sessions",
+                "{{pubsub_session_b}}"
+              ]
+            },
+            "description": "Closes Client B's Socket.IO connection and removes the harness session."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Client B disconnected', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     }
   ],
   "variable": [
@@ -2276,6 +3017,36 @@
     },
     {
       "key": "page_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_base_url",
+      "value": "http://localhost:4500",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_token_a",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_token_b",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_session_a",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_session_b",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "pubsub_user_id_a",
       "value": "",
       "type": "string"
     }
