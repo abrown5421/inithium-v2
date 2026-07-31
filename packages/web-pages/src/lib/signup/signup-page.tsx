@@ -55,11 +55,11 @@ export const SignupPage: PageLayoutComponent = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6">
-      <Heading level={1} className="text-center">
+      <Heading level={1} className="text-center text-background">
         Sign Up
       </Heading>
 
-      <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
+      <form className="bg-background p-8 rounded-md flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
         <AuthField
           label="First Name"
           autoComplete="given-name"

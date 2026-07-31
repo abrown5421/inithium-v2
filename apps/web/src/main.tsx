@@ -4,6 +4,7 @@ import * as ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { store, setApiBaseUrl } from '@inithium/store';
 import App from './app/app';
+import { ApiHealthGate } from './app/api-health-gate';
 
 setApiBaseUrl(import.meta.env.VITE_API_ORIGIN ?? 'http://localhost:3000');
 
@@ -15,7 +16,9 @@ root.render(
   <StrictMode>
     <Provider store={store}>
       <BrowserRouter>
-        <App />
+        <ApiHealthGate>
+          <App />
+        </ApiHealthGate>
       </BrowserRouter>
     </Provider>
   </StrictMode>,

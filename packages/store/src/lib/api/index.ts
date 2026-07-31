@@ -4,3 +4,4 @@ export * from './users.api.js';
 export * from './assets.api.js';
 export * from './page.api.js';
 export * from './auth.api.js';
+export * from './health.api.js';

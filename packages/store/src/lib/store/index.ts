@@ -4,6 +4,7 @@ import { usersApi } from '../api/users.api.js';
 import { assetsApi } from '../api/assets.api.js';
 import { pageApi } from '../api/page.api.js';
 import { authApi } from '../api/auth.api.js';
+import { healthApi } from '../api/health.api.js';
 import { authReducer } from '../slices/auth.slice.js';
 import { alertReducer } from '../slices/alert.slice.js';
 // collection-generator:imports
@@ -14,6 +15,7 @@ export const store = configureStore({
     [assetsApi.reducerPath]: assetsApi.reducer,
     [pageApi.reducerPath]: pageApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
+    [healthApi.reducerPath]: healthApi.reducer,
     auth: authReducer,
     alert: alertReducer,
 // collection-generator:reducers
@@ -24,6 +26,7 @@ export const store = configureStore({
       assetsApi.middleware,
       pageApi.middleware,
       authApi.middleware,
+      healthApi.middleware,
 // collection-generator:middleware
     )
 });
