@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   closeAlert,
   selectAlerts,
@@ -16,9 +15,11 @@ import {
   DynamicRouterProvider,
   PageSession,
   PageSessionProvider,
+  PageTransitionProvider,
   RouterNavLink,
   toNavbarMenuItem,
   useNavEntries,
+  usePageNavigate,
   usePageSession
 } from '@inithium/pages';
 import { AlertViewport, AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
@@ -45,8 +46,14 @@ const toNavbarUser = (user: ReturnType<typeof selectCurrentUser>): NavbarUser | 
       }
     : undefined;
 
-const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
-  const navigate = useNavigate();
+const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => (
+  <PageTransitionProvider>
+    <AppChrome pages={pages} isLoading={isLoading} />
+  </PageTransitionProvider>
+);
+
+const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
+  const pageNavigate = usePageNavigate();
   const session = usePageSession();
   const currentUser = useAppSelector(selectCurrentUser);
   const [logout] = useLogoutMutation();
@@ -64,7 +71,7 @@ const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) =
           isAuthenticated={session.isAuthenticated}
           user={toNavbarUser(currentUser)}
           linkComponent={RouterNavLink}
-          onLoginClick={() => navigate(config.loginRoute)}
+          onLoginClick={() => pageNavigate(config.loginRoute)}
           onLogoutClick={() => void logout()}
         />
       }

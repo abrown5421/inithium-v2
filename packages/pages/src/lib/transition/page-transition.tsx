@@ -13,7 +13,7 @@ export const PageTransition: React.FC<PageTransitionProps> = ({ page, children }
   const { containerRef, setActivePage } = usePageTransitionContext();
   const localRef = React.useRef<HTMLDivElement>(null);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     setActivePage(page);
     containerRef.current = localRef.current;
     const node = localRef.current;

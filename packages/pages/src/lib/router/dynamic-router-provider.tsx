@@ -6,7 +6,6 @@ import { FallbackComponents, NotFoundPage } from '../fallback/index.js';
 import { AccessGuard } from '../guard/access-guard.js';
 import { selectActivePagesForApp } from '../route-selection/route-selection.js';
 import { PageTransition } from '../transition/page-transition.js';
-import { PageTransitionProvider } from '../transition/page-transition-context.js';
 
 export type PageLayoutComponent = React.ComponentType<{ readonly page: Page }>;
 
@@ -38,21 +37,19 @@ export const DynamicRouterProvider: React.FC<DynamicRouterProviderProps> = ({
   const activePages = React.useMemo(() => selectActivePagesForApp(pages, app), [pages, app]);
 
   return (
-    <PageTransitionProvider>
-      <Routes>
-        {activePages.map((page) => (
-          <Route
-            key={page._id}
-            path={page.route}
-            element={
-              <AccessGuard page={page} config={config} fallbackComponents={fallbackComponents}>
-                <PageTransition page={page}>{renderPageLayout(page, layouts)}</PageTransition>
-              </AccessGuard>
-            }
-          />
-        ))}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </PageTransitionProvider>
+    <Routes>
+      {activePages.map((page) => (
+        <Route
+          key={page._id}
+          path={page.route}
+          element={
+            <AccessGuard page={page} config={config} fallbackComponents={fallbackComponents}>
+              <PageTransition page={page}>{renderPageLayout(page, layouts)}</PageTransition>
+            </AccessGuard>
+          }
+        />
+      ))}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
   );
 };

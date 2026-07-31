@@ -9,6 +9,17 @@ export const buildAnimateClassNames = (animation: AnimateEntry | AnimateExit): r
   `${ANIMATE_CSS_PREFIX}${animation}`
 ];
 
+// Route transitions can land on a reused DOM node (React reconciles the
+// container in place rather than remounting it), so a class left over from
+// the previous animation can still be attached when the next one starts.
+// Clear it defensively before applying the new one so the two never collide.
+const clearAnimateClasses = (element: HTMLElement): void => {
+  const stale = Array.from(element.classList).filter((className) => className.startsWith(ANIMATE_CSS_PREFIX));
+  if (stale.length > 0) {
+    element.classList.remove(...stale);
+  }
+};
+
 export const waitForAnimationEnd = (
   element: HTMLElement,
   timeoutMs: number = DEFAULT_ANIMATION_TIMEOUT_MS
@@ -35,6 +46,7 @@ export const playEntranceAnimation = (
   animation: AnimateEntry,
   timeoutMs: number = DEFAULT_ANIMATION_TIMEOUT_MS
 ): (() => void) => {
+  clearAnimateClasses(element);
   const classNames = buildAnimateClassNames(animation);
   element.classList.add(...classNames);
 
@@ -52,8 +64,12 @@ export const playExitAnimation = async (
   animation: AnimateExit,
   timeoutMs: number = DEFAULT_ANIMATION_TIMEOUT_MS
 ): Promise<void> => {
+  clearAnimateClasses(element);
   const classNames = buildAnimateClassNames(animation);
   element.classList.add(...classNames);
   await waitForAnimationEnd(element, timeoutMs);
-  element.classList.remove(...classNames);
+  // Leave the classes on: animate.css uses animation-fill-mode: both, so the
+  // element stays hidden until the caller unmounts it. Stripping them here would
+  // snap the element back to visible for a frame before the route swap commits.
+  // (Any staleness gets cleared at the start of whichever animation runs next.)
 };
