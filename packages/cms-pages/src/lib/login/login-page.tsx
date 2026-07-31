@@ -1,8 +1,76 @@
-import { PageLayoutComponent } from '@inithium/pages';
-import { Heading } from '@inithium/ui';
+import * as React from 'react';
+import { z } from 'zod';
+import { PageLayoutComponent, usePageNavigate } from '@inithium/pages';
+import { AuthField, Button, Heading, PasswordField, toast } from '@inithium/ui';
+import { loginSchema } from '@inithium/validators';
+import { useLoginMutation, useLogoutMutation } from '@inithium/store';
+import { LoginFormErrors } from './login-page.types.js';
 
-export const LoginPage: PageLayoutComponent = ({ page }) => (
-  <div className="flex flex-1 items-center justify-center">
-    <Heading level={1}>{page.pageName}</Heading>
-  </div>
-);
+const SUBMISSION_ERROR_MESSAGE = 'There was a problem with your submission';
+const FORBIDDEN_ROLE_MESSAGE = "You don't have permission to access the CMS.";
+export const CMS_ALLOWED_ROLES = new Set(['super-admin', 'admin', 'editor', 'writer']);
+
+export const LoginPage: PageLayoutComponent = () => {
+  const navigate = usePageNavigate();
+  const [login, { isLoading }] = useLoginMutation();
+  const [logout] = useLogoutMutation();
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [errors, setErrors] = React.useState<LoginFormErrors>({});
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const result = loginSchema.safeParse({ email, password });
+    if (!result.success) {
+      const { fieldErrors } = z.flattenError(result.error);
+      setErrors({ email: fieldErrors.email?.[0], password: fieldErrors.password?.[0] });
+      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+      return;
+    }
+
+    setErrors({});
+    try {
+      const user = await login(result.data).unwrap();
+      if (!CMS_ALLOWED_ROLES.has(user.role)) {
+        await logout();
+        toast({ variant: 'destructive', description: FORBIDDEN_ROLE_MESSAGE });
+        return;
+      }
+      await navigate('/');
+    } catch {
+      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+    }
+  };
+
+  return (
+    <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center gap-6">
+      <Heading level={1} className="text-center">
+        Log In
+      </Heading>
+
+      <form className="flex w-full flex-col gap-4 max-w-[90%] md:max-w-md" onSubmit={handleSubmit} noValidate>
+        <AuthField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          errorMessage={errors.email}
+        />
+        <PasswordField
+          label="Password"
+          autoComplete="current-password"
+          required
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          errorMessage={errors.password}
+        />
+        <Button type="submit" loading={isLoading} className="mt-2">
+          Log In
+        </Button>
+      </form>
+    </div>
+  );
+};

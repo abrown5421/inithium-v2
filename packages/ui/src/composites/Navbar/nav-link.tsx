@@ -27,7 +27,7 @@ export const NavLink: React.FC<NavLinkProps> = ({ item, linkComponent, fullWidth
   }
 
   return (
-    <Button asChild variant="ghost" size="sm" className={cn(fullWidth && 'w-full justify-start')}>
+    <Button asChild variant="link" className={cn('h-auto p-0', fullWidth && 'w-full justify-start')}>
       <Link href={item.href}>{item.label}</Link>
     </Button>
   );

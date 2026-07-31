@@ -6,3 +6,4 @@
    the workspace-linked @inithium/ui and @inithium/pages source for class scanning. */
 @source '../../../packages/ui/src';
 @source '../../../packages/pages/src';
+@source '../../../packages/web-pages/src';

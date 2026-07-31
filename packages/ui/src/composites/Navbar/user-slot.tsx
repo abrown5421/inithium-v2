@@ -38,15 +38,16 @@ export const UserSlot: React.FC<UserSlotProps> = ({
           trigger={<UserAvatar user={user} />}
           triggerLabel="Account menu"
           sections={[{ items: mainMenuItems }, { items: profileMenuItems }]}
-          footerAction={{ label: 'Log Out', onClick: onLogoutClick }}
+          footerAction={{ label: 'Log Out', onClick: onLogoutClick, variant: 'destructive' }}
           linkComponent={linkComponent}
+          userName={user?.firstName}
         />
       ) : (
         <NavDrawer
           trigger={<Menu />}
           triggerLabel="Menu"
           sections={[{ items: mainMenuItems }]}
-          footerAction={{ label: 'Log In', onClick: onLoginClick }}
+          footerAction={{ label: 'Log In', onClick: onLoginClick, variant: 'default' }}
           linkComponent={linkComponent}
         />
       )}
@@ -58,8 +59,9 @@ export const UserSlot: React.FC<UserSlotProps> = ({
           trigger={<UserAvatar user={user} />}
           triggerLabel="Account menu"
           sections={[{ items: profileMenuItems }]}
-          footerAction={{ label: 'Log Out', onClick: onLogoutClick }}
+          footerAction={{ label: 'Log Out', onClick: onLogoutClick, variant: 'destructive' }}
           linkComponent={linkComponent}
+          userName={user?.firstName}
         />
       ) : (
         <Button onClick={onLoginClick}>Log In</Button>

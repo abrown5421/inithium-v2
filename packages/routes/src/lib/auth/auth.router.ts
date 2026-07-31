@@ -58,8 +58,14 @@ export const createAuthRouter = (userService: UserService, config: AuthRouterCon
     res.status(200).json({ success: true, data: { loggedOut: true } });
   });
 
-  router.get('/me', config.authenticate, (req: Request, res: Response) => {
-    res.status(200).json({ success: true, data: req.user });
+  router.get('/me', config.authenticate, async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: createUnauthorizedError('Authentication required') });
+      return;
+    }
+
+    const result = await userService.readOne(req.user.id);
+    handleResult(res, result);
   });
 
   return router;

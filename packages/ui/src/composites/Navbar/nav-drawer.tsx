@@ -20,6 +20,7 @@ export interface NavDrawerSection {
 export interface NavDrawerFooterAction {
   readonly label: string;
   readonly onClick?: () => void;
+  readonly variant?: 'default' | 'destructive';
 }
 
 export interface NavDrawerProps {
@@ -28,14 +29,22 @@ export interface NavDrawerProps {
   readonly sections: readonly NavDrawerSection[];
   readonly footerAction?: NavDrawerFooterAction;
   readonly linkComponent?: NavbarLinkComponent;
+  readonly userName?: string;
 }
+
+const getGreeting = (userName?: string): string => {
+  const hour = new Date().getHours();
+  const period = hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening';
+  return userName ? `Good ${period}, ${userName}` : `Good ${period}`;
+};
 
 export const NavDrawer: React.FC<NavDrawerProps> = ({
   trigger,
   triggerLabel,
   sections,
   footerAction,
-  linkComponent
+  linkComponent,
+  userName
 }) => (
   <Sheet>
     <SheetTrigger asChild>
@@ -45,13 +54,13 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
     </SheetTrigger>
     <SheetContent>
       <SheetHeader>
-        <SheetTitle className="sr-only">{triggerLabel}</SheetTitle>
+        <SheetTitle className="text-lg">{getGreeting(userName)}</SheetTitle>
       </SheetHeader>
       <nav aria-label={triggerLabel} className="flex flex-1 flex-col gap-4 overflow-y-auto">
         {sections.map((section, index) => (
           <React.Fragment key={index}>
             {index > 0 ? <Separator /> : null}
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-3">
               {section.items.map((item) => (
                 <SheetClose asChild key={item.label}>
                   <span>
@@ -66,7 +75,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
       {footerAction ? (
         <SheetFooter>
           <SheetClose asChild>
-            <Button className="w-full" onClick={footerAction.onClick}>
+            <Button className="w-full" variant={footerAction.variant} onClick={footerAction.onClick}>
               {footerAction.label}
             </Button>
           </SheetClose>
