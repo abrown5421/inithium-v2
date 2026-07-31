@@ -1,6 +1,16 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { selectCurrentUser, selectIsAuthenticated, useAppSelector, useLogoutMutation, useMeQuery, useReadAllPagesQuery } from '@inithium/store';
+import {
+  closeAlert,
+  selectAlerts,
+  selectCurrentUser,
+  selectIsAuthenticated,
+  useAppDispatch,
+  useAppSelector,
+  useLogoutMutation,
+  useMeQuery,
+  useReadAllPagesQuery
+} from '@inithium/store';
 import { Page } from '@inithium/models';
 import {
   DynamicRouterProvider,
@@ -11,7 +21,7 @@ import {
   useNavEntries,
   usePageSession
 } from '@inithium/pages';
-import { AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
+import { AlertViewport, AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
 import { CMS_ALLOWED_ROLES, DashboardPage, LoginPage } from '@inithium/cms-pages';
 
 const layouts = {
@@ -77,8 +87,9 @@ const App: React.FC = () => {
   const currentUser = useAppSelector(selectCurrentUser);
   const rawIsAuthenticated = useAppSelector(selectIsAuthenticated);
   const isAuthenticated = rawIsAuthenticated && CMS_ALLOWED_ROLES.has(currentUser?.role ?? '');
+  const alerts = useAppSelector(selectAlerts);
+  const dispatch = useAppDispatch();
 
-  console.log(isAuthenticated)
   const session: PageSession = React.useMemo(
     () => ({ isAuthenticated, role: currentUser?.role }),
     [isAuthenticated, currentUser?.role]
@@ -87,6 +98,7 @@ const App: React.FC = () => {
   return (
     <PageSessionProvider value={session}>
       <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
+      <AlertViewport alerts={alerts} onClose={(id) => dispatch(closeAlert(id))} />
     </PageSessionProvider>
   );
 };

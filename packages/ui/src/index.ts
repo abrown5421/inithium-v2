@@ -1,9 +1,6 @@
 // Utilities
 export * from './utils/index.js';
 
-// Hooks
-export * from './hooks/use-toast.js';
-
 // Primitives — Typography & Content
 export * from './primitives/text.js';
 export * from './primitives/heading.js';
@@ -55,10 +52,9 @@ export * from './primitives/navigation-menu.js';
 export * from './primitives/progress.js';
 export * from './primitives/spinner.js';
 export * from './primitives/alert.js';
-export * from './primitives/toast.js';
-export * from './primitives/toaster.js';
 
 // Composites
 export * from './composites/Navbar/index.js';
 export * from './composites/AppShell/index.js';
 export * from './composites/Auth/index.js';
+export * from './composites/AlertToast/index.js';

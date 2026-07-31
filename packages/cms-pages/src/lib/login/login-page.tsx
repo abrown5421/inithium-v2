@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { z } from 'zod';
 import { PageLayoutComponent, usePageNavigate } from '@inithium/pages';
-import { AuthField, Button, Heading, PasswordField, toast } from '@inithium/ui';
+import { AuthField, Button, Heading, PasswordField } from '@inithium/ui';
 import { loginSchema } from '@inithium/validators';
-import { useLoginMutation, useLogoutMutation } from '@inithium/store';
+import { openAlert, useAppDispatch, useLoginMutation, useLogoutMutation } from '@inithium/store';
 import { LoginFormErrors } from './login-page.types.js';
 
 const SUBMISSION_ERROR_MESSAGE = 'There was a problem with your submission';
@@ -12,6 +12,7 @@ export const CMS_ALLOWED_ROLES = new Set(['super-admin', 'admin', 'editor', 'wri
 
 export const LoginPage: PageLayoutComponent = () => {
   const navigate = usePageNavigate();
+  const dispatch = useAppDispatch();
   const [login, { isLoading }] = useLoginMutation();
   const [logout] = useLogoutMutation();
   const [email, setEmail] = React.useState('');
@@ -25,7 +26,7 @@ export const LoginPage: PageLayoutComponent = () => {
     if (!result.success) {
       const { fieldErrors } = z.flattenError(result.error);
       setErrors({ email: fieldErrors.email?.[0], password: fieldErrors.password?.[0] });
-      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
       return;
     }
 
@@ -34,12 +35,12 @@ export const LoginPage: PageLayoutComponent = () => {
       const user = await login(result.data).unwrap();
       if (!CMS_ALLOWED_ROLES.has(user.role)) {
         await logout();
-        toast({ variant: 'destructive', description: FORBIDDEN_ROLE_MESSAGE });
+        dispatch(openAlert({ severity: 'destructive', message: FORBIDDEN_ROLE_MESSAGE }));
         return;
       }
       await navigate('/');
     } catch {
-      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
     }
   };
 

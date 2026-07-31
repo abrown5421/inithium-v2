@@ -5,6 +5,7 @@ import { assetsApi } from '../api/assets.api.js';
 import { pageApi } from '../api/page.api.js';
 import { authApi } from '../api/auth.api.js';
 import { authReducer } from '../slices/auth.slice.js';
+import { alertReducer } from '../slices/alert.slice.js';
 // collection-generator:imports
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     [pageApi.reducerPath]: pageApi.reducer,
     [authApi.reducerPath]: authApi.reducer,
     auth: authReducer,
+    alert: alertReducer,
 // collection-generator:reducers
   },
   middleware: (getDefaultMiddleware) =>

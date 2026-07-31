@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { z } from 'zod';
 import { PageLayoutComponent, usePageNavigate } from '@inithium/pages';
-import { AuthField, Button, Heading, PasswordField, Text, toast } from '@inithium/ui';
-import { useRegisterMutation } from '@inithium/store';
+import { AuthField, Button, Heading, PasswordField, Text } from '@inithium/ui';
+import { openAlert, useAppDispatch, useRegisterMutation } from '@inithium/store';
 import { signupSchema } from './signup-schema.js';
 import { SignupFormErrors } from './signup-page.types.js';
 
@@ -10,6 +10,7 @@ const SUBMISSION_ERROR_MESSAGE = 'There was a problem with your submission';
 
 export const SignupPage: PageLayoutComponent = () => {
   const navigate = usePageNavigate();
+  const dispatch = useAppDispatch();
   const [register, { isLoading }] = useRegisterMutation();
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
@@ -38,7 +39,7 @@ export const SignupPage: PageLayoutComponent = () => {
         password: fieldErrors.password?.[0],
         confirm_password: fieldErrors.confirm_password?.[0]
       });
-      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
       return;
     }
 
@@ -48,7 +49,7 @@ export const SignupPage: PageLayoutComponent = () => {
       await register({ ...rest, last_name: last_name ?? '' }).unwrap();
       await navigate('/');
     } catch {
-      toast({ variant: 'destructive', description: SUBMISSION_ERROR_MESSAGE });
+      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
     }
   };
 
