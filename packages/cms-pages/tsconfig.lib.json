@@ -17,6 +17,12 @@
     },
     {
       "path": "../pages/tsconfig.lib.json"
+    },
+    {
+      "path": "../store/tsconfig.lib.json"
+    },
+    {
+      "path": "../validators/tsconfig.lib.json"
     }
   ]
 }

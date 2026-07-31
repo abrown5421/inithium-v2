@@ -3,3 +3,4 @@ export * from './crud-endpoints.js';
 export * from './users.api.js';
 export * from './assets.api.js';
 export * from './page.api.js';
+export * from './auth.api.js';

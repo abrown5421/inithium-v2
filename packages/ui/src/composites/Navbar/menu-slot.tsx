@@ -13,7 +13,7 @@ export const MenuSlot: React.FC<MenuSlotProps> = ({ items, linkComponent }) => {
   }
 
   return (
-    <nav aria-label="Main" className="hidden items-center gap-1 lg:flex">
+    <nav aria-label="Main" className="hidden items-center gap-6 lg:flex">
       {items.map((item) => (
         <NavLink key={item.label} item={item} linkComponent={linkComponent} />
       ))}

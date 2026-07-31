@@ -22,6 +22,7 @@ export interface NavbarLogo {
 
 export interface NavbarUser {
   readonly name?: string;
+  readonly firstName?: string;
   readonly avatarSrc?: string;
   readonly avatarFallback?: string;
 }

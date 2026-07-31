@@ -1,34 +1,45 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useReadAllPagesQuery } from '@inithium/store';
+import { selectCurrentUser, selectIsAuthenticated, useAppSelector, useLogoutMutation, useMeQuery, useReadAllPagesQuery } from '@inithium/store';
 import { Page } from '@inithium/models';
 import {
-  ANONYMOUS_SESSION,
   DynamicRouterProvider,
+  PageSession,
   PageSessionProvider,
   RouterNavLink,
   toNavbarMenuItem,
   useNavEntries,
   usePageSession
 } from '@inithium/pages';
-import { AppShell, Navbar, Spinner } from '@inithium/ui';
-import { DashboardPage, LoginPage } from '@inithium/cms-pages';
+import { AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
+import { CMS_ALLOWED_ROLES, DashboardPage, LoginPage } from '@inithium/cms-pages';
 
 const layouts = {
   default: DashboardPage,
   login: LoginPage
 };
 
-const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/dashboard' };
+const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
 
 interface AppShellWithNavProps {
   readonly pages: readonly Page[];
   readonly isLoading: boolean;
 }
 
+const toNavbarUser = (user: ReturnType<typeof selectCurrentUser>): NavbarUser | undefined =>
+  user
+    ? {
+        name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email,
+        firstName: user.first_name,
+        avatarFallback: (user.first_name ?? user.email).charAt(0).toUpperCase()
+      }
+    : undefined;
+
 const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const navigate = useNavigate();
   const session = usePageSession();
+  const currentUser = useAppSelector(selectCurrentUser);
+  const [logout] = useLogoutMutation();
   const mainMenuItems = useNavEntries(pages, 'cms', 'cms', config).map(toNavbarMenuItem);
   const profileMenuItems = useNavEntries(pages, 'cms', 'profile', config).map(toNavbarMenuItem);
 
@@ -41,8 +52,10 @@ const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) =
           mainMenuItems={mainMenuItems}
           profileMenuItems={profileMenuItems}
           isAuthenticated={session.isAuthenticated}
+          user={toNavbarUser(currentUser)}
           linkComponent={RouterNavLink}
           onLoginClick={() => navigate(config.loginRoute)}
+          onLogoutClick={() => void logout()}
         />
       }
     >
@@ -59,9 +72,20 @@ const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) =
 
 const App: React.FC = () => {
   const { data, isLoading } = useReadAllPagesQuery({ limit: 100 });
+  useMeQuery();
+
+  const currentUser = useAppSelector(selectCurrentUser);
+  const rawIsAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isAuthenticated = rawIsAuthenticated && CMS_ALLOWED_ROLES.has(currentUser?.role ?? '');
+
+  console.log(isAuthenticated)
+  const session: PageSession = React.useMemo(
+    () => ({ isAuthenticated, role: currentUser?.role }),
+    [isAuthenticated, currentUser?.role]
+  );
 
   return (
-    <PageSessionProvider value={ANONYMOUS_SESSION}>
+    <PageSessionProvider value={session}>
       <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
     </PageSessionProvider>
   );
