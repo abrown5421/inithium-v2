@@ -58,3 +58,5 @@ export * from './composites/Navbar/index.js';
 export * from './composites/AppShell/index.js';
 export * from './composites/Auth/index.js';
 export * from './composites/AlertToast/index.js';
+export * from './composites/ColorPicker/index.js';
+export * from './composites/Pagination/index.js';
