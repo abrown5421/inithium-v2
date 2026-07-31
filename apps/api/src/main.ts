@@ -16,6 +16,7 @@ import {
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
+import { createApiPubSubServer } from './pubsub.js';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -118,8 +119,14 @@ const bootstrap = async (): Promise<void> => {
   app.use('/pages', pageCollection.router);
 // collection-generator:routes
 
-  app.listen(env.PORT, () => {
+  const httpServer = app.listen(env.PORT, () => {
     console.log(`Application online on port ${env.PORT}`);
+  });
+
+  createApiPubSubServer({
+    httpServer,
+    jwtAccessSecret: env.JWT_ACCESS_SECRET,
+    cors: createCorsOptions(env.CORS_ORIGINS)
   });
 };
 
