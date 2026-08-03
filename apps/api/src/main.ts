@@ -53,7 +53,7 @@ const bootstrap = async (): Promise<void> => {
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
-  const userCollection = createUserCollection(db, { authenticate, requireAdmin });
+  const userCollection = createUserCollection(db, { authenticate });
 
   const assetRootDir = path.resolve(env.APP_FILE_ROOT);
   await fs.mkdir(assetRootDir, { recursive: true });
