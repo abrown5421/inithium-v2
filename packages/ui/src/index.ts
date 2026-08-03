@@ -60,3 +60,7 @@ export * from './composites/Auth/index.js';
 export * from './composites/AlertToast/index.js';
 export * from './composites/ColorPicker/index.js';
 export * from './composites/Pagination/index.js';
+export * from './composites/DataTable/index.js';
+export * from './composites/SearchFilterBar/index.js';
+export * from './composites/EntityFormDialog/index.js';
+export * from './composites/ConfirmDeleteDialog/index.js';

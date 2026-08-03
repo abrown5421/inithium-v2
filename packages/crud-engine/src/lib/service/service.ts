@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Filter } from 'mongodb';
 import { ResultAsync } from 'neverthrow';
 import { AppError, BaseEntity, PaginatedResult } from '@inithium/types';
 import { validateDoc, validateManyDocs } from '@inithium/validators';
@@ -9,7 +10,7 @@ export interface CrudService<T extends BaseEntity, CreateDTO, UpdateDTO> {
   readonly createMany: (dtos: readonly CreateDTO[]) => ResultAsync<readonly T[], AppError>;
   readonly readOne: (id: string) => ResultAsync<T, AppError>;
   readonly readMany: (ids: readonly string[]) => ResultAsync<readonly T[], AppError>;
-  readonly readAll: (page?: number, limit?: number) => ResultAsync<PaginatedResult<T>, AppError>;
+  readonly readAll: (page?: number, limit?: number, filter?: Record<string, unknown>) => ResultAsync<PaginatedResult<T>, AppError>;
   readonly updateOne: (id: string, dto: UpdateDTO) => ResultAsync<T, AppError>;
   readonly updateMany: (items: readonly { readonly id: string; readonly data: UpdateDTO }[]) => ResultAsync<readonly T[], AppError>;
   readonly deleteOne: (id: string) => ResultAsync<void, AppError>;
@@ -43,7 +44,7 @@ export const createService = <T extends BaseEntity, CreateDTO, UpdateDTO>(
 
     readMany: (ids) => repo.readMany(ids),
 
-    readAll: (page = 1, limit = 25) => repo.readAll(page, limit),
+    readAll: (page = 1, limit = 25, filter) => repo.readAll(page, limit, filter as Filter<T>),
 
     updateOne: (id, dto) =>
       validateDoc(updateSchema)(dto).asyncAndThen((valid) =>

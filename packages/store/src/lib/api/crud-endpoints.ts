@@ -28,10 +28,19 @@ export const createCrudEndpoints =
   resourcePath: string,
   tagType: TTagType
 ) => ({
-  readAll: builder.query<PaginatedResult<TEntity>, { page?: number; limit?: number } | void>({
+  readAll: builder.query<
+    PaginatedResult<TEntity>,
+    { page?: number; limit?: number; field?: string; search?: string; fieldType?: string } | void
+  >({
     query: (params) => ({
       url: resourcePath,
-      params: { page: params?.page ?? 1, limit: params?.limit ?? 25 }
+      params: {
+        page: params?.page ?? 1,
+        limit: params?.limit ?? 25,
+        ...(params?.field && params?.search
+          ? { field: params.field, search: params.search, ...(params.fieldType ? { fieldType: params.fieldType } : {}) }
+          : {})
+      }
     }),
     providesTags: (result) =>
       result

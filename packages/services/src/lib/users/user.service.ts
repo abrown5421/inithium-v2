@@ -30,7 +30,11 @@ export interface UserService {
   readonly createMany: (dtos: readonly CreateUserDTO[]) => ResultAsync<readonly SanitizedUser[], AppError>;
   readonly readOne: (id: string) => ResultAsync<SanitizedUser, AppError>;
   readonly readMany: (ids: readonly string[]) => ResultAsync<readonly SanitizedUser[], AppError>;
-  readonly readAll: (page?: number, limit?: number) => ResultAsync<PaginatedResult<SanitizedUser>, AppError>;
+  readonly readAll: (
+    page?: number,
+    limit?: number,
+    filter?: Record<string, unknown>
+  ) => ResultAsync<PaginatedResult<SanitizedUser>, AppError>;
   readonly updateOne: (id: string, dto: UpdateUserDTO) => ResultAsync<SanitizedUser, AppError>;
   readonly updateMany: (
     items: readonly { readonly id: string; readonly data: UpdateUserDTO }[]
@@ -107,8 +111,10 @@ export const createUserService = (repo: CrudRepository<User>): UserService => {
 
     readMany: (ids) => repo.readMany(ids).map((users) => users.map(sanitize)),
 
-    readAll: (page = 1, limit = 25) =>
-      repo.readAll(page, limit).map((result) => ({ ...result, data: result.data.map(sanitize) })),
+    readAll: (page = 1, limit = 25, filter) =>
+      repo
+        .readAll(page, limit, filter as Filter<User>)
+        .map((result) => ({ ...result, data: result.data.map(sanitize) })),
 
     updateOne: (id, dto) =>
       validateDoc(updateUserSchema)(dto).asyncAndThen((valid) =>
