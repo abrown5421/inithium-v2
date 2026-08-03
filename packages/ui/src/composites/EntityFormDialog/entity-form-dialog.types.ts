@@ -35,10 +35,25 @@ export interface FormFieldConfig {
   readonly renderCustom?: (params: CustomFieldRenderParams) => React.ReactNode;
 }
 
+export interface EntityFormDialogFileField {
+  readonly label: string;
+  readonly value: File | null;
+  readonly onChange: (file: File | null) => void;
+  readonly error?: string;
+  readonly accept?: string;
+  readonly required?: boolean;
+}
+
 export interface EntityFormDialogProps {
   readonly open: boolean;
   readonly onOpenChange: (open: boolean) => void;
   readonly title: string;
+  /**
+   * A `File` value doesn't fit the string-keyed `values` model every other field shares, so it's
+   * not a `FormFieldConfig` entry — one dedicated slot, rendered full-width above the regular
+   * fields grid, for entities (like Assets) whose create flow is a file upload rather than a form.
+   */
+  readonly fileField?: EntityFormDialogFileField;
   readonly fields: readonly FormFieldConfig[];
   /**
    * All field values as strings, including `type: 'switch'` (`'true'`/`'false'`) — this keeps a

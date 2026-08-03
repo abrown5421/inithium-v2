@@ -53,15 +53,16 @@ export interface CrudRouterOptions {
   readonly authorize?: (req: Request, operation: CrudOperation) => AppError | undefined;
 }
 
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+export const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
  * `string` fields get a substring, case-insensitive match (progressive search-as-you-type).
  * `enum`/`boolean` fields get an exact match, since the UI restricts input to a closed set of
  * values and a substring match would false-positive on values that contain each other (e.g. a
- * role search for "admin" would otherwise also match "super-admin").
+ * role search for "admin" would otherwise also match "super-admin"). Exported so bespoke routers
+ * (e.g. assets, which isn't built on `createCrudRouter`) can get the same search semantics.
  */
-const buildSearchFilterValue = (search: string, fieldType: string | undefined): unknown => {
+export const buildSearchFilterValue = (search: string, fieldType: string | undefined): unknown => {
   if (fieldType === 'boolean') return search === 'true';
   if (fieldType === 'enum') return search;
   return { $regex: escapeRegExp(search), $options: 'i' };

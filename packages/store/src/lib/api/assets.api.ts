@@ -8,13 +8,18 @@ import { createCrudEndpoints } from './crud-endpoints.js';
 export interface UploadAssetArgs {
   readonly file: File;
   readonly isSystem?: boolean;
+  /** Admin/super-admin only — attributes the upload to this user instead of the requester. */
+  readonly onBehalfOfUserId?: string;
 }
 
-const buildUploadFormData = ({ file, isSystem }: UploadAssetArgs): FormData => {
+const buildUploadFormData = ({ file, isSystem, onBehalfOfUserId }: UploadAssetArgs): FormData => {
   const formData = new FormData();
   formData.append('file', file);
   if (isSystem !== undefined) {
     formData.append('isSystem', String(isSystem));
+  }
+  if (onBehalfOfUserId) {
+    formData.append('onBehalfOfUserId', onBehalfOfUserId);
   }
   return formData;
 };
@@ -45,6 +50,11 @@ export const assetsApi = createApi({
       deleteAssetByKey: builder.mutation<{ key: string; deleted: boolean }, string>({
         query: (key) => ({ url: `assets/by-key/${key}`, method: 'DELETE' }),
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }]
+      }),
+
+      deleteAssetsByKeys: builder.mutation<number, readonly string[]>({
+        query: (keys) => ({ url: 'assets/batch', method: 'DELETE', body: { keys } }),
+        invalidatesTags: [{ type: 'Asset', id: 'LIST' }]
       })
     };
   }
@@ -55,5 +65,6 @@ export const {
   useReadOneQuery: useReadAssetQuery,
   useUpdateOneMutation: useUpdateAssetMutation,
   useUploadAssetMutation,
-  useDeleteAssetByKeyMutation
+  useDeleteAssetByKeyMutation,
+  useDeleteAssetsByKeysMutation
 } = assetsApi;

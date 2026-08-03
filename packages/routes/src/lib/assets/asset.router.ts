@@ -1,22 +1,33 @@
 import fs from 'node:fs';
 import { Router, Request, Response, RequestHandler } from 'express';
 import multer, { MulterError } from 'multer';
-import '@inithium/auth';
-import { handleResult } from '@inithium/crud-engine';
-import { AssetService } from '../../../../services/src/lib/assets/asset.service.js';
+import { createRequireRoleMiddleware } from '@inithium/auth';
+import { buildSearchFilterValue, handleResult } from '@inithium/crud-engine';
+import {
+  ASSET_EDITABLE_FIELDS,
+  ASSET_PERMISSION_MATRIX,
+  UserRole,
+  canAssignAssetIsSystem,
+  canPerformAssetAction,
+  getDisallowedFields
+} from '@inithium/types';
+import { AssetService, UserService } from '@inithium/services';
 
 export interface AssetRouterConfig {
   readonly authenticate: RequestHandler;
-  readonly requireAdmin: RequestHandler;
   readonly maxUploadSizeMb: number;
+  /** Used to validate an `onBehalfOfUserId` upload target actually exists before attributing the asset to it. */
+  readonly userService: UserService;
 }
+
+/** Roles allowed into the CMS at all — everyone gets read access to the whole asset library. */
+const CMS_ROLES: readonly UserRole[] = ['super-admin', 'admin', 'editor', 'writer'];
+const SEARCHABLE_FIELDS = ['originalName', 'isSystem'];
 
 const isAdminRole = (role: string): boolean => role === 'admin' || role === 'super-admin';
 
 const parseIsSystem = (file: Express.Multer.File | undefined, body: Record<string, unknown> | undefined): boolean =>
-  file
-    ? body?.isSystem === 'true' || body?.isSystem === true
-    : Boolean(body?.isSystem);
+  file ? body?.isSystem === 'true' || body?.isSystem === true : Boolean(body?.isSystem);
 
 const extractFilePayload = (file: Express.Multer.File | undefined, body: Record<string, unknown> | undefined) => ({
   fileContentBase64: (file ? file.buffer.toString('base64') : body?.fileContent) as string | undefined,
@@ -47,17 +58,51 @@ const buildUploadMiddleware = (maxUploadSizeMb: number): RequestHandler => {
 export const createAssetRouter = (assetService: AssetService, config: AssetRouterConfig): Router => {
   const router = Router();
   const uploadMiddleware = buildUploadMiddleware(config.maxUploadSizeMb);
+  const requireCmsRole = createRequireRoleMiddleware(CMS_ROLES);
 
   router.post('/', config.authenticate, uploadMiddleware, async (req: Request, res: Response) => {
-    const requesterIsAdmin = isAdminRole(req.user!.role);
-    const requestedIsSystem = parseIsSystem(req.file, req.body);
+    const role = req.user!.role;
 
-    if (requestedIsSystem && !requesterIsAdmin) {
+    if (!canPerformAssetAction(role, 'create')) {
+      res.status(403).json({ success: false, error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to upload assets' } });
+      return;
+    }
+
+    const requestedIsSystem = parseIsSystem(req.file, req.body);
+    const isSystemValue: 'true' | 'false' = requestedIsSystem ? 'true' : 'false';
+    const onBehalfOfUserId =
+      typeof req.body?.onBehalfOfUserId === 'string' && req.body.onBehalfOfUserId.length > 0
+        ? req.body.onBehalfOfUserId
+        : undefined;
+
+    const payload: Record<string, unknown> = {
+      isSystem: isSystemValue,
+      ...(onBehalfOfUserId ? { onBehalfOfUserId } : {})
+    };
+
+    const disallowedFields = getDisallowedFields(ASSET_PERMISSION_MATRIX, role, payload, ASSET_EDITABLE_FIELDS);
+    if (disallowedFields.length > 0) {
       res.status(403).json({
         success: false,
-        error: { type: 'FORBIDDEN_ERROR', message: 'Only administrators can upload system assets' }
+        error: { type: 'FORBIDDEN_ERROR', message: `You are not allowed to set: ${disallowedFields.join(', ')}` }
       });
       return;
+    }
+
+    if (!canAssignAssetIsSystem(role, isSystemValue)) {
+      res.status(403).json({
+        success: false,
+        error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to upload this type of asset' }
+      });
+      return;
+    }
+
+    if (onBehalfOfUserId) {
+      const targetUserResult = await config.userService.readOne(onBehalfOfUserId);
+      if (targetUserResult.isErr()) {
+        handleResult(res, targetUserResult);
+        return;
+      }
     }
 
     const { fileContentBase64, originalName, mimeType } = extractFilePayload(req.file, req.body);
@@ -75,7 +120,7 @@ export const createAssetRouter = (assetService: AssetService, config: AssetRoute
       originalName,
       mimeType,
       isSystem: requestedIsSystem,
-      userId: req.user!.id
+      userId: onBehalfOfUserId ?? req.user!.id
     });
     handleResult(res, result, 201);
   });
@@ -101,26 +146,78 @@ export const createAssetRouter = (assetService: AssetService, config: AssetRoute
     );
   });
 
-  router.delete('/by-key/:key', config.authenticate, async (req: Request, res: Response) => {
+  router.delete('/batch', config.authenticate, requireCmsRole, async (req: Request, res: Response) => {
+    const role = req.user!.role;
+    if (!canPerformAssetAction(role, 'delete')) {
+      res.status(403).json({ success: false, error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to delete assets' } });
+      return;
+    }
+
+    const keys: readonly unknown[] = Array.isArray(req.body?.keys) ? req.body.keys : [];
+    let deletedCount = 0;
+    for (const key of keys) {
+      const result = await assetService.deleteAssetByKey(String(key), req.user!.id, isAdminRole(role));
+      if (result.isOk()) deletedCount += 1;
+    }
+    res.status(200).json({ success: true, data: deletedCount });
+  });
+
+  router.delete('/by-key/:key', config.authenticate, requireCmsRole, async (req: Request, res: Response) => {
+    const role = req.user!.role;
+    if (!canPerformAssetAction(role, 'delete')) {
+      res.status(403).json({ success: false, error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to delete assets' } });
+      return;
+    }
+
     const key = String(req.params['key']);
-    const result = await assetService.deleteAssetByKey(key, req.user!.id, isAdminRole(req.user!.role)); 
+    const result = await assetService.deleteAssetByKey(key, req.user!.id, isAdminRole(role));
     handleResult(res, result.map(() => ({ key, deleted: true })));
   });
 
-  router.get('/', config.authenticate, config.requireAdmin, async (req: Request, res: Response) => {
+  router.get('/', config.authenticate, requireCmsRole, async (req: Request, res: Response) => {
     const page = req.query['page'] ? parseInt(req.query['page'] as string, 10) : 1;
     const limit = req.query['limit'] ? parseInt(req.query['limit'] as string, 10) : 25;
-    const result = await assetService.readAll(page, limit);
+    const field = typeof req.query['field'] === 'string' ? req.query['field'] : undefined;
+    const search = typeof req.query['search'] === 'string' ? req.query['search'] : undefined;
+    const fieldType = typeof req.query['fieldType'] === 'string' ? req.query['fieldType'] : undefined;
+    const filter =
+      field && search && SEARCHABLE_FIELDS.includes(field)
+        ? { [field]: buildSearchFilterValue(search, fieldType) }
+        : undefined;
+    const result = await assetService.readAll(page, limit, filter);
     handleResult(res, result);
   });
 
-  router.get('/:id', config.authenticate, config.requireAdmin, async (req: Request, res: Response) => {
+  router.get('/:id', config.authenticate, requireCmsRole, async (req: Request, res: Response) => {
     const result = await assetService.readOne(String(req.params['id']));
     handleResult(res, result);
   });
 
-  router.put('/:id', config.authenticate, config.requireAdmin, async (req: Request, res: Response) => {
-    const result = await assetService.updateOne(String(req.params['id']), req.body);
+  router.put('/:id', config.authenticate, requireCmsRole, async (req: Request, res: Response) => {
+    const role = req.user!.role;
+    if (!canPerformAssetAction(role, 'update')) {
+      res.status(403).json({ success: false, error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to edit assets' } });
+      return;
+    }
+
+    const id = String(req.params['id']);
+
+    if (role === 'editor') {
+      const existingResult = await assetService.readOne(id);
+      if (existingResult.isErr()) {
+        handleResult(res, existingResult);
+        return;
+      }
+      if (!existingResult.value.isSystem) {
+        res.status(403).json({
+          success: false,
+          error: { type: 'FORBIDDEN_ERROR', message: 'You can only rename system assets' }
+        });
+        return;
+      }
+    }
+
+    const result = await assetService.updateOne(id, req.body);
     handleResult(res, result);
   });
 

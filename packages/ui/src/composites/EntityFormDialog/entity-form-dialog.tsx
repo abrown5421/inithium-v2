@@ -8,6 +8,7 @@ import { Text } from '../../primitives/text.js';
 import { AuthField } from '../Auth/auth-field.js';
 import { PasswordField } from '../Auth/password-field.js';
 import { ColorPicker } from '../ColorPicker/color-picker.js';
+import { FileDropzone } from '../FileDropzone/file-dropzone.js';
 import type { EntityFormDialogProps, FormFieldConfig } from './entity-form-dialog.types.js';
 
 const renderField = (
@@ -109,6 +110,7 @@ export const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
   open,
   onOpenChange,
   title,
+  fileField,
   fields,
   values,
   errors,
@@ -132,6 +134,24 @@ export const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
           onSubmit={onSubmit}
           noValidate
         >
+          {fileField ? (
+            <div className="sm:col-span-2">
+              <div className="flex flex-col gap-1.5">
+                <Label required={fileField.required}>{fileField.label}</Label>
+                <FileDropzone
+                  value={fileField.value}
+                  onChange={fileField.onChange}
+                  accept={fileField.accept}
+                  error={fileField.error}
+                />
+                {fileField.error ? (
+                  <Text as="span" size="xs" tone="destructive">
+                    {fileField.error}
+                  </Text>
+                ) : null}
+              </div>
+            </div>
+          ) : null}
           {fields
             .filter((field) => field.visible ?? true)
             .map((field) => (

@@ -2,7 +2,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Filter } from 'mongodb';
 import { ResultAsync, errAsync, okAsync } from 'neverthrow';
-import { AppError, createNotFoundError, createForbiddenError } from '@inithium/types';
+import { AppError, PaginatedResult, createNotFoundError, createForbiddenError } from '@inithium/types';
 import { CrudRepository, CrudService, createService } from '@inithium/crud-engine';
 import { FileManagerService } from '@inithium/file-manager';
 import { 
@@ -28,7 +28,11 @@ export interface AssetService {
   readonly getAssetFileStreamByKey: (key: string) => ResultAsync<{ filePath: string; mimeType: string }, AppError>;
   readonly deleteAssetByKey: (key: string, requesterUserId: string, isAdmin: boolean) => ResultAsync<void, AppError>;
   readonly readOne: (id: string) => ResultAsync<AssetWithUrl, AppError>;
-  readonly readAll: CrudService<Asset, CreateAssetDTO, UpdateAssetDTO>['readAll'];
+  readonly readAll: (
+    page?: number,
+    limit?: number,
+    filter?: Record<string, unknown>
+  ) => ResultAsync<PaginatedResult<AssetWithUrl>, AppError>;
   readonly updateOne: (id: string, dto: UpdateAssetDTO) => ResultAsync<AssetWithUrl, AppError>;
   readonly createOne: CrudService<Asset, CreateAssetDTO, UpdateAssetDTO>['createOne'];
   readonly deleteOne: CrudService<Asset, CreateAssetDTO, UpdateAssetDTO>['deleteOne'];
@@ -71,7 +75,11 @@ export const createAssetService = (
   return {
     createOne: baseCrud.createOne,
     deleteOne: baseCrud.deleteOne,
-    readAll: baseCrud.readAll,
+
+    readAll: (page, limit, filter) =>
+      baseCrud
+        .readAll(page, limit, filter)
+        .map((result) => ({ ...result, data: result.data.map((asset) => toAssetWithUrl(asset, publicAssetBaseUrl)) })),
 
     readOne: (id) => baseCrud.readOne(id).map((asset) => toAssetWithUrl(asset, publicAssetBaseUrl)),
 

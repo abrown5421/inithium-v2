@@ -68,7 +68,7 @@ const bootstrap = async (): Promise<void> => {
   const assetCollection = createAssetCollection(db, {
     fileManagerService: assetFileManagerService,
     authenticate,
-    requireAdmin,
+    userService: userCollection.service,
     maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB,
     publicAssetBaseUrl: env.API_PUBLIC_ORIGIN
   });

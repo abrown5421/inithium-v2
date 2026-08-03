@@ -23,13 +23,21 @@ import {
   usePageSession
 } from '@inithium/pages';
 import { AlertViewport, AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
-import { CMS_ALLOWED_ROLES, DashboardPage, LoginPage, PageManagementPage, UserManagementPage } from '@inithium/cms-pages';
+import {
+  AssetManagementPage,
+  CMS_ALLOWED_ROLES,
+  DashboardPage,
+  LoginPage,
+  PageManagementPage,
+  UserManagementPage
+} from '@inithium/cms-pages';
 
 const layouts = {
   default: DashboardPage,
   login: LoginPage,
   users: UserManagementPage,
-  pages: PageManagementPage
+  pages: PageManagementPage,
+  assets: AssetManagementPage
 };
 
 const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
