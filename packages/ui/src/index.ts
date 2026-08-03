@@ -64,3 +64,4 @@ export * from './composites/DataTable/index.js';
 export * from './composites/SearchFilterBar/index.js';
 export * from './composites/EntityFormDialog/index.js';
 export * from './composites/ConfirmDeleteDialog/index.js';
+export * from './composites/FileDropzone/index.js';
