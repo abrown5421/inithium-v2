@@ -21,10 +21,18 @@ export interface MatrixAuthorizerConfig<
   /** The one "capped" field (e.g. `role`) whose value is checked against `assignableValues`, if any. */
   readonly assignableField?: TField;
   readonly getRole: (req: Request) => TRole | undefined;
-  /** Maps each mutating CRUD operation to the matrix action it requires. Operations left out (e.g. reads) are always allowed here. */
+  /** Maps each mutating CRUD operation to the matrix action it requires. Operations left out (e.g. reads) are never touched by this authorizer at all — no role is even required for them, so a collection can still expose public reads via `publicRoutes`. */
   readonly operationAction: Partial<Record<CrudOperation, TAction>>;
   /** Reject `createMany`/`updateMany` outright regardless of role. Default `true` — most entities don't need batch create/update from the CMS. */
   readonly disableBatch?: boolean;
+  /**
+   * Fields exempt from the "may this role set this field" check specifically on `createOne`
+   * (still fully enforced on `updateOne`). For fields a schema requires on every record but a
+   * role may only ever create with a fixed, client-supplied default — never edit thereafter on
+   * an existing record. Narrower than granting the field via `editableFields`, which would also
+   * allow editing it on existing records.
+   */
+  readonly fieldsUncheckedOnCreate?: readonly TField[];
 }
 
 /**
@@ -38,9 +46,6 @@ export const createMatrixAuthorizer =
     config: MatrixAuthorizerConfig<TRole, TAction, TField, TAssignable>
   ) =>
   (req: Request, operation: CrudOperation): AppError | undefined => {
-    const role = config.getRole(req);
-    if (!role) return createUnauthorizedError('Authentication required');
-
     const disableBatch = config.disableBatch ?? true;
     if (disableBatch && (operation === 'createMany' || operation === 'updateMany')) {
       return createForbiddenError('Batch create/update is not supported for this resource');
@@ -49,14 +54,20 @@ export const createMatrixAuthorizer =
     const action = config.operationAction[operation];
     if (!action) return undefined;
 
+    const role = config.getRole(req);
+    if (!role) return createUnauthorizedError('Authentication required');
+
     if (!canPerformAction(config.matrix, role, action)) {
       return createForbiddenError(`You are not allowed to ${action} this resource`);
     }
 
     if (action === 'create' || action === 'update') {
       const payload = (req.body && typeof req.body === 'object' ? req.body : {}) as Record<string, unknown>;
+      const exemptOnCreate = new Set<TField>(action === 'create' ? config.fieldsUncheckedOnCreate ?? [] : []);
 
-      const disallowedFields = getDisallowedFields(config.matrix, role, payload, config.allFields);
+      const disallowedFields = getDisallowedFields(config.matrix, role, payload, config.allFields).filter(
+        (key) => !exemptOnCreate.has(key as TField)
+      );
       if (disallowedFields.length > 0) {
         return createForbiddenError(`You are not allowed to set: ${disallowedFields.join(', ')}`);
       }

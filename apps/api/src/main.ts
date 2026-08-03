@@ -91,11 +91,7 @@ const bootstrap = async (): Promise<void> => {
     process.exit(1);
   }
 
-  const pageCollection = createPageCollection(db, {
-    authenticate,
-    publicRoutes: ['readAll', 'readOne', 'readMany'],
-    protectedMiddleware: [requireAdmin]
-  });
+  const pageCollection = createPageCollection(db, { authenticate });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());

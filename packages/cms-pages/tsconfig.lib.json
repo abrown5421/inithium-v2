@@ -16,6 +16,9 @@
       "path": "../services/tsconfig.lib.json"
     },
     {
+      "path": "../models/tsconfig.lib.json"
+    },
+    {
       "path": "../types/tsconfig.lib.json"
     },
     {
