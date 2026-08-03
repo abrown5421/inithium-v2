@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-export type FormFieldType = 'text' | 'email' | 'password' | 'select' | 'switch';
+export type FormFieldType = 'text' | 'email' | 'password' | 'select' | 'switch' | 'color' | 'custom';
+
+export interface CustomFieldRenderParams {
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+  readonly error: string | undefined;
+}
 
 export interface FormFieldOption {
   readonly value: string;
@@ -19,6 +25,14 @@ export interface FormFieldConfig {
   /** Omits the field from the form entirely (e.g. password only on create, role only if the acting role may set it). Defaults to `true`. */
   readonly visible?: boolean;
   readonly autoComplete?: string;
+  /** Spans both columns of the fields grid instead of sharing a row — for content that needs the room (a checkbox group, a longer description) or that reads better as its own section. */
+  readonly fullWidth?: boolean;
+  /**
+   * Required for `type: 'custom'`. Full control over the field's markup (e.g. a multi-value
+   * checkbox group) while still participating in the same values/errors/visible wiring as every
+   * other field type — the value is still just a string, encoded however the caller likes.
+   */
+  readonly renderCustom?: (params: CustomFieldRenderParams) => React.ReactNode;
 }
 
 export interface EntityFormDialogProps {

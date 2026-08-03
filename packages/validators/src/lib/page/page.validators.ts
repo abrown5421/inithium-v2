@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { ANIMATE_ENTRIES, ANIMATE_EXITS, NAV_LOCATIONS, THEME_TOKENS, USER_ROLES } from '@inithium/types';
+import { ANIMATE_ENTRIES, ANIMATE_EXITS, NAV_LOCATIONS, USER_ROLES } from '@inithium/types';
 
 export const pageThemeSchema = z.object({
-  backgroundColor: z.enum(THEME_TOKENS),
-  foregroundColor: z.enum(THEME_TOKENS)
+  backgroundColor: z.string().min(1),
+  foregroundColor: z.string().min(1)
 });
 
 export const pageAnimationsSchema = z.object({

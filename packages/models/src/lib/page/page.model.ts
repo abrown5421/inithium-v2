@@ -1,8 +1,9 @@
-import { AnimateEntry, AnimateExit, BaseEntity, NavLocation, ThemeToken, UserRole } from '@inithium/types';
+import { AnimateEntry, AnimateExit, BaseEntity, NavLocation, UserRole } from '@inithium/types';
 
 export interface PageTheme {
-  readonly backgroundColor: ThemeToken;
-  readonly foregroundColor: ThemeToken;
+  /** A CSS color — a hex string from the color picker, or a legacy semantic token name (e.g. `background`) rendered as `var(--background)`. */
+  readonly backgroundColor: string;
+  readonly foregroundColor: string;
 }
 
 export interface PageAnimations {
