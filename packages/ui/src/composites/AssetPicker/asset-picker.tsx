@@ -92,6 +92,7 @@ export const AssetPicker = React.forwardRef<HTMLInputElement, AssetPickerProps>(
       onValueChange,
       user,
       pageLimit,
+      assetCategory,
       dialogTitle,
       dialogDescription,
       emptyMessage = 'No assets found',
@@ -111,7 +112,7 @@ export const AssetPicker = React.forwardRef<HTMLInputElement, AssetPickerProps>(
       [onValueChange]
     );
 
-    const picker = useAssetPicker({ user, pageLimit });
+    const picker = useAssetPicker({ user, pageLimit, assetCategory });
 
     return (
       <>
