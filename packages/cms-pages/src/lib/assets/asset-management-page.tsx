@@ -1,9 +1,20 @@
 import * as React from 'react';
 import { z } from 'zod';
-import { File as GenericFileIcon, FileText, Film, Image as ImageIcon, Music, Pencil, Trash2 } from 'lucide-react';
+import {
+  Archive,
+  File as GenericFileIcon,
+  FileJson,
+  FileText,
+  FileType,
+  Film,
+  Image as ImageIcon,
+  Music,
+  Pencil,
+  Trash2
+} from 'lucide-react';
 import { PageLayoutComponent, useCrudFormState, useEntityListState } from '@inithium/pages';
 import { canAssignAssetIsSystem, canPerformAssetAction, getEditableAssetFields } from '@inithium/types';
-import type { AssetWithUrl } from '@inithium/models';
+import { ASSET_CATEGORIES, type AssetCategory, type AssetWithUrl } from '@inithium/models';
 import { updateAssetSchema } from '@inithium/validators';
 import {
   openAlert,
@@ -47,9 +58,26 @@ const SCOPE_OPTIONS: readonly { value: string; label: string }[] = [
   { value: 'system', label: 'System Asset' }
 ];
 
+const CATEGORY_LABELS: Record<AssetCategory, string> = {
+  images: 'Images',
+  pdfs: 'PDFs',
+  videos: 'Videos',
+  audio: 'Audio',
+  fonts: 'Fonts',
+  archives: 'Archives',
+  data: 'Data',
+  other: 'Other'
+};
+
 const SEARCHABLE_FIELDS: readonly SearchFieldConfig[] = [
   { value: 'originalName', label: 'Name', type: 'string' },
-  { value: 'isSystem', label: 'System Asset', type: 'boolean' }
+  { value: 'isSystem', label: 'System Asset', type: 'boolean' },
+  {
+    value: 'category',
+    label: 'Type',
+    type: 'enum',
+    options: ASSET_CATEGORIES.map((category) => ({ value: category, label: CATEGORY_LABELS[category] }))
+  }
 ];
 
 const formatFileSize = (bytes: number): string => {
@@ -58,16 +86,19 @@ const formatFileSize = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
 
-const AssetIcon: React.FC<{ mimeType: string }> = ({ mimeType }) => {
-  const Icon = mimeType.startsWith('image/')
-    ? ImageIcon
-    : mimeType === 'application/pdf'
-      ? FileText
-      : mimeType.startsWith('video/')
-        ? Film
-        : mimeType.startsWith('audio/')
-          ? Music
-          : GenericFileIcon;
+const CATEGORY_ICONS: Record<AssetCategory, typeof GenericFileIcon> = {
+  images: ImageIcon,
+  pdfs: FileText,
+  videos: Film,
+  audio: Music,
+  fonts: FileType,
+  archives: Archive,
+  data: FileJson,
+  other: GenericFileIcon
+};
+
+const AssetIcon: React.FC<{ category: AssetCategory }> = ({ category }) => {
+  const Icon = CATEGORY_ICONS[category];
   return <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />;
 };
 
@@ -141,7 +172,7 @@ export const AssetManagementPage: PageLayoutComponent = () => {
           rel="noopener noreferrer"
           className="flex items-center gap-2 hover:underline"
         >
-          <AssetIcon mimeType={asset.mimeType} />
+          <AssetIcon category={asset.category} />
           {asset.originalName}
         </a>
       )

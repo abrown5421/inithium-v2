@@ -38,12 +38,31 @@ export interface AssetService {
   readonly deleteOne: CrudService<Asset, CreateAssetDTO, UpdateAssetDTO>['deleteOne'];
 }
 
-const determineCategory = (mimeType: string): AssetCategory => {
+/** Fonts/archives/data files don't share a consistent `mimeType` family across browsers/OSes, so they're classified by extension instead. */
+const EXTENSION_CATEGORIES: Readonly<Record<string, AssetCategory>> = {
+  '.ttf': 'fonts',
+  '.otf': 'fonts',
+  '.woff': 'fonts',
+  '.woff2': 'fonts',
+  '.zip': 'archives',
+  '.tar.gz': 'archives',
+  '.rar': 'archives',
+  '.json': 'data',
+  '.csv': 'data',
+  '.xml': 'data'
+};
+
+const getExtension = (filename: string): string => {
+  const lower = filename.toLowerCase();
+  return lower.endsWith('.tar.gz') ? '.tar.gz' : path.extname(lower);
+};
+
+const determineCategory = (mimeType: string, originalName: string): AssetCategory => {
   if (mimeType.startsWith('image/')) return 'images';
   if (mimeType === 'application/pdf') return 'pdfs';
   if (mimeType.startsWith('video/')) return 'videos';
   if (mimeType.startsWith('audio/')) return 'audio';
-  return 'other';
+  return EXTENSION_CATEGORIES[getExtension(originalName)] ?? 'other';
 };
 
 const buildAssetPath = (category: AssetCategory, isSystem: boolean, userId: string, filename: string): string =>
@@ -103,7 +122,7 @@ export const createAssetService = (
         return errAsync(createNotFoundError('fileContent must be a valid base64-encoded string'));
       }
 
-      const category = determineCategory(valid.mimeType);
+      const category = determineCategory(valid.mimeType, valid.originalName);
       const key = randomUUID();
       const extension = path.extname(valid.originalName);
       const filename = `${key}${extension}`;
@@ -128,7 +147,8 @@ export const createAssetService = (
           mimeType: valid.mimeType,
           sizeBytes: buffer.byteLength,
           uploadedBy,
-          isSystem: valid.isSystem
+          isSystem: valid.isSystem,
+          category
         });
 
         if (createDtoResult.isErr()) {
