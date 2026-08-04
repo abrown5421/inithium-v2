@@ -24,14 +24,12 @@ import {
   useDeleteAssetByKeyMutation,
   useDeleteAssetsByKeysMutation,
   useReadAllAssetsQuery,
-  useReadAllUsersQuery,
   useReadUsersByIdsQuery,
   useUpdateAssetMutation,
   useUploadAssetMutation
 } from '@inithium/store';
 import {
   Button,
-  Combobox,
   ConfirmDeleteDialog,
   DataTable,
   type DataTableColumn,
@@ -42,7 +40,8 @@ import {
   type SearchFieldConfig,
   SearchFilterBar,
   Text,
-  useEntityListState
+  useEntityListState,
+  UserPicker
 } from '@inithium/ui';
 import { RenameFormValues, UploadFormValues, UploadScope } from './asset-management-page.types.js';
 
@@ -147,12 +146,6 @@ export const AssetManagementPage: PageLayoutComponent = () => {
     return map;
   }, [uploaders]);
 
-  const { data: allUsers } = useReadAllUsersQuery({ limit: 100 }, { skip: !canUploadOnBehalfOf });
-  const userOptions = React.useMemo(
-    () => (allUsers?.data ?? []).map((user) => ({ value: user._id, label: `${user.first_name} ${user.last_name} (${user.email})` })),
-    [allUsers]
-  );
-
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const [fileError, setFileError] = React.useState<string | undefined>(undefined);
   const uploadFormState = useCrudFormState<UploadFormValues>(EMPTY_UPLOAD_FORM_VALUES);
@@ -199,14 +192,7 @@ export const AssetManagementPage: PageLayoutComponent = () => {
           renderCustom: ({ value, onChange, error }) => (
             <div className="flex flex-col gap-1.5">
               <Label required>User</Label>
-              <Combobox
-                options={userOptions}
-                value={value}
-                onValueChange={onChange}
-                placeholder="Search for a user…"
-                searchPlaceholder="Search users…"
-                error={Boolean(error)}
-              />
+              <UserPicker value={value} onChange={onChange} error={error} />
               {error ? (
                 <Text as="span" size="xs" tone="destructive">
                   {error}

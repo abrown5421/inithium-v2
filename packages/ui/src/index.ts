@@ -69,3 +69,4 @@ export * from './composites/EntityFormDialog/index.js';
 export * from './composites/ConfirmDeleteDialog/index.js';
 export * from './composites/FileDropzone/index.js';
 export * from './composites/AssetPicker/index.js';
+export * from './composites/UserPicker/index.js';
