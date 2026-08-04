@@ -1,26 +1,22 @@
 import { Db } from 'mongodb';
-import { Router } from 'express';
-import { createRepository, createService, createCrudRouter, CrudRouterOptions } from '@inithium/crud-engine';
+import { Router, RequestHandler } from 'express';
+import { createRepository } from '@inithium/crud-engine';
+import { createSettingService, SettingService } from '@inithium/services';
+import { createSettingRouter } from '@inithium/routes';
 import { Setting } from '@inithium/models';
-import {
-  createSettingSchema,
-  updateSettingSchema,
-  CreateSettingDTO,
-  UpdateSettingDTO
-} from '@inithium/validators';
+
+export interface SettingCollectionConfig {
+  readonly authenticate: RequestHandler;
+}
 
 export interface SettingCollection {
-  readonly service: ReturnType<typeof createService<Setting, CreateSettingDTO, UpdateSettingDTO>>;
+  readonly service: SettingService;
   readonly router: Router;
 }
 
-export const createSettingCollection = (db: Db, config: CrudRouterOptions): SettingCollection => {
+export const createSettingCollection = (db: Db, config: SettingCollectionConfig): SettingCollection => {
   const repository = createRepository<Setting>(db, 'settings');
-  const service = createService<Setting, CreateSettingDTO, UpdateSettingDTO>(
-    repository,
-    createSettingSchema,
-    updateSettingSchema
-  );
-  const router = createCrudRouter(service, config);
+  const service = createSettingService(repository);
+  const router = createSettingRouter(service, { authenticate: config.authenticate });
   return { service, router };
 };

@@ -93,7 +93,7 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const pageCollection = createPageCollection(db, { authenticate });
-  const settingCollection = createSettingCollection(db, { authenticate, publicRoutes: [] });
+  const settingCollection = createSettingCollection(db, { authenticate });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
