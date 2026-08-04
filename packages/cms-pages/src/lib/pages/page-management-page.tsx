@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { z } from 'zod';
 import { Pencil, Trash2 } from 'lucide-react';
-import { PageLayoutComponent, useCrudFormState, useEntityListState } from '@inithium/pages';
+import { PageLayoutComponent, useCrudFormState } from '@inithium/pages';
 import {
   ANIMATE_ENTRIES,
   ANIMATE_EXITS,
@@ -37,7 +37,8 @@ import {
   Label,
   type SearchFieldConfig,
   SearchFilterBar,
-  Text
+  Text,
+  useEntityListState
 } from '@inithium/ui';
 import { PageFormValues } from './page-management-page.types.js';
 

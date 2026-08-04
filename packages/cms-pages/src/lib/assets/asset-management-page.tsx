@@ -12,7 +12,7 @@ import {
   Pencil,
   Trash2
 } from 'lucide-react';
-import { PageLayoutComponent, useCrudFormState, useEntityListState } from '@inithium/pages';
+import { PageLayoutComponent, useCrudFormState } from '@inithium/pages';
 import { canAssignAssetIsSystem, canPerformAssetAction, getEditableAssetFields } from '@inithium/types';
 import { ASSET_CATEGORIES, type AssetCategory, type AssetWithUrl } from '@inithium/models';
 import { updateAssetSchema } from '@inithium/validators';
@@ -41,7 +41,8 @@ import {
   Label,
   type SearchFieldConfig,
   SearchFilterBar,
-  Text
+  Text,
+  useEntityListState
 } from '@inithium/ui';
 import { RenameFormValues, UploadFormValues, UploadScope } from './asset-management-page.types.js';
 
