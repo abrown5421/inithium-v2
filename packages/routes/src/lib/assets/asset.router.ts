@@ -22,7 +22,7 @@ export interface AssetRouterConfig {
 
 /** Roles allowed into the CMS at all — everyone gets read access to the whole asset library. */
 const CMS_ROLES: readonly UserRole[] = ['super-admin', 'admin', 'editor', 'writer'];
-const SEARCHABLE_FIELDS = ['originalName', 'isSystem'];
+const SEARCHABLE_FIELDS = ['originalName', 'isSystem', 'category'];
 
 const isAdminRole = (role: string): boolean => role === 'admin' || role === 'super-admin';
 

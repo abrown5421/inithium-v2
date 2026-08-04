@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const assetCategorySchema = z.enum(['images', 'pdfs', 'videos', 'audio', 'other']);
+export const assetCategorySchema = z.enum(['images', 'pdfs', 'videos', 'audio', 'fonts', 'archives', 'data', 'other']);
 
 export const createAssetSchema = z.object({
   key: z.string().min(1),
@@ -9,7 +9,8 @@ export const createAssetSchema = z.object({
   mimeType: z.string().min(1),
   sizeBytes: z.number().int().nonnegative(),
   uploadedBy: z.string().min(1),
-  isSystem: z.boolean()
+  isSystem: z.boolean(),
+  category: assetCategorySchema
 });
 
 export const uploadAssetInputSchema = z.object({

@@ -7,6 +7,7 @@ import { authApi } from '../api/auth.api.js';
 import { healthApi } from '../api/health.api.js';
 import { authReducer } from '../slices/auth.slice.js';
 import { alertReducer } from '../slices/alert.slice.js';
+import { settingApi } from '../api/setting.api.js';
 // collection-generator:imports
 
 export const store = configureStore({
@@ -18,6 +19,7 @@ export const store = configureStore({
     [healthApi.reducerPath]: healthApi.reducer,
     auth: authReducer,
     alert: alertReducer,
+    [settingApi.reducerPath]: settingApi.reducer,
 // collection-generator:reducers
   },
   middleware: (getDefaultMiddleware) =>
@@ -27,6 +29,7 @@ export const store = configureStore({
       pageApi.middleware,
       authApi.middleware,
       healthApi.middleware,
+      settingApi.middleware,
 // collection-generator:middleware
     )
 });

@@ -17,6 +17,7 @@ import { createFileRepository, createFileManagerService } from '@inithium/file-m
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
+import { createSettingCollection } from '@inithium/collections';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -92,6 +93,7 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const pageCollection = createPageCollection(db, { authenticate });
+  const settingCollection = createSettingCollection(db, { authenticate, publicRoutes: [] });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
@@ -113,6 +115,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/collection-definitions', collectionDefinitionCollection.router);
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
   app.use('/pages', pageCollection.router);
+  app.use('/settings', settingCollection.router);
 // collection-generator:routes
 
   const httpServer = app.listen(env.PORT, () => {

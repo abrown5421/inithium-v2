@@ -8,14 +8,11 @@
 @custom-variant dark (&:where(.dark, .dark *, [data-theme='dark'], [data-theme='dark'] *));
 
 :root {
-  /* Geometry — one value drives the whole radius scale */
   --radius: 0.625rem;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* Neutral surfaces */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -26,11 +23,6 @@
   --muted-foreground: oklch(0.556 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-
-  /*
-   * Brand tokens — reskinning a client app is changing these 5 values
-   * (plus their .dark counterparts below).
-   */
   --primary: oklch(0.49 0.09 224.7);
   --primary-foreground: oklch(0.96 0.01 215.8);
   --secondary: oklch(0.72 0.03 198.5);
@@ -38,8 +30,6 @@
   --accent: oklch(0.78 0.16 57.8);
   --accent-foreground: oklch(0.96 0.01 215.8);
   --ring: oklch(0.606 0.19 262.66);
-
-  /* State colors */
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.6 0.16 149);
@@ -62,7 +52,6 @@
   --muted-foreground: oklch(0.708 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-
   --primary: oklch(0.685 0.19 262.66);
   --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.269 0 0);
@@ -70,7 +59,6 @@
   --accent: oklch(0.3 0.06 262.66);
   --accent-foreground: oklch(0.9 0.05 262.66);
   --ring: oklch(0.606 0.19 262.66);
-
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.985 0 0);
   --success: oklch(0.7 0.17 149);

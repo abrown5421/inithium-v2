@@ -1,6 +1,8 @@
 import { BaseEntity } from '@inithium/types';
 
-export type AssetCategory = 'images' | 'pdfs' | 'videos' | 'audio' | 'other';
+export const ASSET_CATEGORIES = ['images', 'pdfs', 'videos', 'audio', 'fonts', 'archives', 'data', 'other'] as const;
+
+export type AssetCategory = (typeof ASSET_CATEGORIES)[number];
 
 export interface Asset extends BaseEntity {
   readonly key: string;
@@ -10,6 +12,7 @@ export interface Asset extends BaseEntity {
   readonly sizeBytes: number;
   readonly uploadedBy: string;
   readonly isSystem: boolean;
+  readonly category: AssetCategory;
 }
 
 export interface AssetWithUrl extends Asset {
