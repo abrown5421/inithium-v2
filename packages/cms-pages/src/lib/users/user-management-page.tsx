@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { z } from 'zod';
 import { Pencil, Trash2 } from 'lucide-react';
-import { PageLayoutComponent, useCrudFormState, useEntityListState } from '@inithium/pages';
+import { PageLayoutComponent, useCrudFormState } from '@inithium/pages';
 import {
   USER_ROLES,
   canAssignUserRole,
@@ -31,7 +31,8 @@ import {
   type FormFieldConfig,
   Heading,
   type SearchFieldConfig,
-  SearchFilterBar
+  SearchFilterBar,
+  useEntityListState
 } from '@inithium/ui';
 import { UserFormValues } from './user-management-page.types.js';
 

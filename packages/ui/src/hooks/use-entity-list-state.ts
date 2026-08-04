@@ -15,10 +15,10 @@ export interface EntityListState {
 }
 
 /**
- * Pagination + search + row-selection interaction state shared by any CMS list page (built out
- * of `user-management-page.tsx`'s hand-written state). Changing the search field or value resets
- * to page 1 and clears selection, since the visible row set is about to change underneath it.
- * Doesn't own the actual data fetch — the page still calls its own entity-specific
+ * Pagination + search + row-selection interaction state shared by any list page or picker (built
+ * out of `user-management-page.tsx`'s hand-written state). Changing the search field or value
+ * resets to page 1 and clears selection, since the visible row set is about to change underneath
+ * it. Doesn't own the actual data fetch — the caller still calls its own entity-specific
  * `useReadAllXQuery` with `{ page: currentPage, field: searchField, search: searchValue }`.
  */
 export const useEntityListState = (defaultSearchField: string): EntityListState => {
