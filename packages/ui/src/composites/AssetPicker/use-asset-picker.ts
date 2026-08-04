@@ -33,10 +33,19 @@ export const ASSET_PICKER_SEARCHABLE_FIELDS: readonly SearchFieldConfig[] = [
 /**
  * System assets have no owning user (`uploadedBy: 'system'`), so a user-scoped picker can never
  * contain one — the "System Asset" filter would always be a no-op or an empty result there, so
- * it's dropped from the field list entirely once `user` is set.
+ * it's dropped from the field list entirely once `user` is set. Likewise, once `assetCategory`
+ * locks the picker to a single type, the "Type" filter has nothing left to discriminate on and
+ * is dropped too.
  */
-const getSearchableFields = (user: string | undefined): readonly SearchFieldConfig[] =>
-  user ? ASSET_PICKER_SEARCHABLE_FIELDS.filter((field) => field.value !== 'isSystem') : ASSET_PICKER_SEARCHABLE_FIELDS;
+const getSearchableFields = (
+  user: string | undefined,
+  assetCategory: AssetCategory | undefined
+): readonly SearchFieldConfig[] =>
+  ASSET_PICKER_SEARCHABLE_FIELDS.filter((field) => {
+    if (field.value === 'isSystem' && user) return false;
+    if (field.value === 'category' && assetCategory) return false;
+    return true;
+  });
 
 /**
  * `uploadedBy` isn't one of the assets endpoint's server-side searchable fields (only
@@ -47,12 +56,30 @@ const scopeAssetsToOwner = (assets: readonly AssetWithUrl[], user: string | unde
   user ? assets.filter((asset) => asset.uploadedBy === user) : assets;
 
 /**
+ * When `assetCategory` is set it's locked, not just a default — the active search field is always
+ * whatever the caller is filtering by (e.g. Name), so category can't ride along as the `field`/
+ * `search` query params without hijacking the search box. Enforced client-side instead, same as
+ * owner scoping above.
+ */
+const scopeAssetsToCategory = (
+  assets: readonly AssetWithUrl[],
+  assetCategory: AssetCategory | undefined
+): readonly AssetWithUrl[] => (assetCategory ? assets.filter((asset) => asset.category === assetCategory) : assets);
+
+/**
  * Owns asset-picker data fetching, search/type filtering, and pagination state, independent of
  * how the results get presented. Built on the same `useEntityListState` + `useReadAllAssetsQuery`
  * pairing as the CMS asset management page, so paging/search behave identically.
  */
-export const useAssetPicker = ({ user, pageLimit = DEFAULT_PAGE_LIMIT }: UseAssetPickerOptions): AssetPickerState => {
-  const searchableFields = React.useMemo(() => getSearchableFields(user), [user]);
+export const useAssetPicker = ({
+  user,
+  pageLimit = DEFAULT_PAGE_LIMIT,
+  assetCategory
+}: UseAssetPickerOptions): AssetPickerState => {
+  const searchableFields = React.useMemo(
+    () => getSearchableFields(user, assetCategory),
+    [user, assetCategory]
+  );
 
   const listState = useEntityListState(searchableFields[0].value);
   const activeSearchField =
@@ -66,7 +93,10 @@ export const useAssetPicker = ({ user, pageLimit = DEFAULT_PAGE_LIMIT }: UseAsse
     fieldType: activeSearchField.type
   });
 
-  const assets = React.useMemo(() => scopeAssetsToOwner(data?.data ?? [], user), [data, user]);
+  const assets = React.useMemo(
+    () => scopeAssetsToCategory(scopeAssetsToOwner(data?.data ?? [], user), assetCategory),
+    [data, user, assetCategory]
+  );
 
   return {
     assets,
