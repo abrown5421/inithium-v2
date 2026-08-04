@@ -2,7 +2,7 @@
   "info": {
     "_postman_id": "d158393b-59a9-44c3-ad36-c8c0ed551697",
     "name": "Inithium API",
-    "description": "CRUD engine API covering auth, file management, and the users / assets / collection-definitions / pages collections. Run \"Auth > Admin Login\" first to populate the auth_cookie collection variable used by every other authenticated request.",
+    "description": "CRUD engine API covering auth, file management, and the users / assets / collection-definitions / pages / settings collections. Run \"Auth > Admin Login\" first to populate the auth_cookie collection variable used by every other authenticated request.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -2248,6 +2248,467 @@
       ]
     },
     {
+      "name": "Settings",
+      "description": "CRUD engine routes for the settings collection. Each record pairs a unique settingName key with a dynamic settingValue that can be any JSON-compatible primitive, ISO date string, array, or nested object (ISO date strings round-trip through native Date instances server-side). All routes require an authenticated admin.",
+      "item": [
+        {
+          "name": "Create One",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings"
+              ]
+            },
+            "description": "Creates a single setting and stores its _id in the setting_id collection variable. settingValue here is a nested object mixing a string, boolean, number, ISO date string, and array to exercise the dynamic schema.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settingName\": \"site.config\",\n  \"settingValue\": {\n    \"siteName\": \"Inithium\",\n    \"maintenanceMode\": false,\n    \"maxUploadSizeMb\": 25,\n    \"launchDate\": \"2026-01-01T00:00:00.000Z\",\n    \"supportedLocales\": [\n      \"en\",\n      \"fr\",\n      \"es\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Parse the response, verify creation succeeded, and capture the new",
+                  "// entity's Mongo _id into the \"setting_id\" collection variable so",
+                  "// subsequent single-entity requests in this folder can chain off it.",
+                  "const jsonData = pm.response.json();",
+                  "",
+                  "pm.test('setting created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "    pm.expect(jsonData.success).to.eql(true);",
+                  "    pm.expect(jsonData.data).to.have.property('_id');",
+                  "});",
+                  "",
+                  "if (jsonData.success && jsonData.data && jsonData.data._id) {",
+                  "    pm.collectionVariables.set('setting_id', jsonData.data._id);",
+                  "    console.log('Stored setting_id =', jsonData.data._id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "batch"
+              ]
+            },
+            "description": "Bulk-creates multiple setting records in a single request, showing settingValue accepting different primitive types across records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"settingName\": \"feature.betaAccess\",\n    \"settingValue\": true\n  },\n  {\n    \"settingName\": \"feature.rolloutPercentage\",\n    \"settingValue\": 42\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting batch created successfully', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read One",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/{{setting_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "{{setting_id}}"
+              ]
+            },
+            "description": "Fetches a single setting by id, using the id captured by Create One. The launchDate field in settingValue should come back as the same ISO date string that was sent in."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read Many",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/query",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "query"
+              ]
+            },
+            "description": "Fetches multiple setting records by id.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{setting_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting batch fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Read All (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings?page=1&limit=25",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "25"
+                }
+              ]
+            },
+            "description": "Fetches a paginated list of setting records."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting page fetched successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update One",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/{{setting_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "{{setting_id}}"
+              ]
+            },
+            "description": "Updates a single setting by id. settingValue is replaced wholesale (no deep merge), so the full object is resent here with maintenanceMode flipped and a locale added.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settingValue\": {\n    \"siteName\": \"Inithium\",\n    \"maintenanceMode\": true,\n    \"maxUploadSizeMb\": 50,\n    \"launchDate\": \"2026-01-01T00:00:00.000Z\",\n    \"supportedLocales\": [\n      \"en\",\n      \"fr\",\n      \"es\",\n      \"de\"\n    ]\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Many",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "batch"
+              ]
+            },
+            "description": "Bulk-updates multiple setting records.",
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": \"{{setting_id}}\",\n    \"data\": {\n      \"settingValue\": {\n        \"siteName\": \"Inithium\",\n        \"maintenanceMode\": false,\n        \"maxUploadSizeMb\": 50,\n        \"launchDate\": \"2026-01-01T00:00:00.000Z\",\n        \"supportedLocales\": [\n          \"en\",\n          \"fr\",\n          \"es\",\n          \"de\"\n        ]\n      }\n    }\n  }\n]",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting batch updated successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete One",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/{{setting_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "{{setting_id}}"
+              ]
+            },
+            "description": "Deletes a single setting by id."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Many",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Cookie",
+                "value": "access_token={{auth_cookie}}",
+                "type": "text",
+                "description": "Injected automatically from the Admin Login test script (auth_cookie collection variable)."
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/settings/batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "settings",
+                "batch"
+              ]
+            },
+            "description": "Bulk-deletes multiple setting records.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"{{setting_id}}\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('setting batch deleted successfully', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Pub/Sub",
       "description": "Exercises the @inithium/pubsub real-time engine wired directly into the API (apps/api/src/pubsub.ts) end to end over plain HTTP. Postman cannot import or export native Socket.IO requests, so these requests instead talk to a small HTTP test harness (packages/pubsub/examples/http-test-harness.mjs) that holds real Socket.IO client connections open on your behalf and exposes them as REST endpoints: connect, emit, poll received events, and disconnect. The pub/sub gateway shares the API's real HTTP server and its real JWT cookie auth — there is no separate pub/sub-only server or fake auth. Before running this folder: 1) make sure the API is running on base_url (`nx serve api`), 2) start the harness with `node packages/pubsub/examples/http-test-harness.mjs` (listens on :4500 and proxies Socket.IO connections to base_url). Run the requests in order top to bottom: the two Register & Get Token requests create disposable real users and capture their access tokens, Connect Client A / Connect Client B use those tokens to open real authenticated sockets and populate pubsub_session_a / pubsub_session_b, and Disconnect Client A / Disconnect Client B should run last to close the sockets cleanly. The 'Poll For ...' requests long-poll the harness (waitMs query param) instead of returning immediately, so they are safe to run back-to-back with no manual delay even under Collection Runner.",
       "item": [
@@ -3017,6 +3478,11 @@
     },
     {
       "key": "page_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "setting_id",
       "value": "",
       "type": "string"
     },
