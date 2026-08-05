@@ -26,31 +26,37 @@ const textVariants = cva('text-foreground', {
       success: 'text-success',
       warning: 'text-warning',
     },
+    font: {
+      primary: 'font-primary',
+      secondary: 'font-secondary',
+      sans: 'font-sans',
+      serif: 'font-serif',
+      mono: 'font-mono',
+    },
   },
   defaultVariants: {
     size: 'base',
     weight: 'normal',
     tone: 'default',
+    font: 'sans',
   },
 });
 
 export interface TextProps
   extends React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof textVariants> {
-  /** Render as a different element/tag. Defaults to `p`. */
   as?: 'p' | 'span' | 'div' | 'label' | 'small';
-  /** Merge props onto the immediate child instead of rendering an element of your own. */
   asChild?: boolean;
 }
 
 export const Text = React.forwardRef<HTMLElement, TextProps>(
-  ({ className, size, weight, tone, as = 'p', asChild = false, ...props }, ref) => {
+  ({ className, size, weight, tone, font, as = 'p', asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : (as as React.ElementType);
     return (
       <Comp
         ref={ref}
         data-slot="text"
-        className={cn(textVariants({ size, weight, tone }), className)}
+        className={cn(textVariants({ size, weight, tone, font }), className)}
         {...props}
       />
     );

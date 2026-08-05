@@ -46,7 +46,7 @@ export const LoginPage: PageLayoutComponent = () => {
 
   return (
     <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center gap-6">
-      <Heading level={1} className="text-center">
+      <Heading font='secondary' level={1} className="text-center">
         Log In
       </Heading>
 

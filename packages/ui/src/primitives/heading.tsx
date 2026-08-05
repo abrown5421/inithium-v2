@@ -13,28 +13,35 @@ const headingVariants = cva('font-semibold tracking-tight text-balance text-fore
       5: 'text-lg lg:text-xl',
       6: 'text-base lg:text-lg',
     },
+    font: {
+      primary: 'font-primary',
+      secondary: 'font-secondary',
+      sans: 'font-sans',
+      serif: 'font-serif',
+      mono: 'font-mono',
+    },
   },
   defaultVariants: {
     level: 2,
+    font: 'sans',
   },
 });
 
 export interface HeadingProps
   extends React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof headingVariants> {
-  /** Merge props onto the immediate child instead of rendering an element of your own. */
   asChild?: boolean;
 }
 
 export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
-  ({ className, level, asChild = false, ...props }, ref) => {
+  ({ className, level, font, asChild = false, ...props }, ref) => {
     const resolvedLevel = level ?? 2;
     const Comp = asChild ? Slot : ((`h${resolvedLevel}` as const) as React.ElementType);
     return (
       <Comp
         ref={ref}
         data-slot="heading"
-        className={cn(headingVariants({ level: resolvedLevel }), className)}
+        className={cn(headingVariants({ level: resolvedLevel, font }), className)}
         {...props}
       />
     );
