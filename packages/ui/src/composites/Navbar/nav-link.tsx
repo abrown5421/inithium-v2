@@ -30,7 +30,11 @@ export const NavLink: React.FC<NavLinkProps> = ({ item, linkComponent, fullWidth
   }
 
   return (
-    <Button asChild variant="link" className={cn('h-auto p-0', fullWidth && 'w-full justify-start')}>
+    <Button
+      asChild
+      variant="link"
+      className={cn('h-auto p-0', item.active && 'font-bold text-primary', fullWidth && 'w-full justify-start')}
+    >
       <Link href={item.href} onClick={onNavigate}>
         {item.label}
       </Link>

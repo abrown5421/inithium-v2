@@ -13,6 +13,7 @@ export interface NavbarMenuItem {
   readonly label: string;
   readonly href: string;
   readonly isButton?: boolean;
+  readonly active?: boolean;
 }
 
 export interface NavbarLogo {
