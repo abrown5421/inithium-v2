@@ -2,13 +2,18 @@ import * as React from 'react';
 import { useHref } from 'react-router-dom';
 import { NavbarLinkComponent, NavbarMenuItem } from '@inithium/ui';
 import { usePageNavigate } from '../hooks/use-page-navigate.js';
+import { MatchableLocation, resolvesToCurrentLocation } from './location-match.js';
 import { NavEntry, resolveNavHref } from './navigation-selection.js';
 
-export const toNavbarMenuItem = ({ page, navigation }: NavEntry): NavbarMenuItem => ({
-  label: navigation.label,
-  href: resolveNavHref(page, navigation),
-  isButton: navigation.isButton
-});
+export const toNavbarMenuItem = ({ page, navigation }: NavEntry, location: MatchableLocation): NavbarMenuItem => {
+  const href = resolveNavHref(page, navigation);
+  return {
+    label: navigation.label,
+    href,
+    isButton: navigation.isButton,
+    active: resolvesToCurrentLocation(href, location)
+  };
+};
 
 const isModifiedClick = (event: React.MouseEvent): boolean =>
   event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;

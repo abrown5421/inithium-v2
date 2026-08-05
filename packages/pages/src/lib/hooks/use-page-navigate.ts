@@ -1,6 +1,7 @@
 import * as React from 'react';
-import { resolvePath, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { playExitAnimation } from '../animation/animation-orchestrator.js';
+import { resolvesToCurrentLocation } from '../navigation/location-match.js';
 import { usePageTransitionContext } from '../transition/page-transition-context.js';
 
 export interface PageNavigateOptions {
@@ -17,9 +18,7 @@ export const usePageNavigate = (): PageNavigate => {
 
   return React.useCallback(
     async (to: string, options?: PageNavigateOptions) => {
-      const target = resolvePath(to, location.pathname);
-      const isSameLocation = target.pathname === location.pathname && target.search === location.search;
-      if (isSameLocation) {
+      if (resolvesToCurrentLocation(to, location)) {
         return;
       }
 

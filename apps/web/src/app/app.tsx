@@ -18,7 +18,7 @@ import {
   PageSessionProvider,
   PageTransitionProvider,
   RouterNavLink,
-  toNavbarMenuItem,
+  useNavbarMenuItems,
   useNavEntries,
   usePageNavigate,
   usePageSession
@@ -78,8 +78,8 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const logoUrl = typeof settingsMap['site.logo'] === 'string' ? settingsMap['site.logo'] : undefined;
   const siteLogo = logoUrl ? { src: logoUrl, alt: siteName } : undefined;
 
-  const mainMenuItems = useNavEntries(pages, 'web', 'main', config).map(toNavbarMenuItem);
-  const profileMenuItems = useNavEntries(pages, 'web', 'profile', config).map(toNavbarMenuItem);
+  const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'main', config));
+  const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'profile', config));
 
   return (
     <AppShell
