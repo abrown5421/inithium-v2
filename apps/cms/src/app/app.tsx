@@ -8,9 +8,10 @@ import {
   useAppSelector,
   useLogoutMutation,
   useMeQuery,
-  useReadAllPagesQuery
+  useReadAllPagesQuery,
+  useReadAllSettingsQuery
 } from '@inithium/store';
-import { Page } from '@inithium/models';
+import { Page, Setting } from '@inithium/models';
 import {
   DynamicRouterProvider,
   PageSession,
@@ -42,10 +43,29 @@ const layouts = {
 
 const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
 
+interface PaginatedSettings {
+  readonly data?: readonly Setting[];
+}
+
 interface AppShellWithNavProps {
   readonly pages: readonly Page[];
   readonly isLoading: boolean;
 }
+
+const extractSettingsMap = (response?: PaginatedSettings): Record<string, unknown> =>
+  (response?.data ?? []).reduce<Record<string, unknown>>(
+    (acc, item) => ({ ...acc, [item.settingName]: item.settingValue }),
+    {}
+  );
+
+const getSettingString = (map: Record<string, unknown>, key: string, fallback: string): string =>
+  typeof map[key] === 'string' ? (map[key] as string) : fallback;
+
+const getSettingOptionalString = (map: Record<string, unknown>, key: string): string | undefined =>
+  typeof map[key] === 'string' ? (map[key] as string) : undefined;
+
+const createLogoConfig = (logoUrl?: string, altText?: string) =>
+  logoUrl ? { src: logoUrl, alt: altText ?? '' } : undefined;
 
 const toNavbarUser = (user: ReturnType<typeof selectCurrentUser>): NavbarUser | undefined =>
   user
@@ -65,8 +85,15 @@ const AppShellWithNav: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) =
 const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const pageNavigate = usePageNavigate();
   const session = usePageSession();
+  const { data: settingsData } = useReadAllSettingsQuery();
   const currentUser = useAppSelector(selectCurrentUser);
   const [logout] = useLogoutMutation();
+
+  const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
+  const siteName = React.useMemo(() => getSettingString(settingsMap, 'site.name', 'Inithium CMS'), [settingsMap]);
+  const logoUrl = React.useMemo(() => getSettingOptionalString(settingsMap, 'site.logo'), [settingsMap]);
+  const siteLogo = React.useMemo(() => createLogoConfig(logoUrl, siteName), [logoUrl, siteName]);
+
   const mainMenuItems = useNavEntries(pages, 'cms', 'cms', config).map(toNavbarMenuItem);
   const profileMenuItems = useNavEntries(pages, 'cms', 'profile', config).map(toNavbarMenuItem);
 
@@ -74,7 +101,8 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
     <AppShell
       navbar={
         <Navbar
-          title="Inithium CMS"
+          title={siteName}
+          logo={siteLogo}
           homeHref="/"
           mainMenuItems={mainMenuItems}
           profileMenuItems={profileMenuItems}

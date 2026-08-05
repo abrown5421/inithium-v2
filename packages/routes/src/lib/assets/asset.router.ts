@@ -221,5 +221,45 @@ export const createAssetRouter = (assetService: AssetService, config: AssetRoute
     handleResult(res, result);
   });
 
+  router.put('/:id/file', config.authenticate, uploadMiddleware, async (req: Request, res: Response) => {
+    const role = req.user!.role;
+    if (!canPerformAssetAction(role, 'update')) {
+      res.status(403).json({ success: false, error: { type: 'FORBIDDEN_ERROR', message: 'You are not allowed to edit assets' } });
+      return;
+    }
+
+    const id = String(req.params['id']);
+
+    if (role === 'editor') {
+      const existingResult = await assetService.readOne(id);
+      if (existingResult.isErr()) {
+        handleResult(res, existingResult);
+        return;
+      }
+      if (!existingResult.value.isSystem) {
+        res.status(403).json({
+          success: false,
+          error: { type: 'FORBIDDEN_ERROR', message: 'You can only replace the file for system assets' }
+        });
+        return;
+      }
+    }
+
+    if (!req.file) {
+      res.status(400).json({
+        success: false,
+        error: { type: 'VALIDATION_ERROR', message: 'A replacement file is required' }
+      });
+      return;
+    }
+
+    const result = await assetService.replaceAssetFile(id, {
+      fileContentBase64: req.file.buffer.toString('base64'),
+      fileName: req.file.originalname,
+      mimeType: req.file.mimetype
+    });
+    handleResult(res, result);
+  });
+
   return router;
 };

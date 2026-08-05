@@ -2,16 +2,17 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { Filter } from 'mongodb';
 import { ResultAsync, errAsync, okAsync } from 'neverthrow';
-import { AppError, PaginatedResult, createNotFoundError, createForbiddenError } from '@inithium/types';
+import { AppError, PaginatedResult, createNotFoundError, createForbiddenError, createValidationError } from '@inithium/types';
 import { CrudRepository, CrudService, createService } from '@inithium/crud-engine';
 import { FileManagerService } from '@inithium/file-manager';
-import { 
-  CreateAssetDTO, 
-  UpdateAssetDTO, 
-  uploadAssetInputSchema, 
-  createAssetSchema, 
-  updateAssetSchema, 
-  validateDoc 
+import {
+  CreateAssetDTO,
+  UpdateAssetDTO,
+  uploadAssetInputSchema,
+  createAssetSchema,
+  updateAssetSchema,
+  replaceAssetFileInputSchema,
+  validateDoc
 } from '@inithium/validators';
 import { Asset, AssetCategory, AssetWithUrl } from '@inithium/models';
 
@@ -23,8 +24,15 @@ export interface UploadAssetInput {
   readonly isSystem?: boolean;
 }
 
+export interface ReplaceAssetFileInput {
+  readonly fileContentBase64: string;
+  readonly fileName: string;
+  readonly mimeType: string;
+}
+
 export interface AssetService {
   readonly uploadAsset: (input: UploadAssetInput) => ResultAsync<AssetWithUrl, AppError>;
+  readonly replaceAssetFile: (id: string, input: ReplaceAssetFileInput) => ResultAsync<AssetWithUrl, AppError>;
   readonly getAssetFileStreamByKey: (key: string) => ResultAsync<{ filePath: string; mimeType: string }, AppError>;
   readonly deleteAssetByKey: (key: string, requesterUserId: string, isAdmin: boolean) => ResultAsync<void, AppError>;
   readonly readOne: (id: string) => ResultAsync<AssetWithUrl, AppError>;
@@ -156,6 +164,50 @@ export const createAssetService = (
         }
 
         return repo.createOne(createDtoResult.value).orElse(rollbackAndFail);
+      }).map((asset) => toAssetWithUrl(asset, publicAssetBaseUrl));
+    },
+
+    replaceAssetFile: (id, input) => {
+      const validation = validateDoc(replaceAssetFileInputSchema)(input);
+      if (validation.isErr()) return errAsync(validation.error);
+      const valid = validation.value;
+
+      let buffer: Buffer;
+      try {
+        buffer = Buffer.from(valid.fileContentBase64, 'base64');
+      } catch {
+        return errAsync(createValidationError('fileContent must be a valid base64-encoded string'));
+      }
+
+      return repo.readOne(id).andThen((asset) => {
+        const newCategory = determineCategory(valid.mimeType, valid.fileName);
+        if (newCategory !== asset.category) {
+          return errAsync(
+            createValidationError(`Replacement file must match the existing asset's type (expected a "${asset.category}" file)`)
+          );
+        }
+
+        const directory = path.posix.dirname(asset.filePath);
+        const newExtension = getExtension(valid.fileName);
+        const currentExtension = getExtension(asset.filePath);
+        const targetFilePath =
+          newExtension === currentExtension ? asset.filePath : path.posix.join(directory, `${asset.key}${newExtension}`);
+
+        const applyMetadata = (): ResultAsync<Asset, AppError> =>
+          repo.updateOne(id, { filePath: targetFilePath, mimeType: valid.mimeType, sizeBytes: buffer.byteLength });
+
+        const overwritten = fileManagerService.updateFile({
+          filePath: asset.filePath,
+          fileContent: valid.fileContentBase64
+        });
+
+        if (targetFilePath === asset.filePath) {
+          return overwritten.andThen(applyMetadata);
+        }
+
+        return overwritten
+          .andThen(() => fileManagerService.moveFile({ sourcePath: asset.filePath, targetPath: targetFilePath }))
+          .andThen(applyMetadata);
       }).map((asset) => toAssetWithUrl(asset, publicAssetBaseUrl));
     },
 
