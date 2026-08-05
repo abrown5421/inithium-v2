@@ -1,10 +1,22 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
-/*
- * Class/attribute driven dark mode. Toggling `.dark` (or `data-theme="dark"`)
- * on any ancestor (usually <html>) flips every semantic token below.
- */
+@font-face {
+  font-family: 'PrimaryFont';
+  src: url('/assets/by-key/900e0f9c-97e7-4213-a3cb-82c63e1e8350') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SecondaryFont';
+  src: url('/assets/by-key/ea51f172-5c66-4466-ab57-9a72766a9fae') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @custom-variant dark (&:where(.dark, .dark *, [data-theme='dark'], [data-theme='dark'] *));
 
 :root {
@@ -70,6 +82,9 @@
 }
 
 @theme inline {
+  --font-primary: 'PrimaryFont', sans-serif;
+  --font-secondary: 'SecondaryFont', sans-serif;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

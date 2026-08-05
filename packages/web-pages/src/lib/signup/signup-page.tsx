@@ -55,7 +55,7 @@ export const SignupPage: PageLayoutComponent = () => {
 
   return (
     <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-6">
-      <Heading level={1} className="text-center text-background">
+      <Heading font='secondary' level={1} className="text-center text-background">
         Sign Up
       </Heading>
 

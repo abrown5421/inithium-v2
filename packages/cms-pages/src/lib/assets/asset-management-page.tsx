@@ -297,7 +297,7 @@ export const AssetManagementPage: PageLayoutComponent = () => {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div className="flex items-center justify-between">
-        <Heading level={1}>Assets</Heading>
+        <Heading font='secondary' level={1}>Assets</Heading>
         <div className="flex items-center gap-2">
           {canDelete && listState.selectedIds.size > 1 ? (
             <Button type="button" variant="destructive" onClick={openBulkDeleteDialog}>

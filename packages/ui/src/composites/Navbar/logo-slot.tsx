@@ -25,7 +25,7 @@ export const LogoSlot: React.FC<LogoSlotProps> = ({ logo, title, homeHref, onLog
     <>
       {logo ? <img src={logo.src} alt={logo.alt ?? title ?? ''} className="h-8 w-auto" /> : null}
       {title ? (
-        <Text as="span" size="lg" weight="semibold">
+        <Text as="span" size="lg" weight="semibold" font='primary'>
           {title}
         </Text>
       ) : null}
