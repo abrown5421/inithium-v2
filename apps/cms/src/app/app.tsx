@@ -30,6 +30,7 @@ import {
   DashboardPage,
   LoginPage,
   PageManagementPage,
+  SettingManagementPage,
   UserManagementPage
 } from '@inithium/cms-pages';
 
@@ -38,7 +39,8 @@ const layouts = {
   login: LoginPage,
   users: UserManagementPage,
   pages: PageManagementPage,
-  assets: AssetManagementPage
+  assets: AssetManagementPage,
+  settings: SettingManagementPage
 };
 
 const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
