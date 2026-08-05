@@ -46,11 +46,11 @@ export const LoginPage: PageLayoutComponent = () => {
 
   return (
     <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center gap-6">
-      <Heading font='secondary' level={1} className="text-center">
+      <Heading font='secondary' level={1} className="text-center text-background">
         Log In
       </Heading>
 
-      <form className="flex w-full flex-col gap-4 max-w-[90%] md:max-w-md" onSubmit={handleSubmit} noValidate>
+      <form className="bg-background p-8 rounded-md flex w-full flex-col gap-4 max-w-[90%] md:max-w-md" onSubmit={handleSubmit} noValidate>
         <AuthField
           label="Email"
           type="email"
