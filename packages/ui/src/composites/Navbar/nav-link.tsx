@@ -13,22 +13,27 @@ export interface NavLinkProps {
   readonly item: NavbarMenuItem;
   readonly linkComponent?: NavbarLinkComponent;
   readonly fullWidth?: boolean;
+  readonly onNavigate?: () => void;
 }
 
-export const NavLink: React.FC<NavLinkProps> = ({ item, linkComponent, fullWidth = false }) => {
+export const NavLink: React.FC<NavLinkProps> = ({ item, linkComponent, fullWidth = false, onNavigate }) => {
   const Link = linkComponent ?? DefaultLink;
 
   if (item.isButton) {
     return (
       <Button asChild size="sm" className={cn(fullWidth && 'w-full')}>
-        <Link href={item.href}>{item.label}</Link>
+        <Link href={item.href} onClick={onNavigate}>
+          {item.label}
+        </Link>
       </Button>
     );
   }
 
   return (
     <Button asChild variant="link" className={cn('h-auto p-0', fullWidth && 'w-full justify-start')}>
-      <Link href={item.href}>{item.label}</Link>
+      <Link href={item.href} onClick={onNavigate}>
+        {item.label}
+      </Link>
     </Button>
   );
 };

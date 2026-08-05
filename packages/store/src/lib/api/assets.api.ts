@@ -12,6 +12,11 @@ export interface UploadAssetArgs {
   readonly onBehalfOfUserId?: string;
 }
 
+export interface ReplaceAssetFileArgs {
+  readonly id: string;
+  readonly file: File;
+}
+
 const buildUploadFormData = ({ file, isSystem, onBehalfOfUserId }: UploadAssetArgs): FormData => {
   const formData = new FormData();
   formData.append('file', file);
@@ -21,6 +26,12 @@ const buildUploadFormData = ({ file, isSystem, onBehalfOfUserId }: UploadAssetAr
   if (onBehalfOfUserId) {
     formData.append('onBehalfOfUserId', onBehalfOfUserId);
   }
+  return formData;
+};
+
+const buildReplaceFileFormData = (file: File): FormData => {
+  const formData = new FormData();
+  formData.append('file', file);
   return formData;
 };
 
@@ -47,6 +58,11 @@ export const assetsApi = createApi({
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }]
       }),
 
+      replaceAssetFile: builder.mutation<AssetWithUrl, ReplaceAssetFileArgs>({
+        query: ({ id, file }) => ({ url: `assets/${id}/file`, method: 'PUT', body: buildReplaceFileFormData(file) }),
+        invalidatesTags: (_result, _error, { id }) => [{ type: 'Asset', id }, { type: 'Asset', id: 'LIST' }]
+      }),
+
       deleteAssetByKey: builder.mutation<{ key: string; deleted: boolean }, string>({
         query: (key) => ({ url: `assets/by-key/${key}`, method: 'DELETE' }),
         invalidatesTags: [{ type: 'Asset', id: 'LIST' }]
@@ -65,6 +81,7 @@ export const {
   useReadOneQuery: useReadAssetQuery,
   useUpdateOneMutation: useUpdateAssetMutation,
   useUploadAssetMutation,
+  useReplaceAssetFileMutation,
   useDeleteAssetByKeyMutation,
   useDeleteAssetsByKeysMutation
 } = assetsApi;

@@ -45,42 +45,43 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
   footerAction,
   linkComponent,
   userName
-}) => (
-  <Sheet>
-    <SheetTrigger asChild>
-      <Button variant="ghost" size="icon" aria-label={triggerLabel}>
-        {trigger}
-      </Button>
-    </SheetTrigger>
-    <SheetContent>
-      <SheetHeader>
-        <SheetTitle className="text-lg">{getGreeting(userName)}</SheetTitle>
-      </SheetHeader>
-      <nav aria-label={triggerLabel} className="flex flex-1 flex-col gap-4 overflow-y-auto">
-        {sections.map((section, index) => (
-          <React.Fragment key={index}>
-            {index > 0 ? <Separator /> : null}
-            <div className="flex flex-col gap-3">
-              {section.items.map((item) => (
-                <SheetClose asChild key={item.label}>
-                  <span>
-                    <NavLink item={item} linkComponent={linkComponent} fullWidth />
-                  </span>
-                </SheetClose>
-              ))}
-            </div>
-          </React.Fragment>
-        ))}
-      </nav>
-      {footerAction ? (
-        <SheetFooter>
-          <SheetClose asChild>
-            <Button className="w-full" variant={footerAction.variant} onClick={footerAction.onClick}>
-              {footerAction.label}
-            </Button>
-          </SheetClose>
-        </SheetFooter>
-      ) : null}
-    </SheetContent>
-  </Sheet>
-);
+}) => {
+  const [open, setOpen] = React.useState(false);
+  const closeDrawer = React.useCallback(() => setOpen(false), []);
+
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label={triggerLabel}>
+          {trigger}
+        </Button>
+      </SheetTrigger>
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle className="text-lg">{getGreeting(userName)}</SheetTitle>
+        </SheetHeader>
+        <nav aria-label={triggerLabel} className="flex flex-1 flex-col gap-4 overflow-y-auto">
+          {sections.map((section, index) => (
+            <React.Fragment key={index}>
+              {index > 0 ? <Separator /> : null}
+              <div className="flex flex-col gap-3">
+                {section.items.map((item) => (
+                  <NavLink key={item.label} item={item} linkComponent={linkComponent} fullWidth onNavigate={closeDrawer} />
+                ))}
+              </div>
+            </React.Fragment>
+          ))}
+        </nav>
+        {footerAction ? (
+          <SheetFooter>
+            <SheetClose asChild>
+              <Button className="w-full" variant={footerAction.variant} onClick={footerAction.onClick}>
+                {footerAction.label}
+              </Button>
+            </SheetClose>
+          </SheetFooter>
+        ) : null}
+      </SheetContent>
+    </Sheet>
+  );
+};

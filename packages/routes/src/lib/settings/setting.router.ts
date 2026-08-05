@@ -13,5 +13,6 @@ export const createSettingRouter = (
 ): Router =>
   createCrudRouter(settingService, {
     authenticate: config.authenticate,
+    publicRoutes: ['readAll', 'readOne', 'readMany'],
     searchableFields: ['settingName']
   });

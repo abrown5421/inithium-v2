@@ -25,6 +25,7 @@ import {
   useDeleteAssetsByKeysMutation,
   useReadAllAssetsQuery,
   useReadUsersByIdsQuery,
+  useReplaceAssetFileMutation,
   useUpdateAssetMutation,
   useUploadAssetMutation
 } from '@inithium/store';
@@ -43,14 +44,14 @@ import {
   useEntityListState,
   UserPicker
 } from '@inithium/ui';
-import { RenameFormValues, UploadFormValues, UploadScope } from './asset-management-page.types.js';
+import { EditAssetFormValues, UploadFormValues, UploadScope } from './asset-management-page.types.js';
 
 const SUBMISSION_ERROR_MESSAGE = 'There was a problem with your submission';
 const DELETE_ERROR_MESSAGE = 'There was a problem deleting the selected asset(s)';
 const PAGE_LIMIT = 10;
 
 const EMPTY_UPLOAD_FORM_VALUES: UploadFormValues = { scope: 'self', onBehalfOfUserId: '' };
-const EMPTY_RENAME_FORM_VALUES: RenameFormValues = { originalName: '' };
+const EMPTY_EDIT_FORM_VALUES: EditAssetFormValues = { originalName: '' };
 
 const SCOPE_OPTIONS: readonly { value: string; label: string }[] = [
   { value: 'self', label: 'For Myself' },
@@ -128,6 +129,7 @@ export const AssetManagementPage: PageLayoutComponent = () => {
   });
   const [uploadAsset, { isLoading: isUploading }] = useUploadAssetMutation();
   const [updateAsset, { isLoading: isRenaming }] = useUpdateAssetMutation();
+  const [replaceAssetFile, { isLoading: isReplacingFile }] = useReplaceAssetFileMutation();
   const [deleteAssetByKey, { isLoading: isDeletingOne }] = useDeleteAssetByKeyMutation();
   const [deleteAssetsByKeys, { isLoading: isDeletingMany }] = useDeleteAssetsByKeysMutation();
   const isDeleting = isDeletingOne || isDeletingMany;
@@ -151,7 +153,9 @@ export const AssetManagementPage: PageLayoutComponent = () => {
   const uploadFormState = useCrudFormState<UploadFormValues>(EMPTY_UPLOAD_FORM_VALUES);
 
   const [selectedAsset, setSelectedAsset] = React.useState<AssetWithUrl | null>(null);
-  const renameFormState = useCrudFormState<RenameFormValues>(EMPTY_RENAME_FORM_VALUES);
+  const editFormState = useCrudFormState<EditAssetFormValues>(EMPTY_EDIT_FORM_VALUES);
+  const [replacementFile, setReplacementFile] = React.useState<File | null>(null);
+  const [replacementFileError, setReplacementFileError] = React.useState<string | undefined>(undefined);
 
   const [assetsPendingDelete, setAssetsPendingDelete] = React.useState<readonly AssetWithUrl[]>([]);
 
@@ -212,7 +216,9 @@ export const AssetManagementPage: PageLayoutComponent = () => {
 
   const openEditModal = (asset: AssetWithUrl) => {
     setSelectedAsset(asset);
-    renameFormState.openEdit({ originalName: asset.originalName });
+    setReplacementFile(null);
+    setReplacementFileError(undefined);
+    editFormState.openEdit({ originalName: asset.originalName });
   };
 
   const handleUploadSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -247,22 +253,26 @@ export const AssetManagementPage: PageLayoutComponent = () => {
     }
   };
 
-  const handleRenameSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleEditSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selectedAsset) return;
 
-    const result = updateAssetSchema.safeParse({ originalName: renameFormState.values.originalName });
+    const result = updateAssetSchema.safeParse({ originalName: editFormState.values.originalName });
     if (!result.success) {
       const { fieldErrors } = z.flattenError(result.error);
-      renameFormState.setErrors({ originalName: fieldErrors.originalName?.[0] });
+      editFormState.setErrors({ originalName: fieldErrors.originalName?.[0] });
       return;
     }
 
-    renameFormState.setErrors({});
+    editFormState.setErrors({});
+    setReplacementFileError(undefined);
     try {
       await updateAsset({ id: selectedAsset._id, data: result.data }).unwrap();
-      dispatch(openAlert({ severity: 'success', message: 'Asset renamed' }));
-      renameFormState.close();
+      if (replacementFile) {
+        await replaceAssetFile({ id: selectedAsset._id, file: replacementFile }).unwrap();
+      }
+      dispatch(openAlert({ severity: 'success', message: 'Asset updated' }));
+      editFormState.close();
     } catch {
       dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
     }
@@ -347,7 +357,7 @@ export const AssetManagementPage: PageLayoutComponent = () => {
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label={`Rename ${asset.originalName}`}
+                aria-label={`Edit ${asset.originalName}`}
                 onClick={() => openEditModal(asset)}
               >
                 <Pencil className="size-4" />
@@ -395,18 +405,27 @@ export const AssetManagementPage: PageLayoutComponent = () => {
       />
 
       <EntityFormDialog
-        open={renameFormState.isOpen}
+        open={editFormState.isOpen}
         onOpenChange={(open) => {
-          if (!open) renameFormState.close();
+          if (!open) editFormState.close();
         }}
-        title="Rename Asset"
+        title="Edit Asset"
+        fileField={{
+          label: 'Replacement File',
+          value: replacementFile,
+          onChange: (file) => {
+            setReplacementFile(file);
+            setReplacementFileError(undefined);
+          },
+          error: replacementFileError
+        }}
         fields={[{ key: 'originalName', label: 'Name', type: 'text', required: true }]}
-        values={renameFormState.values}
-        errors={renameFormState.errors}
-        onChange={renameFormState.setValue}
-        onSubmit={handleRenameSubmit}
-        onCancel={renameFormState.close}
-        isSubmitting={isRenaming}
+        values={editFormState.values}
+        errors={editFormState.errors}
+        onChange={editFormState.setValue}
+        onSubmit={handleEditSubmit}
+        onCancel={editFormState.close}
+        isSubmitting={isRenaming || isReplacingFile}
         submitLabel="Save"
       />
 

@@ -7,7 +7,7 @@ export interface UploadFormValues {
   readonly onBehalfOfUserId: string;
 }
 
-export interface RenameFormValues {
+export interface EditAssetFormValues {
   readonly [key: string]: string;
   readonly originalName: string;
 }

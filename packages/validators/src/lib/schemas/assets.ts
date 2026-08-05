@@ -24,6 +24,13 @@ export const updateAssetSchema = z.object({
   originalName: z.string().min(1).optional()
 });
 
+export const replaceAssetFileInputSchema = z.object({
+  fileContentBase64: z.string().min(1),
+  fileName: z.string().min(1),
+  mimeType: z.string().min(1)
+});
+
 export type CreateAssetDTO = z.infer<typeof createAssetSchema>;
 export type UploadAssetInputDTO = z.infer<typeof uploadAssetInputSchema>;
 export type UpdateAssetDTO = z.infer<typeof updateAssetSchema>;
+export type ReplaceAssetFileInputDTO = z.infer<typeof replaceAssetFileInputSchema>;
