@@ -247,7 +247,7 @@ export const UserManagementPage: PageLayoutComponent = () => {
         <Heading font='secondary' level={1}>Users</Heading>
         <div className="flex items-center gap-2">
           {canDelete && listState.selectedIds.size > 1 ? (
-            <Button type="button" variant="destructive" onClick={openBulkDeleteDialog}>
+            <Button type="button" variant="default"  onClick={openBulkDeleteDialog}>
               Delete Selected ({listState.selectedIds.size})
             </Button>
           ) : null}
