@@ -2,7 +2,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import type { CreateAssetDTO, UpdateAssetDTO } from '@inithium/validators';
 import type { AssetWithUrl } from '@inithium/models';
-import { unwrappingBaseQuery } from './base-query.js';
+import { getApiBaseUrl, unwrappingBaseQuery } from './base-query.js';
 import { createCrudEndpoints } from './crud-endpoints.js';
 
 export interface UploadAssetArgs {
@@ -34,6 +34,15 @@ const buildReplaceFileFormData = (file: File): FormData => {
   formData.append('file', file);
   return formData;
 };
+
+/**
+ * Turns a stored asset proxy path (e.g. `/assets/by-key/<key>`, the domain-independent form
+ * `AssetPicker` writes to the DB) into a URL that actually resolves, by resolving it against the
+ * current API origin at call time rather than baking a domain into the stored value. Already-
+ * absolute values (legacy data saved before this existed) pass through unchanged.
+ */
+export const resolveAssetUrl = (assetPath: string): string =>
+  /^https?:\/\//i.test(assetPath) ? assetPath : `${getApiBaseUrl()}${assetPath}`;
 
 export const assetsApi = createApi({
   reducerPath: 'assetsApi',

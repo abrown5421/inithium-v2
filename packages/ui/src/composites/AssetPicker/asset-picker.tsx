@@ -56,6 +56,22 @@ const handleSelectValue =
     setOpen?.(setOpenState(false));
   };
 
+/**
+ * `AssetWithUrl.url` is always domain-qualified (the API bakes in its own public origin — see
+ * `toAssetWithUrl` in `asset.service.ts`), but that's the wrong shape to persist: most callers
+ * store this value in the DB, where a hardcoded domain breaks the moment the API's origin differs
+ * (a different environment, a domain change, etc). Only the path is stable, so that's what gets
+ * handed to `onValueChange`; resolving it back into a working URL happens at render time instead,
+ * against whatever the current API origin actually is (see `resolveAssetUrl` in `@inithium/store`).
+ */
+const toAssetProxyPath = (url: string): string => {
+  try {
+    return new URL(url).pathname;
+  } catch {
+    return url;
+  }
+};
+
 const CATEGORY_ICONS: Record<AssetCategory, typeof GenericFileIcon> = {
   images: ImageIcon,
   pdfs: FileText,
@@ -154,11 +170,11 @@ export const AssetPicker = React.forwardRef<HTMLInputElement, AssetPickerProps>(
                   <li key={asset._id}>
                     <button
                       type="button"
-                      onClick={() => selectValue(asset.url)}
-                      aria-pressed={value === asset.url}
+                      onClick={() => selectValue(toAssetProxyPath(asset.url))}
+                      aria-pressed={value === toAssetProxyPath(asset.url)}
                       className={cn(
                         'flex w-full flex-col items-center gap-1.5 rounded-md p-2 text-center transition-colors hover:bg-muted',
-                        value === asset.url && 'bg-muted ring-2 ring-ring'
+                        value === toAssetProxyPath(asset.url) && 'bg-muted ring-2 ring-ring'
                       )}
                     >
                       <AssetThumbnail asset={asset} />

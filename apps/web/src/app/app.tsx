@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   closeAlert,
+  resolveAssetUrl,
   selectAlerts,
   selectCurrentUser,
   selectIsAuthenticated,
@@ -76,7 +77,7 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const siteName = typeof settingsMap['site.name'] === 'string' ? settingsMap['site.name'] : 'Inithium';
 
   const logoUrl = typeof settingsMap['site.logo'] === 'string' ? settingsMap['site.logo'] : undefined;
-  const siteLogo = logoUrl ? { src: logoUrl, alt: siteName } : undefined;
+  const siteLogo = logoUrl ? { src: resolveAssetUrl(logoUrl), alt: siteName } : undefined;
 
   const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'main', config));
   const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'profile', config));
