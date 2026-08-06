@@ -13,6 +13,9 @@ export const setApiBaseUrl = (url: string): void => {
   apiBaseUrl = url;
 };
 
+/** The origin API-relative paths (e.g. an asset proxy path) should be resolved against. */
+export const getApiBaseUrl = (): string => apiBaseUrl;
+
 const rawBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = (args, api, extraOptions) =>
   fetchBaseQuery({ baseUrl: apiBaseUrl, credentials: 'include' })(args, api, extraOptions);
 

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {
   closeAlert,
+  resolveAssetUrl,
   selectAlerts,
   selectCurrentUser,
   selectIsAuthenticated,
@@ -94,7 +95,8 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
   const siteName = React.useMemo(() => getSettingString(settingsMap, 'site.name', 'Inithium CMS'), [settingsMap]);
   const logoUrl = React.useMemo(() => getSettingOptionalString(settingsMap, 'site.logo'), [settingsMap]);
-  const siteLogo = React.useMemo(() => createLogoConfig(logoUrl, siteName), [logoUrl, siteName]);
+  const resolvedLogoUrl = React.useMemo(() => (logoUrl ? resolveAssetUrl(logoUrl) : undefined), [logoUrl]);
+  const siteLogo = React.useMemo(() => createLogoConfig(resolvedLogoUrl, siteName), [resolvedLogoUrl, siteName]);
 
   const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'cms', 'cms', config));
   const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'cms', 'profile', config));
