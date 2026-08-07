@@ -48,7 +48,7 @@ export const PasswordField = React.forwardRef<HTMLInputElement, PasswordFieldPro
           </Button>
         </div>
         {errorMessage ? (
-          <Text as="span" id={helperId} size="xs" tone="destructive">
+          <Text as="span" id={helperId} size="xs" color="destructive">
             {errorMessage}
           </Text>
         ) : null}

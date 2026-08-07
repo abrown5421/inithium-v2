@@ -35,7 +35,7 @@ export const FileDropzone: React.FC<FileDropzoneProps> = ({ value, onChange, acc
             <Text size="sm" className="truncate">
               {value.name}
             </Text>
-            <Text size="xs" tone="muted">
+            <Text size="xs" color="muted">
               {formatFileSize(value.size)}
             </Text>
           </div>

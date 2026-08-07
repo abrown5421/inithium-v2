@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
 
-const spinnerVariants = cva('text-muted-foreground', {
+const spinnerVariants = cva('', {
   variants: {
     size: {
       sm: 'size-4',
@@ -18,14 +20,16 @@ const spinnerVariants = cva('text-muted-foreground', {
 });
 
 export interface SpinnerProps
-  extends Omit<React.HTMLAttributes<HTMLSpanElement>, 'color'>,
+  extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof spinnerVariants> {
   /** Accessible label announced to assistive tech while the spinner is visible. */
   label?: string;
+  /** One of the 8 core theme tokens. Defaults to `muted`, matching the previous hardcoded look. */
+  color?: ColorToken;
 }
 
 export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
-  ({ className, size, label = 'Loading', ...props }, ref) => (
+  ({ className, size, label = 'Loading', color, ...props }, ref) => (
     <span
       ref={ref}
       role="status"
@@ -35,7 +39,7 @@ export const Spinner = React.forwardRef<HTMLSpanElement, SpinnerProps>(
       {...props}
     >
       <motion.span
-        className={cn('flex', spinnerVariants({ size }))}
+        className={cn('flex', spinnerVariants({ size }), resolveColorRecipeClassName('plain', color ?? 'muted'))}
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, ease: 'linear', duration: 0.8 }}
       >

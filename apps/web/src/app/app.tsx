@@ -24,7 +24,15 @@ import {
   usePageNavigate,
   usePageSession
 } from '@inithium/pages';
-import { AlertViewport, AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
+import {
+  AlertViewport,
+  AppShell,
+  Navbar,
+  NavbarUser,
+  Spinner,
+  parseCoreThemeColors,
+  useApplyCoreThemeColors
+} from '@inithium/ui';
 import { HomePage, LoginPage, SignupPage } from '@inithium/web-pages';
 
 const layouts = {
@@ -73,6 +81,9 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const [logout] = useLogoutMutation();
 
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
+
+  const themeColors = React.useMemo(() => parseCoreThemeColors(settingsMap['site.theme']), [settingsMap]);
+  useApplyCoreThemeColors(themeColors);
 
   const siteName = typeof settingsMap['site.name'] === 'string' ? settingsMap['site.name'] : 'Inithium';
 

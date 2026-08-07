@@ -46,7 +46,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
     <>
       <Button
         type="button"
-        variant="outline"
+        variant="outlined"
         role="combobox"
         aria-expanded={open}
         aria-invalid={Boolean(error)}
@@ -92,7 +92,7 @@ export const UserPicker: React.FC<UserPickerProps> = ({
               <Button
                 type="button"
                 size="sm"
-                variant={value === user._id ? 'default' : 'outline'}
+                variant={value === user._id ? 'solid' : 'outlined'}
                 onClick={() => selectUser(user._id)}
               >
                 {value === user._id ? 'Selected' : 'Select'}

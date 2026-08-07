@@ -1,3 +1,5 @@
+import { CORE_COLOR_TOKENS, CORE_COLOR_TOKEN_LABELS } from '../../theme/color-tokens.js';
+
 export interface ThemeColorOption {
   readonly label: string;
   /** Any valid CSS color — typically a `var(--token)` reference into globals.css. */
@@ -9,13 +11,7 @@ export interface ThemeColorOption {
  * default `themeColors` so client apps get their brand palette for free, but
  * fully overridable since each app's token set may differ.
  */
-export const defaultThemeColorOptions: readonly ThemeColorOption[] = [
-  { label: 'Primary', value: 'var(--primary)' },
-  { label: 'Secondary', value: 'var(--secondary)' },
-  { label: 'Accent', value: 'var(--accent)' },
-  { label: 'Muted', value: 'var(--muted)' },
-  { label: 'Success', value: 'var(--success)' },
-  { label: 'Warning', value: 'var(--warning)' },
-  { label: 'Info', value: 'var(--info)' },
-  { label: 'Destructive', value: 'var(--destructive)' },
-];
+export const defaultThemeColorOptions: readonly ThemeColorOption[] = CORE_COLOR_TOKENS.map((token) => ({
+  label: CORE_COLOR_TOKEN_LABELS[token],
+  value: `var(--${token})`,
+}));

@@ -23,7 +23,7 @@ export function ThemeColorList({ colors, onSelect, className }: ThemeColorListPr
           onClick={() => onSelect(option.value)}
         >
           <ColorSwatch color={option.value} size="lg" aria-hidden="true" />
-          <Text size="xs" tone="muted" className="w-full truncate text-center">
+          <Text size="xs" color="muted" className="w-full truncate text-center">
             {option.label}
           </Text>
         </button>

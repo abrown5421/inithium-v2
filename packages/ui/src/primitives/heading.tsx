@@ -2,8 +2,10 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
 
-const headingVariants = cva('font-semibold tracking-tight text-balance text-foreground', {
+const headingVariants = cva('font-semibold tracking-tight text-balance', {
   variants: {
     level: {
       1: 'text-4xl lg:text-5xl',
@@ -31,17 +33,23 @@ export interface HeadingProps
   extends React.HTMLAttributes<HTMLHeadingElement>,
     VariantProps<typeof headingVariants> {
   asChild?: boolean;
+  /** One of the 8 core theme tokens. Omit for the default `text-foreground` treatment. */
+  color?: ColorToken;
 }
 
 export const Heading = React.forwardRef<HTMLHeadingElement, HeadingProps>(
-  ({ className, level, font, asChild = false, ...props }, ref) => {
+  ({ className, level, font, color, asChild = false, ...props }, ref) => {
     const resolvedLevel = level ?? 2;
     const Comp = asChild ? Slot : ((`h${resolvedLevel}` as const) as React.ElementType);
     return (
       <Comp
         ref={ref}
         data-slot="heading"
-        className={cn(headingVariants({ level: resolvedLevel, font }), className)}
+        className={cn(
+          headingVariants({ level: resolvedLevel, font }),
+          color ? resolveColorRecipeClassName('plain', color) : 'text-foreground',
+          className,
+        )}
         {...props}
       />
     );

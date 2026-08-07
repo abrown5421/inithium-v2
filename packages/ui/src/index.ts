@@ -4,6 +4,9 @@ export * from './utils/index.js';
 // Hooks
 export * from './hooks/index.js';
 
+// Theme
+export * from './theme/index.js';
+
 // Primitives — Typography & Content
 export * from './primitives/text.js';
 export * from './primitives/heading.js';

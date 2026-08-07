@@ -49,7 +49,7 @@ export function PaginationControl({
       {showPrevNext ? (
         <Button
           type="button"
-          variant="outline"
+          variant="outlined"
           size={size}
           aria-label={previousLabel}
           disabled={disabled || currentPage <= 1}
@@ -69,7 +69,7 @@ export function PaginationControl({
             <li key={item}>
               <Button
                 type="button"
-                variant={item === currentPage ? 'outline' : 'ghost'}
+                variant={item === currentPage ? 'outlined' : 'ghost'}
                 size={size}
                 aria-label={`Go to page ${item}`}
                 aria-current={item === currentPage ? 'page' : undefined}
@@ -86,7 +86,7 @@ export function PaginationControl({
       {showPrevNext ? (
         <Button
           type="button"
-          variant="outline"
+          variant="outlined"
           size={size}
           aria-label={nextLabel}
           disabled={disabled || currentPage >= totalPages}

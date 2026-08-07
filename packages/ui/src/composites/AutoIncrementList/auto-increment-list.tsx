@@ -99,7 +99,7 @@ export function AutoIncrementList<T = unknown>({
                 ) : (
                   <Button
                     type="button"
-                    variant="destructive"
+                    color="destructive"
                     size="icon"
                     aria-label="Remove row"
                     onClick={() => onListChange(list.filter((_, i) => i !== index))}
@@ -147,7 +147,7 @@ export function AutoIncrementList<T = unknown>({
               ) : (
                 <Button
                   type="button"
-                  variant="destructive"
+                  color="destructive"
                   size="icon"
                   aria-label="Remove row"
                   onClick={() => handleDecrement(row.id)}

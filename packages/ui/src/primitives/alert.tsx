@@ -1,37 +1,29 @@
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
 
-const alertVariants = cva(
-  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current",
-  {
-    variants: {
-      variant: {
-        default: 'border-border bg-card text-card-foreground',
-        destructive:
-          'border-destructive/30 bg-destructive/5 text-destructive [&>svg]:text-destructive',
-        success: 'border-success/30 bg-success/5 text-success [&>svg]:text-success',
-        warning: 'border-warning/30 bg-warning/5 text-warning [&>svg]:text-warning',
-        info: 'border-info/30 bg-info/5 text-info [&>svg]:text-info',
-      },
-    },
-    defaultVariants: {
-      variant: 'default',
-    },
-  },
-);
+const ALERT_BASE_CLASSES =
+  "relative grid w-full grid-cols-[0_1fr] items-start gap-y-0.5 rounded-lg border px-4 py-3 text-sm has-[>svg]:grid-cols-[calc(var(--spacing)*4)_1fr] has-[>svg]:gap-x-3 [&>svg]:size-4 [&>svg]:translate-y-0.5 [&>svg]:text-current";
 
-export interface AlertProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof alertVariants> {}
+const ALERT_NEUTRAL_CLASSES = 'border-border bg-card text-card-foreground';
+
+export interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
+  /** One of the 8 core theme tokens. Omit for the neutral (card-surface) treatment. */
+  color?: ColorToken;
+}
 
 export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
-  ({ className, variant, ...props }, ref) => (
+  ({ className, color, ...props }, ref) => (
     <div
       ref={ref}
       role="alert"
       data-slot="alert"
-      className={cn(alertVariants({ variant }), className)}
+      className={cn(
+        ALERT_BASE_CLASSES,
+        color ? resolveColorRecipeClassName('soft', color) : ALERT_NEUTRAL_CLASSES,
+        className,
+      )}
       {...props}
     />
   ),
@@ -64,5 +56,3 @@ export const AlertDescription = React.forwardRef<HTMLDivElement, React.HTMLAttri
   ),
 );
 AlertDescription.displayName = 'AlertDescription';
-
-export { alertVariants };

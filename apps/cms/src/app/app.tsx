@@ -24,7 +24,15 @@ import {
   usePageNavigate,
   usePageSession
 } from '@inithium/pages';
-import { AlertViewport, AppShell, Navbar, NavbarUser, Spinner } from '@inithium/ui';
+import {
+  AlertViewport,
+  AppShell,
+  Navbar,
+  NavbarUser,
+  Spinner,
+  parseCoreThemeColors,
+  useApplyCoreThemeColors
+} from '@inithium/ui';
 import {
   AssetManagementPage,
   CMS_ALLOWED_ROLES,
@@ -93,6 +101,10 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const [logout] = useLogoutMutation();
 
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
+
+  const themeColors = React.useMemo(() => parseCoreThemeColors(settingsMap['site.theme']), [settingsMap]);
+  useApplyCoreThemeColors(themeColors);
+
   const siteName = React.useMemo(() => getSettingString(settingsMap, 'site.name', 'Inithium CMS'), [settingsMap]);
   const logoUrl = React.useMemo(() => getSettingOptionalString(settingsMap, 'site.logo'), [settingsMap]);
   const resolvedLogoUrl = React.useMemo(() => (logoUrl ? resolveAssetUrl(logoUrl) : undefined), [logoUrl]);

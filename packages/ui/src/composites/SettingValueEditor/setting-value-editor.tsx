@@ -106,7 +106,7 @@ export const SettingValueEditor: React.FC<SettingValueEditorProps> = ({
           disabled={assetCategoryLocked}
         />
         {assetCategoryLocked ? (
-          <Text as="span" size="xs" tone="muted">
+          <Text as="span" size="xs" color="muted">
             Asset type is locked — switch Setting Type away from Asset and back to change it.
           </Text>
         ) : null}

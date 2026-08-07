@@ -105,9 +105,9 @@ export const SignupPage: PageLayoutComponent = () => {
         </Button>
       </form>
 
-      <Text size="sm" tone="muted" className="text-center">
+      <Text size="sm" color="muted" className="text-center">
         {'Already have an account? '}
-        <Button type="button" variant="link" className="h-auto p-0" onClick={() => navigate('/login')}>
+        <Button type="button" variant="link" className="h-auto p-0 text-accent" onClick={() => navigate('/login')}>
           Log In
         </Button>
       </Text>

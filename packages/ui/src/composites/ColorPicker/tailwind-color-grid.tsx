@@ -69,7 +69,7 @@ export function TailwindColorGrid({ palette, onSelect, className }: TailwindColo
             <Text size="xs" weight="medium" className="capitalize">
               {activeFamily}
             </Text>
-            <Text size="xs" tone="muted">
+            <Text size="xs" color="muted">
               {shade}
             </Text>
           </div>
