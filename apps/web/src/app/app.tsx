@@ -33,10 +33,11 @@ import {
   parseCoreThemeColors,
   useApplyCoreThemeColors
 } from '@inithium/ui';
-import { HomePage, LoginPage, SignupPage } from '@inithium/web-pages';
+import { DocumentationPage, HomePage, LoginPage, SignupPage } from '@inithium/web-pages';
 
 const layouts = {
   default: HomePage,
+  documentation: DocumentationPage,
   login: LoginPage,
   signup: SignupPage
 };
