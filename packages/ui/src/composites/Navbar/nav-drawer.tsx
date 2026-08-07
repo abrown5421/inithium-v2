@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Button } from '../../primitives/button.js';
+import type { CoreColorToken } from '../../theme/color-tokens.js';
 import { Separator } from '../../primitives/separator.js';
 import {
   Sheet,
@@ -20,7 +21,7 @@ export interface NavDrawerSection {
 export interface NavDrawerFooterAction {
   readonly label: string;
   readonly onClick?: () => void;
-  readonly variant?: 'default' | 'destructive';
+  readonly color?: CoreColorToken;
 }
 
 export interface NavDrawerProps {
@@ -75,7 +76,7 @@ export const NavDrawer: React.FC<NavDrawerProps> = ({
         {footerAction ? (
           <SheetFooter>
             <SheetClose asChild>
-              <Button className="w-full" variant={footerAction.variant} onClick={footerAction.onClick}>
+              <Button className="w-full" color={footerAction.color} onClick={footerAction.onClick}>
                 {footerAction.label}
               </Button>
             </SheetClose>

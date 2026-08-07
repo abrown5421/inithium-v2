@@ -30,7 +30,7 @@ export const AuthField = React.forwardRef<HTMLInputElement, AuthFieldProps>(
           {...props}
         />
         {errorMessage ? (
-          <Text as="span" id={helperId} size="xs" tone="destructive">
+          <Text as="span" id={helperId} size="xs" color="destructive">
             {errorMessage}
           </Text>
         ) : null}

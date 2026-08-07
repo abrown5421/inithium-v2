@@ -17,7 +17,7 @@ import { createFileRepository, createFileManagerService } from '@inithium/file-m
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
-import { createSettingCollection } from '@inithium/collections';
+import { createSettingCollection, ensureDefaultSiteTheme } from '@inithium/collections';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -94,6 +94,12 @@ const bootstrap = async (): Promise<void> => {
 
   const pageCollection = createPageCollection(db, { authenticate });
   const settingCollection = createSettingCollection(db, { authenticate });
+
+  const siteThemeSeedResult = await ensureDefaultSiteTheme(settingCollection.service);
+  if (siteThemeSeedResult.isErr()) {
+    console.error(siteThemeSeedResult.error);
+    process.exit(1);
+  }
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());

@@ -3,19 +3,20 @@ import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Loader2 } from 'lucide-react';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
+
+export type ButtonVariant = 'solid' | 'outlined' | 'ghost' | 'link';
 
 const buttonVariants = cva(
-  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:border-destructive aria-invalid:ring-destructive/20",
+  "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium outline-none cursor-pointer transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background aria-invalid:border-destructive aria-invalid:ring-destructive/20",
   {
     variants: {
       variant: {
-        default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 cursor-pointer transition-all',
-        destructive: 'bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 cursor-pointer transition-all',
-        outline:
-          'border border-border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
-        secondary: 'bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 cursor-pointer transition-all',
-        ghost: 'hover:bg-accent hover:text-accent-foreground cursor-pointer transition-all',
-        link: 'text-foreground underline-offset-4 hover:underline hover:text-accent cursor-pointer transition-all',
+        solid: 'shadow-xs',
+        outlined: 'border bg-background shadow-xs',
+        ghost: '',
+        link: 'underline-offset-4',
       },
       size: {
         default: 'h-9 px-4 py-2',
@@ -25,15 +26,31 @@ const buttonVariants = cva(
       },
     },
     defaultVariants: {
-      variant: 'default',
+      variant: 'solid',
       size: 'default',
     },
   },
 );
 
+/** Applied when `color` is omitted on a variant that has a legitimate neutral (colorless) state. */
+const BUTTON_NEUTRAL_CLASSES: Record<Exclude<ButtonVariant, 'solid'>, string> = {
+  outlined: 'border-border hover:bg-accent hover:text-accent-foreground',
+  ghost: 'hover:bg-accent hover:text-accent-foreground',
+  link: 'text-foreground hover:text-accent hover:underline',
+};
+
+function resolveButtonColorClassName(variant: ButtonVariant, color?: ColorToken): string {
+  if (variant === 'solid') return resolveColorRecipeClassName('solid', color ?? 'primary');
+  if (!color) return BUTTON_NEUTRAL_CLASSES[variant];
+  return resolveColorRecipeClassName(variant, color);
+}
+
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+    Omit<VariantProps<typeof buttonVariants>, 'variant'> {
+  variant?: ButtonVariant;
+  /** One of the 8 core theme tokens. Defaults to `primary` for `solid`, otherwise renders a neutral treatment. */
+  color?: ColorToken;
   /** Merge props onto the immediate child instead of rendering a `<button>`. */
   asChild?: boolean;
   /** Shows a spinner in place of `leftIcon` and disables the button. */
@@ -42,12 +59,28 @@ export interface ButtonProps
   rightIcon?: React.ReactNode;
 }
 
+/** Resolves a complete Button class string (structural + color) without rendering `<Button>` itself. */
+export function getButtonClassName(options: {
+  variant?: ButtonVariant;
+  size?: VariantProps<typeof buttonVariants>['size'];
+  color?: ColorToken;
+  className?: string;
+}): string {
+  const variant = options.variant ?? 'solid';
+  return cn(
+    buttonVariants({ variant, size: options.size }),
+    resolveButtonColorClassName(variant, options.color),
+    options.className,
+  );
+}
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
       className,
       variant,
       size,
+      color,
       asChild = false,
       loading = false,
       disabled,
@@ -77,7 +110,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         data-slot="button"
         data-loading={loading || undefined}
-        className={cn(buttonVariants({ variant, size }), className)}
+        className={getButtonClassName({ variant, size, color, className })}
         disabled={asChild ? undefined : disabled || loading}
         aria-busy={loading || undefined}
         {...props}

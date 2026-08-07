@@ -9,7 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '../../primitives/alert-dialog.js';
-import { buttonVariants } from '../../primitives/button.js';
+import { getButtonClassName } from '../../primitives/button.js';
 import type { ConfirmDeleteDialogProps } from './confirm-delete-dialog.types.js';
 
 /**
@@ -36,7 +36,7 @@ export const ConfirmDeleteDialog: React.FC<ConfirmDeleteDialogProps> = ({
       <AlertDialogFooter>
         <AlertDialogCancel>Cancel</AlertDialogCancel>
         <AlertDialogAction
-          className={buttonVariants({ variant: 'destructive' })}
+          className={getButtonClassName({ variant: 'solid', color: 'destructive' })}
           disabled={isDeleting}
           onClick={(event) => {
             event.preventDefault();

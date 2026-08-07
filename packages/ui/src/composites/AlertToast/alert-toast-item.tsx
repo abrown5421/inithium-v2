@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import type { AlertSeverity, AnimationConfig } from '@inithium/types';
 import { AlertDescription, AlertTitle } from '../../primitives/alert.js';
 import { cn } from '../../utils/cn.js';
+import { getColorRecipeClassName } from '../../theme/color-recipes.js';
 import { playEntranceAnimation, playExitAnimation } from './animate-orchestrator.js';
 
 // Floats over arbitrary page content (unlike the inline `Alert` primitive, which
@@ -16,13 +17,10 @@ const alertToastVariants = cva(
     variants: {
       variant: {
         default: 'border-border bg-popover text-popover-foreground',
-        destructive:
-          'border-destructive/50 bg-[color-mix(in_oklab,var(--color-destructive)_12%,var(--color-popover))] text-destructive [&>svg]:text-destructive',
-        success:
-          'border-success/50 bg-[color-mix(in_oklab,var(--color-success)_12%,var(--color-popover))] text-success [&>svg]:text-success',
-        warning:
-          'border-warning/50 bg-[color-mix(in_oklab,var(--color-warning)_12%,var(--color-popover))] text-warning [&>svg]:text-warning',
-        info: 'border-info/50 bg-[color-mix(in_oklab,var(--color-info)_12%,var(--color-popover))] text-info [&>svg]:text-info'
+        destructive: getColorRecipeClassName('toast', 'destructive'),
+        success: getColorRecipeClassName('toast', 'success'),
+        warning: getColorRecipeClassName('toast', 'warning'),
+        info: getColorRecipeClassName('toast', 'info')
       }
     },
     defaultVariants: {

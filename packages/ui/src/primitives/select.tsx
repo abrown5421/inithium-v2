@@ -2,6 +2,10 @@ import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
+
+const SELECT_TRIGGER_NEUTRAL_FIELD_CLASSES = 'focus-visible:border-ring focus-visible:ring-ring/50';
 
 export const Select = SelectPrimitive.Root;
 export const SelectGroup = SelectPrimitive.Group;
@@ -10,19 +14,22 @@ export const SelectValue = SelectPrimitive.Value;
 export interface SelectTriggerProps
   extends React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> {
   error?: boolean | string;
+  /** One of the 8 core theme tokens for the focus ring. Omit for the neutral default. */
+  color?: ColorToken;
 }
 
 export const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   SelectTriggerProps
->(({ className, children, error, 'aria-invalid': ariaInvalid, ...props }, ref) => (
+>(({ className, children, error, color, 'aria-invalid': ariaInvalid, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
     data-slot="select-trigger"
     aria-invalid={ariaInvalid ?? Boolean(error)}
     className={cn(
       'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-[color,box-shadow] data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
-      'focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/50',
+      'focus-visible:ring-2',
+      color ? resolveColorRecipeClassName('field', color) : SELECT_TRIGGER_NEUTRAL_FIELD_CLASSES,
       'aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20',
       'disabled:cursor-not-allowed disabled:opacity-50',
       className,

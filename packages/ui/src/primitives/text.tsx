@@ -2,8 +2,10 @@ import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '../utils/cn.js';
+import { resolveColorRecipeClassName } from '../theme/resolve-color-recipe.js';
+import type { ColorToken } from '../theme/color-value.js';
 
-const textVariants = cva('text-foreground', {
+const textVariants = cva('', {
   variants: {
     size: {
       xs: 'text-xs',
@@ -18,14 +20,6 @@ const textVariants = cva('text-foreground', {
       semibold: 'font-semibold',
       bold: 'font-bold',
     },
-    tone: {
-      default: 'text-foreground',
-      muted: 'text-muted-foreground',
-      primary: 'text-primary',
-      destructive: 'text-destructive',
-      success: 'text-success',
-      warning: 'text-warning',
-    },
     font: {
       primary: 'font-primary',
       secondary: 'font-secondary',
@@ -37,26 +31,37 @@ const textVariants = cva('text-foreground', {
   defaultVariants: {
     size: 'base',
     weight: 'normal',
-    tone: 'default',
     font: 'sans',
   },
 });
+
+export type TextColor = 'default' | ColorToken;
+
+function resolveTextColorClassName(color: TextColor): string {
+  return color === 'default' ? 'text-foreground' : resolveColorRecipeClassName('plain', color);
+}
 
 export interface TextProps
   extends React.HTMLAttributes<HTMLElement>,
     VariantProps<typeof textVariants> {
   as?: 'p' | 'span' | 'div' | 'label' | 'small';
   asChild?: boolean;
+  /** One of the 8 core theme tokens, or `'default'` for `text-foreground`. */
+  color?: TextColor;
 }
 
 export const Text = React.forwardRef<HTMLElement, TextProps>(
-  ({ className, size, weight, tone, font, as = 'p', asChild = false, ...props }, ref) => {
+  ({ className, size, weight, color, font, as = 'p', asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : (as as React.ElementType);
     return (
       <Comp
         ref={ref}
         data-slot="text"
-        className={cn(textVariants({ size, weight, tone, font }), className)}
+        className={cn(
+          textVariants({ size, weight, font }),
+          resolveTextColorClassName(color ?? 'default'),
+          className,
+        )}
         {...props}
       />
     );

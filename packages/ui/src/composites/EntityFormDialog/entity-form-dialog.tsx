@@ -47,7 +47,7 @@ const renderField = (
             </SelectContent>
           </Select>
           {error ? (
-            <Text as="span" size="xs" tone="destructive">
+            <Text as="span" size="xs" color="destructive">
               {error}
             </Text>
           ) : null}
@@ -68,7 +68,7 @@ const renderField = (
           <Label required={field.required}>{field.label}</Label>
           <ColorPicker value={value} onValueChange={onChange} error={error} />
           {error ? (
-            <Text as="span" size="xs" tone="destructive">
+            <Text as="span" size="xs" color="destructive">
               {error}
             </Text>
           ) : null}
@@ -145,7 +145,7 @@ export const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
                   error={fileField.error}
                 />
                 {fileField.error ? (
-                  <Text as="span" size="xs" tone="destructive">
+                  <Text as="span" size="xs" color="destructive">
                     {fileField.error}
                   </Text>
                 ) : null}
@@ -161,7 +161,7 @@ export const EntityFormDialog: React.FC<EntityFormDialogProps> = ({
             ))}
         </form>
         <DialogFooter className="shrink-0 border-t border-border p-6">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outlined" onClick={onCancel}>
             Cancel
           </Button>
           <Button type="submit" form={formId} loading={isSubmitting}>

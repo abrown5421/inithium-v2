@@ -121,7 +121,7 @@ export const SettingManagementPage: PageLayoutComponent = () => {
             assetCategoryLocked={assetCategoryLocked}
           />
           {error ? (
-            <Text as="span" size="xs" tone="destructive">
+            <Text as="span" size="xs" color="destructive">
               {error}
             </Text>
           ) : null}
@@ -256,7 +256,7 @@ export const SettingManagementPage: PageLayoutComponent = () => {
         <Heading font='secondary' level={1}>Settings</Heading>
         <div className="flex items-center gap-2">
           {canDelete && listState.selectedIds.size > 1 ? (
-            <Button type="button" variant="default"  onClick={openBulkDeleteDialog}>
+            <Button type="button" onClick={openBulkDeleteDialog}>
               Delete Selected ({listState.selectedIds.size})
             </Button>
           ) : null}
