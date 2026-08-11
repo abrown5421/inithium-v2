@@ -7,7 +7,7 @@ import {
   TableRow,
   Text,
 } from '@inithium/ui';
-import type { PropDoc } from '../documentation-page.types.js';
+import type { PropDoc } from '../primitives/primitive-doc.types.js';
 
 export interface PropTableProps {
   readonly props: readonly PropDoc[];
