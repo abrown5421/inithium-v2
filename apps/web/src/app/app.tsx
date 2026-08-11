@@ -15,6 +15,7 @@ import {
 import { Page, Setting } from '@inithium/models';
 import {
   DynamicRouterProvider,
+  NavHrefParams,
   PageSession,
   PageSessionProvider,
   PageTransitionProvider,
@@ -92,8 +93,10 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const logoUrl = typeof settingsMap['site.logo'] === 'string' ? settingsMap['site.logo'] : undefined;
   const siteLogo = logoUrl ? { src: resolveAssetUrl(logoUrl), alt: siteName } : undefined;
 
-  const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'main', config));
-  const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'profile', config));
+  const navParams: NavHrefParams = React.useMemo(() => ({ id: currentUser?.id }), [currentUser?.id]);
+
+  const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'main', config), navParams);
+  const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'web', 'profile', config), navParams);
 
   return (
     <AppShell
