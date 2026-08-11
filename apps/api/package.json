@@ -20,7 +20,11 @@
           "main": "apps/api/src/main.ts",
           "tsConfig": "apps/api/tsconfig.app.json",
           "assets": [
-            "apps/api/src/assets"
+            {
+              "glob": "**/*",
+              "input": "apps/api/src/assets",
+              "output": "apps/api/src/assets"
+            }
           ],
           "esbuildOptions": {
             "sourcemap": true,
@@ -98,6 +102,7 @@
     }
   },
   "dependencies": {
+    "compression": "^1.8.1",
     "express": "^5.1.0"
   }
 }

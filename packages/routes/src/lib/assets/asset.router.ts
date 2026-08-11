@@ -49,11 +49,22 @@ const buildUploadMiddleware = (maxUploadSizeMb: number): RequestHandler => {
         next();
         return;
       }
-      const message = error instanceof MulterError ? error.message : 'Failed to process uploaded file';
+      const message =
+        error instanceof MulterError && error.code === 'LIMIT_FILE_SIZE'
+          ? `File exceeds the maximum upload size of ${maxUploadSizeMb}MB`
+          : error instanceof MulterError
+            ? error.message
+            : 'Failed to process uploaded file';
       res.status(400).json({ success: false, error: { type: 'VALIDATION_ERROR', message } });
     });
   };
 };
+
+/** One year, matching the `immutable` directive below — assets are stored under a random content key that only changes on re-upload, so a cached response never goes stale under normal use. */
+const ASSET_CACHE_CONTROL = 'public, max-age=31536000, immutable';
+
+const buildAssetETag = (key: string, sizeBytes: number, updatedAt: Date): string =>
+  `"${key}-${sizeBytes}-${updatedAt.getTime()}"`;
 
 export const createAssetRouter = (assetService: AssetService, config: AssetRouterConfig): Router => {
   const router = Router();
@@ -126,11 +137,24 @@ export const createAssetRouter = (assetService: AssetService, config: AssetRoute
   });
 
   router.get('/by-key/:key', async (req: Request, res: Response) => {
-    const result = await assetService.getAssetFileStreamByKey(String(req.params['key']));
+    const key = String(req.params['key']);
+    const result = await assetService.getAssetFileStreamByKey(key);
 
     result.match(
-      ({ filePath, mimeType }) => {
+      ({ filePath, mimeType, sizeBytes, updatedAt }) => {
+        const etag = buildAssetETag(key, sizeBytes, updatedAt);
+
         res.setHeader('Content-Type', mimeType);
+        res.setHeader('Content-Length', sizeBytes);
+        res.setHeader('Cache-Control', ASSET_CACHE_CONTROL);
+        res.setHeader('ETag', etag);
+        res.setHeader('Last-Modified', updatedAt.toUTCString());
+
+        if (req.headers['if-none-match'] === etag) {
+          res.status(304).end();
+          return;
+        }
+
         const stream = fs.createReadStream(filePath);
         stream.on('error', () => {
           if (!res.headersSent) {

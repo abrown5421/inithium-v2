@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import cookieParser from 'cookie-parser';
@@ -10,6 +11,9 @@ import {
   createAssetCollection,
   createUserCollection,
   ensureAssetIndices,
+  ensureDefaultSystemFont,
+  PRIMARY_SYSTEM_FONT_KEY,
+  SECONDARY_SYSTEM_FONT_KEY,
   createCollectionDefinitionCollection,
   ensureCollectionDefinitionIndices
 } from '@inithium/collections';
@@ -39,7 +43,7 @@ const bootstrap = async (): Promise<void> => {
   const app = express();
 
   app.use(cors(createCorsOptions(env.CORS_ORIGINS)));
-  app.use(express.json());
+  app.use(compression());
   app.use(cookieParser());
   app.use(express.json({ limit: `${env.FILE_UPLOAD_MAX_SIZE_MB}mb` }));
 
@@ -73,6 +77,36 @@ const bootstrap = async (): Promise<void> => {
     maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB,
     publicAssetBaseUrl: env.API_PUBLIC_ORIGIN
   });
+
+  // Module-relative (not cwd-relative) so this resolves correctly whether main.ts runs directly
+  // (dev) or as the esbuild-bundled dist output (prod), which mirrors the same nesting.
+  const systemFontsDir = path.join(__dirname, 'assets', 'system-fonts');
+  const [primaryFontBuffer, secondaryFontBuffer] = await Promise.all([
+    fs.readFile(path.join(systemFontsDir, 'primary.ttf')),
+    fs.readFile(path.join(systemFontsDir, 'secondary.ttf'))
+  ]);
+
+  const primaryFontSeedResult = await ensureDefaultSystemFont(assetCollection.service, {
+    key: PRIMARY_SYSTEM_FONT_KEY,
+    originalName: 'PrimaryFont.ttf',
+    mimeType: 'font/ttf',
+    fileContentBase64: primaryFontBuffer.toString('base64')
+  });
+  if (primaryFontSeedResult.isErr()) {
+    console.error(primaryFontSeedResult.error);
+    process.exit(1);
+  }
+
+  const secondaryFontSeedResult = await ensureDefaultSystemFont(assetCollection.service, {
+    key: SECONDARY_SYSTEM_FONT_KEY,
+    originalName: 'SecondaryFont.ttf',
+    mimeType: 'font/ttf',
+    fileContentBase64: secondaryFontBuffer.toString('base64')
+  });
+  if (secondaryFontSeedResult.isErr()) {
+    console.error(secondaryFontSeedResult.error);
+    process.exit(1);
+  }
 
   const collectionDefinitionIndexResult = await ensureCollectionDefinitionIndices(db);
   if (collectionDefinitionIndexResult.isErr()) {
