@@ -3,7 +3,7 @@
 
 @font-face {
   font-family: 'PrimaryFont';
-  src: url('/assets/by-key/900e0f9c-97e7-4213-a3cb-82c63e1e8350') format('truetype');
+  src: url('/assets/by-key/900e0f9c-97e7-4213-a3cb-82c63e1e8350') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -11,7 +11,7 @@
 
 @font-face {
   font-family: 'SecondaryFont';
-  src: url('/assets/by-key/ea51f172-5c66-4466-ab57-9a72766a9fae') format('truetype');
+  src: url('/assets/by-key/ea51f172-5c66-4466-ab57-9a72766a9fae') format('woff2');
   font-weight: normal;
   font-style: normal;
   font-display: swap;

@@ -50,6 +50,12 @@ const SUBMISSION_ERROR_MESSAGE = 'There was a problem with your submission';
 const DELETE_ERROR_MESSAGE = 'There was a problem deleting the selected asset(s)';
 const PAGE_LIMIT = 10;
 
+/** Mutation errors thrown by `.unwrap()` carry the API's own `AppError.message` (e.g. the exact upload size limit) — prefer that over a generic message so the alert tells the user what actually went wrong. */
+const getErrorMessage = (error: unknown, fallback: string): string =>
+  typeof error === 'object' && error !== null && 'message' in error && typeof (error as { message?: unknown }).message === 'string'
+    ? (error as { message: string }).message
+    : fallback;
+
 const EMPTY_UPLOAD_FORM_VALUES: UploadFormValues = { scope: 'self', onBehalfOfUserId: '' };
 const EMPTY_EDIT_FORM_VALUES: EditAssetFormValues = { originalName: '' };
 
@@ -248,8 +254,8 @@ export const AssetManagementPage: PageLayoutComponent = () => {
       await uploadAsset({ file: selectedFile, isSystem, onBehalfOfUserId }).unwrap();
       dispatch(openAlert({ severity: 'success', message: 'Asset uploaded' }));
       uploadFormState.close();
-    } catch {
-      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
+    } catch (error) {
+      dispatch(openAlert({ severity: 'destructive', message: getErrorMessage(error, SUBMISSION_ERROR_MESSAGE) }));
     }
   };
 
@@ -273,8 +279,8 @@ export const AssetManagementPage: PageLayoutComponent = () => {
       }
       dispatch(openAlert({ severity: 'success', message: 'Asset updated' }));
       editFormState.close();
-    } catch {
-      dispatch(openAlert({ severity: 'destructive', message: SUBMISSION_ERROR_MESSAGE }));
+    } catch (error) {
+      dispatch(openAlert({ severity: 'destructive', message: getErrorMessage(error, SUBMISSION_ERROR_MESSAGE) }));
     }
   };
 
