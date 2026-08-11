@@ -16,6 +16,9 @@
       "path": "../../packages/types/tsconfig.lib.json"
     },
     {
+      "path": "../../packages/services/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/routes/tsconfig.lib.json"
     },
     {

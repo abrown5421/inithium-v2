@@ -24,6 +24,8 @@ import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithi
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
 import { createSettingCollection, ensureDefaultSiteTheme, ensureDefaultSiteLogo } from '@inithium/collections';
+import { createProfileCollection } from '@inithium/collections';
+import { createInitialProfile } from '@inithium/services';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -60,7 +62,20 @@ const bootstrap = async (): Promise<void> => {
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
-  const userCollection = createUserCollection(db, { authenticate });
+  const profileCollection = createProfileCollection(db, {
+    authenticate,
+    publicRoutes: [],
+    searchableFields: ['user_id']
+  });
+
+  const userCollection = createUserCollection(db, {
+    authenticate,
+    onUserRegistered: (userId) => {
+      void profileCollection.service.createOne(createInitialProfile(userId)).mapErr((error) => {
+        console.error(`Failed to create initial profile for user ${userId}`, error);
+      });
+    }
+  });
 
   const assetRootDir = path.resolve(env.APP_FILE_ROOT);
   await fs.mkdir(assetRootDir, { recursive: true });
@@ -178,6 +193,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
   app.use('/pages', pageCollection.router);
   app.use('/settings', settingCollection.router);
+  app.use('/profiles', profileCollection.router);
 // collection-generator:routes
 
   const httpServer = app.listen(env.PORT, () => {
