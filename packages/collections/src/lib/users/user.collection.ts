@@ -7,6 +7,7 @@ import { User } from '@inithium/models';
 
 export interface UserCollectionConfig {
   readonly authenticate: RequestHandler;
+  readonly onUserRegistered?: (userId: string) => void;
 }
 
 export interface UserCollection {
@@ -16,7 +17,7 @@ export interface UserCollection {
 
 export const createUserCollection = (db: Db, config: UserCollectionConfig): UserCollection => {
   const repository = createRepository<User>(db, 'users');
-  const service = createUserService(repository);
+  const service = createUserService(repository, { onUserRegistered: config.onUserRegistered });
   const router = createUserRouter(service, { authenticate: config.authenticate });
   return { service, router };
 };

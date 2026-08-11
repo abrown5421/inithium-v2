@@ -23,6 +23,10 @@ const sanitize = (user: User): SanitizedUser => {
   return rest;
 };
 
+export interface UserServiceOptions {
+  readonly onUserRegistered?: (userId: string) => void;
+}
+
 export interface UserService {
   readonly register: (dto: RegisterDTO) => ResultAsync<SanitizedUser, AppError>;
   readonly login: (dto: LoginDTO) => ResultAsync<SanitizedUser, AppError>;
@@ -43,7 +47,7 @@ export interface UserService {
   readonly deleteMany: (ids: readonly string[]) => ResultAsync<number, AppError>;
 }
 
-export const createUserService = (repo: CrudRepository<User>): UserService => {
+export const createUserService = (repo: CrudRepository<User>, options: UserServiceOptions = {}): UserService => {
   const findByEmail = (email: string): ResultAsync<User, AppError> => {
     return repo.readAll(1, 1, { email } as Filter<User>).andThen((result) => {
       const user = result.data[0];
@@ -74,7 +78,10 @@ export const createUserService = (repo: CrudRepository<User>): UserService => {
   return {
     register: (dto) =>
       validateDoc(registerSchema)(dto).asyncAndThen((valid) =>
-        createWithHashedPassword({ ...valid, role: 'user' }).map(sanitize)
+        createWithHashedPassword({ ...valid, role: 'user' }).map((user) => {
+          options.onUserRegistered?.(user._id);
+          return sanitize(user);
+        })
       ),
 
     login: (dto) =>
