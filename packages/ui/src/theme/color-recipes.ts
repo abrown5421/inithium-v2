@@ -3,13 +3,6 @@ import type { CoreColorToken } from './color-tokens.js';
 
 type TokenClassMap = Readonly<Record<CoreColorToken, string>>;
 
-/**
- * `muted` is the only token that needs hand exceptions here: `--muted` is a
- * near-white background wash, never meant to be used as literal text/border
- * color, so it always substitutes its `-foreground` pairing (or a translucent
- * `muted-foreground`) instead of following the mechanical `{token}` formula
- * the other 7 tokens use uniformly.
- */
 const TEXT: TokenClassMap = {
   primary: 'text-primary',
   secondary: 'text-secondary',
@@ -229,6 +222,6 @@ export function getColorRecipeClassName(recipe: ColorRecipe, color: CoreColorTok
     case 'checked':
       return CHECKED_BG[color];
     case 'field':
-      return cn(FOCUS_BORDER[color], FOCUS_RING[color], SELECTION_BG[color], SELECTION_TEXT[color]);
+      return cn(TEXT[color], FOCUS_BORDER[color], FOCUS_RING[color], SELECTION_BG[color], SELECTION_TEXT[color]);
   }
 }

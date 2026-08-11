@@ -77,6 +77,6 @@ export function getTailwindColorRecipeClassName(recipe: ColorRecipe, color: Tail
     case 'checked':
       return TW_CHECKED_BG[color];
     case 'field':
-      return cn(TW_FOCUS_BORDER[color], TW_FOCUS_RING[color], TW_SELECTION_BG[color], SELECTION_CONTRAST_TEXT_BY_SHADE[shade]);
+      return cn(TW_TEXT[color], TW_FOCUS_BORDER[color], TW_FOCUS_RING[color], TW_SELECTION_BG[color], SELECTION_CONTRAST_TEXT_BY_SHADE[shade]);
   }
 }

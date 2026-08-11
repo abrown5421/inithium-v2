@@ -49,7 +49,7 @@ export const InputOTPSlot = React.forwardRef<HTMLDivElement, InputOTPSlotProps>(
         data-slot="input-otp-slot"
         data-active={isActive || undefined}
         className={cn(
-          'relative flex size-9 items-center justify-center border-y border-r border-input text-sm shadow-xs outline-none transition-all first:rounded-l-md first:border-l last:rounded-r-md',
+          'relative flex size-9 items-center justify-center border-y border-r border-input text-sm text-foreground shadow-xs outline-none transition-all first:rounded-l-md first:border-l last:rounded-r-md',
           'data-[active=true]:z-10 data-[active=true]:border-ring data-[active=true]:ring-2 data-[active=true]:ring-ring/50',
           className,
         )}
