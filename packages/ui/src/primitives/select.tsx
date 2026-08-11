@@ -27,7 +27,7 @@ export const SelectTrigger = React.forwardRef<
     data-slot="select-trigger"
     aria-invalid={ariaInvalid ?? Boolean(error)}
     className={cn(
-      'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs outline-none transition-[color,box-shadow] data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
+      'flex h-9 w-full items-center justify-between gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground whitespace-nowrap shadow-xs outline-none transition-[color,box-shadow] data-[placeholder]:text-muted-foreground [&>span]:line-clamp-1',
       'focus-visible:ring-2',
       color ? resolveColorRecipeClassName('field', color) : SELECT_TRIGGER_NEUTRAL_FIELD_CLASSES,
       'aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20',

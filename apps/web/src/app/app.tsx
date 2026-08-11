@@ -33,13 +33,14 @@ import {
   parseCoreThemeColors,
   useApplyCoreThemeColors
 } from '@inithium/ui';
-import { DocumentationPage, HomePage, LoginPage, SignupPage } from '@inithium/web-pages';
+import { DocumentationPage, HomePage, LoginPage, SignupPage, ProfilePage } from '@inithium/web-pages';
 
 const layouts = {
   default: HomePage,
   documentation: DocumentationPage,
   login: LoginPage,
-  signup: SignupPage
+  signup: SignupPage,
+  profile: ProfilePage
 };
 
 const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/dashboard' };

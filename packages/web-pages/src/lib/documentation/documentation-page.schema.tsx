@@ -41,6 +41,21 @@ import { ThemeColorDoc } from './theming/theme-color/index.js';
 import { TailwindColorDoc } from './theming/tailwind-color/index.js';
 import { AppFontsDoc } from './theming/app-fonts/index.js';
 import { AppLogoDoc } from './theming/app-logo/index.js';
+import { AlertToastDoc } from './composites/alert-toast/index.js';
+import { AppShellDoc } from './composites/app-shell/index.js';
+import { AssetPickerDoc } from './composites/asset-picker/index.js';
+import { AuthDoc } from './composites/auth/index.js';
+import { AutoIncrementListDoc } from './composites/auto-increment-list/index.js';
+import { ColorPickerDoc } from './composites/color-picker/index.js';
+import { ConfirmDeleteDialogDoc } from './composites/confirm-delete-dialog/index.js';
+import { DataTableDoc } from './composites/data-table/index.js';
+import { EntityFormDialogDoc } from './composites/entity-form-dialog/index.js';
+import { FileDropzoneDoc } from './composites/file-drop-zone/index.js';
+import { NavbarDoc } from './composites/navbar/index.js';
+import { PaginationDoc as PaginationControlDoc } from './composites/pagination/index.js';
+import { SearchFilterBarDoc } from './composites/search-filter-bar/index.js';
+import { SettingValueEditorDoc } from './composites/setting-value-editor/index.js';
+import { UserPickerDoc } from './composites/user-picker/index.js';
 
 export const DOCS_CONFIG: readonly Topic[] = [
   {
@@ -102,21 +117,21 @@ export const DOCS_CONFIG: readonly Topic[] = [
     title: 'Composites',
     overviewContent: <p className="text-muted-foreground">High-level complex composite patterns made up of primitives used to creat complex molecular level UI elements and components.</p>,
     subTopics: [
-      { id: 'alert-toast', title: 'Alert Toast' },
-      { id: 'app-shell', title: 'App Shell' },
-      { id: 'asset-picker', title: 'Asset Picker' },
-      { id: 'auth', title: 'Auth' },
-      { id: 'auto-increment-list', title: 'Auto Increment List' },
-      { id: 'color-picker', title: 'Color Picker' },
-      { id: 'confirm-delete-dialog', title: 'Confirm Delete Dialog' },
-      { id: 'data-table', title: 'Data Table' },
-      { id: 'entity-form-dialog', title: 'Entity Form Dialog' },
-      { id: 'file-drop-zone', title: 'File Dropzone' },
-      { id: 'navbar', title: 'Navbar' },
-      { id: 'pagination', title: 'Pagination' },
-      { id: 'search-filter-bar', title: 'Search Filter Bar' },
-      { id: 'setting-value-editor', title: 'Setting Value Editor' },
-      { id: 'user-picker', title: 'User Picker' },
+      { id: 'alert-toast', title: 'Alert Toast', content: <AlertToastDoc /> },
+      { id: 'app-shell', title: 'App Shell', content: <AppShellDoc /> },
+      { id: 'asset-picker', title: 'Asset Picker', content: <AssetPickerDoc /> },
+      { id: 'auth', title: 'Auth', content: <AuthDoc /> },
+      { id: 'auto-increment-list', title: 'Auto Increment List', content: <AutoIncrementListDoc /> },
+      { id: 'color-picker', title: 'Color Picker', content: <ColorPickerDoc /> },
+      { id: 'confirm-delete-dialog', title: 'Confirm Delete Dialog', content: <ConfirmDeleteDialogDoc /> },
+      { id: 'data-table', title: 'Data Table', content: <DataTableDoc /> },
+      { id: 'entity-form-dialog', title: 'Entity Form Dialog', content: <EntityFormDialogDoc /> },
+      { id: 'file-drop-zone', title: 'File Dropzone', content: <FileDropzoneDoc /> },
+      { id: 'navbar', title: 'Navbar', content: <NavbarDoc /> },
+      { id: 'pagination', title: 'Pagination', content: <PaginationControlDoc /> },
+      { id: 'search-filter-bar', title: 'Search Filter Bar', content: <SearchFilterBarDoc /> },
+      { id: 'setting-value-editor', title: 'Setting Value Editor', content: <SettingValueEditorDoc /> },
+      { id: 'user-picker', title: 'User Picker', content: <UserPickerDoc /> },
     ],
   },
   {
