@@ -14,6 +14,8 @@ import {
   ensureDefaultSystemFont,
   PRIMARY_SYSTEM_FONT_KEY,
   SECONDARY_SYSTEM_FONT_KEY,
+  ensureDefaultSystemLogo,
+  PRIMARY_SYSTEM_LOGO_KEY,
   createCollectionDefinitionCollection,
   ensureCollectionDefinitionIndices
 } from '@inithium/collections';
@@ -21,7 +23,7 @@ import { createFileRepository, createFileManagerService } from '@inithium/file-m
 import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
-import { createSettingCollection, ensureDefaultSiteTheme } from '@inithium/collections';
+import { createSettingCollection, ensureDefaultSiteTheme, ensureDefaultSiteLogo } from '@inithium/collections';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -108,6 +110,20 @@ const bootstrap = async (): Promise<void> => {
     process.exit(1);
   }
 
+  const systemLogoDir = path.join(__dirname, 'assets', 'system-logo');
+  const primaryLogoBuffer = await fs.readFile(path.join(systemLogoDir, 'primary-logo.png'));
+
+  const primaryLogoSeedResult = await ensureDefaultSystemLogo(assetCollection.service, {
+    key: PRIMARY_SYSTEM_LOGO_KEY,
+    originalName: 'PrimaryLogo.png',
+    mimeType: 'image/png',
+    fileContentBase64: primaryLogoBuffer.toString('base64')
+  });
+  if (primaryLogoSeedResult.isErr()) {
+    console.error(primaryLogoSeedResult.error);
+    process.exit(1);
+  }
+
   const collectionDefinitionIndexResult = await ensureCollectionDefinitionIndices(db);
   if (collectionDefinitionIndexResult.isErr()) {
     console.error(collectionDefinitionIndexResult.error);
@@ -132,6 +148,12 @@ const bootstrap = async (): Promise<void> => {
   const siteThemeSeedResult = await ensureDefaultSiteTheme(settingCollection.service);
   if (siteThemeSeedResult.isErr()) {
     console.error(siteThemeSeedResult.error);
+    process.exit(1);
+  }
+
+  const siteLogoSeedResult = await ensureDefaultSiteLogo(settingCollection.service);
+  if (siteLogoSeedResult.isErr()) {
+    console.error(siteLogoSeedResult.error);
     process.exit(1);
   }
 // collection-generator:instances

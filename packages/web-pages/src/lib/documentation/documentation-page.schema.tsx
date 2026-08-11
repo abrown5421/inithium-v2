@@ -37,6 +37,10 @@ import { TabsDoc } from './primitives/tabs/index.js';
 import { TextDoc } from './primitives/text/index.js';
 import { TextareaDoc } from './primitives/textarea/index.js';
 import { TooltipDoc } from './primitives/tooltip/index.js';
+import { ThemeColorDoc } from './theming/theme-color/index.js';
+import { TailwindColorDoc } from './theming/tailwind-color/index.js';
+import { AppFontsDoc } from './theming/app-fonts/index.js';
+import { AppLogoDoc } from './theming/app-logo/index.js';
 
 export const DOCS_CONFIG: readonly Topic[] = [
   {
@@ -120,8 +124,10 @@ export const DOCS_CONFIG: readonly Topic[] = [
     title: 'Theming',
     overviewContent: <p className="text-muted-foreground">Design token system and themes configuration.</p>,
     subTopics: [
-      { id: 'theme-color', title: 'Theme Colors' },
-      { id: 'tailwind-color', title: 'Tailwind Colors' },
+      { id: 'theme-color', title: 'Theme Colors', content: <ThemeColorDoc /> },
+      { id: 'tailwind-color', title: 'Tailwind Colors', content: <TailwindColorDoc /> },
+      { id: 'app-fonts', title: 'Application Fonts', content: <AppFontsDoc /> },
+      { id: 'app-logo', title: 'Application Logo', content: <AppLogoDoc /> },
     ],
   },
 ];
