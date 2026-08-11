@@ -3,10 +3,16 @@ import { useHref } from 'react-router-dom';
 import { NavbarLinkComponent, NavbarMenuItem } from '@inithium/ui';
 import { usePageNavigate } from '../hooks/use-page-navigate.js';
 import { MatchableLocation, resolvesToCurrentLocation } from './location-match.js';
-import { NavEntry, resolveNavHref } from './navigation-selection.js';
+import { NavEntry, NavHrefParams, resolveNavHref } from './navigation-selection.js';
 
-export const toNavbarMenuItem = ({ page, navigation }: NavEntry, location: MatchableLocation): NavbarMenuItem => {
-  const href = resolveNavHref(page, navigation);
+const EMPTY_NAV_HREF_PARAMS: NavHrefParams = {};
+
+export const toNavbarMenuItem = (
+  { page, navigation }: NavEntry,
+  location: MatchableLocation,
+  params: NavHrefParams = EMPTY_NAV_HREF_PARAMS
+): NavbarMenuItem => {
+  const href = resolveNavHref(page, navigation, params);
   return {
     label: navigation.label,
     href,
