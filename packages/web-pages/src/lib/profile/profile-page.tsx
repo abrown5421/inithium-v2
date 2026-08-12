@@ -1,23 +1,8 @@
 import React from 'react';
 import { PageLayoutComponent } from '@inithium/pages';
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-  Card,
-  CardContent,
-  Heading,
-  NavbarUser,
-  Separator,
-  Skeleton,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-  Text
-} from '@inithium/ui';
+import { Card, CardContent, Heading, Separator, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@inithium/ui';
 import { useParams } from 'react-router-dom';
-import { useReadAllProfilesQuery, useReadAllSettingsQuery, useReadUserQuery } from '@inithium/store';
+import { resolveAvatarInitials, useReadAllProfilesQuery, useReadAllSettingsQuery, useReadUserQuery } from '@inithium/store';
 import type { Address, Gender, Profile } from '@inithium/models';
 import { Cake, Link2, Phone, Receipt, Truck, UserRound, type LucideIcon } from 'lucide-react';
 import {
@@ -47,38 +32,7 @@ import { useProfileIdentity } from './profile-identity.js';
 import { extractSettingsMap, isProfileFieldActive, PROFILE_CONFIG_SETTING_NAME } from './profile-config.js';
 import { PROFILE_TAB_REGISTRY, resolveActiveProfileTabs, ProfileTabContext } from './profile-tab-registry.js';
 import { ProfileBannerDisplay } from './profile-banner-display.js';
-
-interface MinimalUserSpec {
-  readonly first_name?: string | null;
-  readonly last_name?: string | null;
-  readonly email: string;
-  readonly avatarSrc?: string | null;
-}
-
-type UserMapper<T extends MinimalUserSpec> = (user?: T | null) => NavbarUser | undefined;
-
-const createNavbarUserMapper = <T extends MinimalUserSpec>(): UserMapper<T> =>
-  (user) =>
-    user
-      ? {
-          name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email,
-          firstName: user.first_name ?? undefined,
-          avatarFallback: (user.first_name ?? user.email).charAt(0).toUpperCase(),
-          avatarSrc: user.avatarSrc ?? undefined
-        }
-      : undefined;
-
-const mapToNavbarUser = createNavbarUserMapper<MinimalUserSpec>();
-
-const formatInitials = (user?: NavbarUser): string =>
-  user?.avatarFallback ?? user?.name?.charAt(0)?.toUpperCase() ?? '?';
-
-const UserAvatar: React.FC<{ readonly user?: NavbarUser }> = ({ user }) => (
-  <Avatar className="size-52 -mt-32 border-15 border-background">
-    {user?.avatarSrc ? <AvatarImage src={user.avatarSrc} alt={user.name ?? 'Account'} /> : null}
-    <AvatarFallback>{formatInitials(user)}</AvatarFallback>
-  </Avatar>
-);
+import { ProfileAvatarDisplay } from './profile-avatar-display.js';
 
 const hasText = (value?: string | null): value is string => Boolean(value && value.trim().length > 0);
 
@@ -258,7 +212,15 @@ export const ProfilePage: PageLayoutComponent = () => {
       />
       <div className="relative mx-auto flex w-full flex-row md:flex-row gap-4 md:gap-8 p-4">
         <div className='flex flex-col flex-2 items-center'>
-          <UserAvatar user={mapToNavbarUser(profileUser)} />
+          <ProfileAvatarDisplay
+            userId={id}
+            profileId={profile?._id}
+            avatar={profile?.profileAvatar}
+            displayName={displayName}
+            avatarFallback={resolveAvatarInitials(profileUser?.first_name, profileUser?.last_name, profileUser?.email)}
+            isEditable={isOwner}
+            className="size-52 -mt-32 border-15 border-background"
+          />
         </div>
         <div className='flex flex-col flex-8'>
           {/* spacer leave blank */}

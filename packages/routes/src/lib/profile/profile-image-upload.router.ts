@@ -3,21 +3,21 @@ import { handleResult } from '@inithium/crud-engine';
 import { AssetService } from '@inithium/services';
 import { buildUploadMiddleware } from '../assets/asset.router.js';
 
-export interface ProfileBannerImageRouterConfig {
+export interface ProfileImageUploadRouterConfig {
   readonly authenticate: RequestHandler;
   readonly maxUploadSizeMb: number;
 }
 
-const ALLOWED_BANNER_IMAGE_MIME_TYPES: ReadonlySet<string> = new Set([
+const ALLOWED_PROFILE_IMAGE_MIME_TYPES: ReadonlySet<string> = new Set([
   'image/png',
   'image/jpeg',
   'image/webp',
   'image/gif'
 ]);
 
-export const createProfileBannerImageRouter = (
+export const createProfileImageUploadRouter = (
   assetService: AssetService,
-  config: ProfileBannerImageRouterConfig
+  config: ProfileImageUploadRouterConfig
 ): Router => {
   const router = Router();
   const uploadMiddleware = buildUploadMiddleware(config.maxUploadSizeMb);
@@ -27,7 +27,7 @@ export const createProfileBannerImageRouter = (
       res.status(400).json({ success: false, error: { type: 'VALIDATION_ERROR', message: 'An image file is required' } });
       return;
     }
-    if (!ALLOWED_BANNER_IMAGE_MIME_TYPES.has(req.file.mimetype)) {
+    if (!ALLOWED_PROFILE_IMAGE_MIME_TYPES.has(req.file.mimetype)) {
       res.status(400).json({
         success: false,
         error: { type: 'VALIDATION_ERROR', message: 'Only PNG, JPEG, WebP, or GIF images are allowed' }

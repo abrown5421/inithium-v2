@@ -26,6 +26,10 @@ export interface NavbarUser {
   readonly firstName?: string;
   readonly avatarSrc?: string;
   readonly avatarFallback?: string;
+  readonly avatarBackgroundColor?: string;
+  readonly avatarFontColor?: string;
+  readonly avatarFontClassName?: string;
+  readonly avatarShapeClassName?: string;
 }
 
 export interface NavbarProps {

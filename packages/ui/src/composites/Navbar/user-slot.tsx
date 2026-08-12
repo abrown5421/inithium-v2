@@ -1,9 +1,9 @@
 import * as React from 'react';
 import { Menu } from 'lucide-react';
-import { Avatar, AvatarFallback, AvatarImage } from '../../primitives/avatar.js';
 import { Button } from '../../primitives/button.js';
 import { NavDrawer } from './nav-drawer.js';
 import { NavbarLinkComponent, NavbarMenuItem, NavbarUser } from './navbar.types.js';
+import { UserAvatar } from './user-avatar.js';
 
 export interface UserSlotProps {
   readonly isAuthenticated: boolean;
@@ -14,13 +14,6 @@ export interface UserSlotProps {
   readonly onLogoutClick?: () => void;
   readonly linkComponent?: NavbarLinkComponent;
 }
-
-const UserAvatar: React.FC<{ readonly user?: NavbarUser }> = ({ user }) => (
-  <Avatar>
-    {user?.avatarSrc ? <AvatarImage src={user.avatarSrc} alt={user?.name ?? 'Account'} /> : null}
-    <AvatarFallback>{user?.avatarFallback ?? user?.name?.charAt(0)?.toUpperCase() ?? '?'}</AvatarFallback>
-  </Avatar>
-);
 
 export const UserSlot: React.FC<UserSlotProps> = ({
   isAuthenticated,

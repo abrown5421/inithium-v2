@@ -2,6 +2,8 @@ import * as React from 'react';
 import {
   closeAlert,
   resolveAssetUrl,
+  resolveAvatarDisplay,
+  resolveAvatarInitials,
   selectAlerts,
   selectCurrentUser,
   selectIsAuthenticated,
@@ -10,9 +12,10 @@ import {
   useLogoutMutation,
   useMeQuery,
   useReadAllPagesQuery,
+  useReadAllProfilesQuery,
   useReadAllSettingsQuery
 } from '@inithium/store';
-import { Page, Setting } from '@inithium/models';
+import { Page, Profile, Setting } from '@inithium/models';
 import {
   DynamicRouterProvider,
   NavHrefParams,
@@ -44,7 +47,7 @@ const layouts = {
   profile: ProfilePage
 };
 
-const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/dashboard' };
+const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
 
 interface PaginatedSettings {
   readonly data?: readonly Setting[];
@@ -61,12 +64,13 @@ const extractSettingsMap = (response?: PaginatedSettings): Record<string, unknow
     {}
   );
 
-const toNavbarUser = (user: ReturnType<typeof selectCurrentUser>): NavbarUser | undefined =>
+const toNavbarUser = (user: ReturnType<typeof selectCurrentUser>, profile?: Profile): NavbarUser | undefined =>
   user
     ? {
         name: [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email,
         firstName: user.first_name,
-        avatarFallback: (user.first_name ?? user.email).charAt(0).toUpperCase()
+        avatarFallback: resolveAvatarInitials(user.first_name, user.last_name, user.email),
+        ...resolveAvatarDisplay(profile?.profileAvatar)
       }
     : undefined;
 
@@ -82,6 +86,11 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const { data: settingsData } = useReadAllSettingsQuery();
   const currentUser = useAppSelector(selectCurrentUser);
   const [logout] = useLogoutMutation();
+  const { data: myProfileResult } = useReadAllProfilesQuery(
+    { field: 'user_id', search: currentUser?.id ?? '', limit: 1 },
+    { skip: !currentUser?.id }
+  );
+  const myProfile = myProfileResult?.data?.[0];
 
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
 
@@ -108,7 +117,7 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
           mainMenuItems={mainMenuItems}
           profileMenuItems={profileMenuItems}
           isAuthenticated={session.isAuthenticated}
-          user={toNavbarUser(currentUser)}
+          user={toNavbarUser(currentUser, myProfile)}
           linkComponent={RouterNavLink}
           onLoginClick={() => pageNavigate(config.loginRoute)}
           onLogoutClick={() => void logout()}
