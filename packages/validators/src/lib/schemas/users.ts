@@ -23,7 +23,31 @@ export const loginSchema = z.object({
   password: z.string().min(1)
 });
 
+export const updateSelfSchema = z.object({
+  email: z.string().email().optional(),
+  first_name: z.string().min(1).optional(),
+  last_name: z.string().min(1).optional()
+});
+
+export const verifyPasswordSchema = z.object({
+  currentPassword: z.string().min(1)
+});
+
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1),
+    newPassword: z.string().min(8),
+    confirmPassword: z.string().min(8)
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword']
+  });
+
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
 export type RegisterDTO = z.infer<typeof registerSchema>;
 export type LoginDTO = z.infer<typeof loginSchema>;
+export type UpdateSelfDTO = z.infer<typeof updateSelfSchema>;
+export type VerifyPasswordDTO = z.infer<typeof verifyPasswordSchema>;
+export type ChangePasswordDTO = z.infer<typeof changePasswordSchema>;

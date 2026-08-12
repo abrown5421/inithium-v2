@@ -75,3 +75,5 @@ export * from './composites/AssetPicker/index.js';
 export * from './composites/UserPicker/index.js';
 export * from './composites/AutoIncrementList/index.js';
 export * from './composites/SettingValueEditor/index.js';
+export * from './composites/SelectField/index.js';
+export * from './composites/TextareaField/index.js';

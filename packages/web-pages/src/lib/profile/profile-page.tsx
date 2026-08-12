@@ -10,12 +10,42 @@ import {
   NavbarUser,
   Separator,
   Skeleton,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
   Text
 } from '@inithium/ui';
 import { useParams } from 'react-router-dom';
 import { useReadAllProfilesQuery, useReadAllSettingsQuery, useReadUserQuery } from '@inithium/store';
-import type { Address, Gender, Profile, Setting } from '@inithium/models';
-import { Cake, FileText, Link2, Phone, Receipt, Truck, UserRound, type LucideIcon } from 'lucide-react';
+import type { Address, Gender, Profile } from '@inithium/models';
+import { Cake, Link2, Phone, Receipt, Truck, UserRound, type LucideIcon } from 'lucide-react';
+import {
+  FaBehance,
+  FaDiscord,
+  FaDribbble,
+  FaFacebook,
+  FaFigma,
+  FaGithub,
+  FaInstagram,
+  FaLinkedin,
+  FaMedium,
+  FaPinterest,
+  FaReddit,
+  FaSnapchat,
+  FaSoundcloud,
+  FaSpotify,
+  FaTelegram,
+  FaThreads,
+  FaTiktok,
+  FaTwitch,
+  FaWhatsapp,
+  FaXTwitter,
+  FaYoutube
+} from 'react-icons/fa6';
+import { useProfileIdentity } from './profile-identity.js';
+import { extractSettingsMap, isProfileFieldActive, PROFILE_CONFIG_SETTING_NAME } from './profile-config.js';
+import { PROFILE_TAB_REGISTRY, resolveActiveProfileTabs, ProfileTabContext } from './profile-tab-registry.js';
 
 interface MinimalUserSpec {
   readonly first_name?: string | null;
@@ -43,28 +73,11 @@ const formatInitials = (user?: NavbarUser): string =>
   user?.avatarFallback ?? user?.name?.charAt(0)?.toUpperCase() ?? '?';
 
 const UserAvatar: React.FC<{ readonly user?: NavbarUser }> = ({ user }) => (
-  <Avatar className="size-52 -mt-32 border-20 border-background">
+  <Avatar className="size-52 -mt-32 border-15 border-background">
     {user?.avatarSrc ? <AvatarImage src={user.avatarSrc} alt={user.name ?? 'Account'} /> : null}
     <AvatarFallback>{formatInitials(user)}</AvatarFallback>
   </Avatar>
 );
-
-const PROFILE_CONFIG_SETTING_NAME = 'site.profileConfig';
-
-interface PaginatedSettings {
-  readonly data?: readonly Setting[];
-}
-
-const extractSettingsMap = (response?: PaginatedSettings): Record<string, unknown> =>
-  (response?.data ?? []).reduce<Record<string, unknown>>(
-    (acc, item) => ({ ...acc, [item.settingName]: item.settingValue }),
-    {}
-  );
-
-const isProfileFieldActive = (config: unknown, field: string): boolean => {
-  if (typeof config !== 'object' || config === null) return true;
-  return (config as Record<string, unknown>)[field] !== false;
-};
 
 const hasText = (value?: string | null): value is string => Boolean(value && value.trim().length > 0);
 
@@ -85,6 +98,54 @@ const formatAddressLines = (address?: Address): readonly string[] | undefined =>
         hasText
       )
     : undefined;
+
+type SocialIconComponent = React.ComponentType<{ readonly className?: string }>;
+
+interface SocialLinkIconEntry {
+  readonly hostnames: readonly string[];
+  readonly icon: SocialIconComponent;
+}
+
+const SOCIAL_LINK_ICON_ENTRIES: readonly SocialLinkIconEntry[] = [
+  { hostnames: ['github.com'], icon: FaGithub },
+  { hostnames: ['twitter.com', 'x.com'], icon: FaXTwitter },
+  { hostnames: ['linkedin.com'], icon: FaLinkedin },
+  { hostnames: ['instagram.com'], icon: FaInstagram },
+  { hostnames: ['facebook.com', 'fb.com'], icon: FaFacebook },
+  { hostnames: ['youtube.com', 'youtu.be'], icon: FaYoutube },
+  { hostnames: ['tiktok.com'], icon: FaTiktok },
+  { hostnames: ['discord.com', 'discord.gg'], icon: FaDiscord },
+  { hostnames: ['twitch.tv'], icon: FaTwitch },
+  { hostnames: ['reddit.com'], icon: FaReddit },
+  { hostnames: ['medium.com'], icon: FaMedium },
+  { hostnames: ['whatsapp.com', 'wa.me'], icon: FaWhatsapp },
+  { hostnames: ['telegram.org', 't.me'], icon: FaTelegram },
+  { hostnames: ['pinterest.com'], icon: FaPinterest },
+  { hostnames: ['snapchat.com'], icon: FaSnapchat },
+  { hostnames: ['threads.net'], icon: FaThreads },
+  { hostnames: ['spotify.com'], icon: FaSpotify },
+  { hostnames: ['soundcloud.com'], icon: FaSoundcloud },
+  { hostnames: ['behance.net'], icon: FaBehance },
+  { hostnames: ['dribbble.com'], icon: FaDribbble },
+  { hostnames: ['figma.com'], icon: FaFigma }
+];
+
+const getHostname = (url: string): string | undefined => {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '').toLowerCase();
+  } catch {
+    return undefined;
+  }
+};
+
+const resolveSocialLinkIcon = (url: string): SocialIconComponent => {
+  const hostname = getHostname(url);
+  if (!hostname) return Link2;
+  const match = SOCIAL_LINK_ICON_ENTRIES.find((entry) =>
+    entry.hostnames.some((candidate) => hostname === candidate || hostname.endsWith(`.${candidate}`))
+  );
+  return match?.icon ?? Link2;
+};
 
 interface ProfileInfoRowProps {
   readonly icon: LucideIcon;
@@ -115,7 +176,8 @@ export const ProfilePage: PageLayoutComponent = () => {
     { skip: !id }
   );
   const { data: settingsData } = useReadAllSettingsQuery();
-console.log(profileUser)
+  const { isOwner } = useProfileIdentity();
+
   const profile: Profile | undefined = profilesResult?.data?.[0];
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
   const profileConfig = settingsMap[PROFILE_CONFIG_SETTING_NAME];
@@ -127,13 +189,10 @@ console.log(profileUser)
   const genderLabel = formatGender(profile?.profileGender);
   const dobLabel = formatDate(profile?.profileDOB);
 
+  const bioActive = isProfileFieldActive(profileConfig, 'profileBio') && hasText(profile?.profileBio);
+  const socialsActive = isProfileFieldActive(profileConfig, 'profileOtherSocials') && socials.length > 0;
+
   const rows: readonly ProfileRowDef[] = [
-    {
-      key: 'profileBio',
-      icon: FileText,
-      active: isProfileFieldActive(profileConfig, 'profileBio'),
-      content: hasText(profile?.profileBio) ? <Text size="sm">{profile?.profileBio}</Text> : null
-    },
     {
       key: 'profileDOB',
       icon: Cake,
@@ -151,23 +210,6 @@ console.log(profileUser)
       icon: Phone,
       active: isProfileFieldActive(profileConfig, 'profilePhone'),
       content: hasText(profile?.profilePhone) ? <Text size="sm">{profile?.profilePhone}</Text> : null
-    },
-    {
-      key: 'profileOtherSocials',
-      icon: Link2,
-      active: isProfileFieldActive(profileConfig, 'profileOtherSocials'),
-      content:
-        socials.length > 0 ? (
-          <div className="flex flex-col gap-0.5">
-            {socials.map((url) => (
-              <a key={url} href={url} target="_blank" rel="noreferrer" className="truncate">
-                <Text as="span" size="sm" color="primary" className="hover:underline">
-                  {url}
-                </Text>
-              </a>
-            ))}
-          </div>
-        ) : null
     },
     {
       key: 'profileShippingAddress',
@@ -201,13 +243,16 @@ console.log(profileUser)
 
   const visibleRows = rows.filter((row) => row.active && row.content !== null);
 
+  const tabContext: ProfileTabContext = { isOwner, userId: id };
+  const activeTabs = resolveActiveProfileTabs(PROFILE_TAB_REGISTRY, tabContext);
+
   return (
     <div className="flex flex-col">
       <div className="w-full h-60 bg-emerald-500">
         banner section
       </div>
       <div className="relative mx-auto flex w-full flex-row md:flex-row gap-4 md:gap-8 p-4">
-        <div className='flex flex-col flex-2'>
+        <div className='flex flex-col flex-2 items-center'>
           <UserAvatar user={mapToNavbarUser(profileUser)} />
         </div>
         <div className='flex flex-col flex-8'>
@@ -240,20 +285,82 @@ console.log(profileUser)
                   <Skeleton className="h-9 w-full" />
                   <Skeleton className="h-9 w-full" />
                 </div>
-              ) : visibleRows.length > 0 && (
-                <div className="flex flex-col divide-y divide-border">
-                  {visibleRows.map((row) => (
-                    <ProfileInfoRow key={row.key} icon={row.icon}>
-                      {row.content}
-                    </ProfileInfoRow>
-                  ))}
-                </div>
+              ) : (
+                <>
+                  {bioActive ? (
+                    <>
+                      <Text size="sm">{profile?.profileBio}</Text>
+                      <Separator />
+                    </>
+                  ) : null}
+
+                  {visibleRows.length > 0 ? (
+                    <div className="flex flex-col divide-y divide-border">
+                      {visibleRows.map((row) => (
+                        <ProfileInfoRow key={row.key} icon={row.icon}>
+                          {row.content}
+                        </ProfileInfoRow>
+                      ))}
+                    </div>
+                  ) : null}
+
+                  {socialsActive ? (
+                    <>
+                      <Separator />
+                      <div className="flex flex-col gap-2">
+                        <Text size="xs" color="muted">
+                          Links
+                        </Text>
+                        <div className="flex flex-wrap gap-2">
+                          {socials.map((url) => {
+                            const Icon = resolveSocialLinkIcon(url);
+                            return (
+                              <a
+                                key={url}
+                                href={url}
+                                target="_blank"
+                                rel="noreferrer"
+                                title={url}
+                                className="flex size-9 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                              >
+                                <Icon className="size-4" />
+                              </a>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  ) : null}
+                </>
               )}
             </CardContent>
           </Card>
         </div>
-        <div className='flex flex-col flex-8'>
-          profile content
+        <div className='flex flex-col flex-8' key={id}>
+          {activeTabs.length > 0 ? (
+            <Tabs defaultValue={activeTabs[0]?.id}>
+              <TabsList>
+                {activeTabs.map((tab) => (
+                  <TabsTrigger key={tab.id} value={tab.id} className="gap-1.5">
+                    <tab.icon className="size-4" aria-hidden="true" />
+                    {tab.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {activeTabs.map((tab) => {
+                const TabComponent = tab.component;
+                return (
+                  <TabsContent key={tab.id} value={tab.id}>
+                    <TabComponent context={tabContext} />
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          ) : (
+            <Text size="sm" color="muted">
+              Nothing to show here.
+            </Text>
+          )}
         </div>
       </div>
     </div>
