@@ -7,7 +7,7 @@
 - When running tasks (for example build, lint, test, e2e, etc.), always prefer running the task through `nx` (i.e. `nx run`, `nx run-many`, `nx affected`) instead of using the underlying tooling directly
 - Prefix nx commands with the workspace's package manager (e.g., `pnpm nx build`, `npm exec nx test`) - avoids using globally installed CLI
 - You have access to the Nx MCP server and its tools, use them to help the user
-- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not all plugins have this file - proceed without it if unavailable.
+- For Nx plugin best practices, check `node_modules/@nx/<plugin>/PLUGIN.md`. Not me plugins have this file - proceed without it if unavailable.
 - NEVER guess CLI flags - always check nx_docs or `--help` first when unsure
 
 ## Scaffolding & Generators
@@ -21,3 +21,15 @@
 - The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
 
 <!-- nx configuration end-->
+
+## Code Conventions
+- Pure functional paradigm: immutable state, no side-effects in core logic.
+- Pure functions accepting explicit dependencies via higher-order functions.
+- Abstraction over direct concrete implementations.
+
+## Module & Architecture Rules
+- Barrel Exports: Expose library module APIs exclusively via barrel entry points (`index.ts`). Prevent deep internal file imports across project boundaries in the Nx monorepo.
+- UI Component Verification: Before generating or designing any UI element, search the workspace UI library barrel exports for existing primitive or composite components. Prefer composing existing UI primitives over creating raw elements.
+
+## Operational Guardrails
+- NEVER suppress build or type errors.

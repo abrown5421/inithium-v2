@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { BANNER_TYPES } from '@inithium/models';
+import { AVATAR_FONTS, AVATAR_SHAPES, AVATAR_TYPES, BANNER_TYPES } from '@inithium/models';
 
 const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/;
 
@@ -27,6 +27,19 @@ const profileBannerSchema = z.object({
   bannerAssetRef: z.string().optional()
 });
 
+const customAvatarConfigSchema = z.object({
+  backgroundColor: z.string().regex(HEX_COLOR_PATTERN),
+  fontColor: z.string().regex(HEX_COLOR_PATTERN),
+  font: z.enum(AVATAR_FONTS),
+  shape: z.enum(AVATAR_SHAPES)
+});
+
+const profileAvatarSchema = z.object({
+  avatarType: z.enum(AVATAR_TYPES).optional(),
+  customAvatarConfig: customAvatarConfigSchema.optional(),
+  avatarAssetRef: z.string().optional()
+});
+
 const profileGenderSchema = z.discriminatedUnion('type', [
   z.object({ type: z.enum(['Male', 'Female', 'Prefer Not to Say']) }),
   z.object({ type: z.literal('Other'), custom: z.string().min(1) })
@@ -34,7 +47,7 @@ const profileGenderSchema = z.discriminatedUnion('type', [
 
 export const createProfileSchema = z.object({
   user_id: z.string().optional(),
-  profileAvatar: z.string().optional(),
+  profileAvatar: profileAvatarSchema.optional(),
   profileBanner: profileBannerSchema.optional(),
   profileBio: z.string().optional(),
   profileDOB: z.coerce.date().optional(),

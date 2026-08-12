@@ -33,13 +33,45 @@ export interface ProfileBanner {
   readonly bannerAssetRef?: string;
 }
 
+export const AVATAR_TYPES = ['custom', 'image'] as const;
+
+export type AvatarType = (typeof AVATAR_TYPES)[number];
+
+export const AVATAR_FONTS = ['primary', 'secondary', 'sans', 'serif', 'mono'] as const;
+
+export type AvatarFont = (typeof AVATAR_FONTS)[number];
+
+export const AVATAR_SHAPES = ['round', 'square'] as const;
+
+export type AvatarShape = (typeof AVATAR_SHAPES)[number];
+
+export interface CustomAvatarConfig {
+  readonly backgroundColor: string;
+  readonly fontColor: string;
+  readonly font: AvatarFont;
+  readonly shape: AvatarShape;
+}
+
+export const DEFAULT_CUSTOM_AVATAR_CONFIG: CustomAvatarConfig = {
+  backgroundColor: '#0f5066',
+  fontColor: '#ffffff',
+  font: 'primary',
+  shape: 'round'
+};
+
+export interface ProfileAvatar {
+  readonly avatarType?: AvatarType;
+  readonly customAvatarConfig?: CustomAvatarConfig;
+  readonly avatarAssetRef?: string;
+}
+
 export type Gender =
   | { readonly type: 'Male' | 'Female' | 'Prefer Not to Say'; readonly custom?: never }
   | { readonly type: 'Other'; readonly custom: string };
 
 export interface Profile extends BaseEntity {
   readonly user_id?: string;
-  readonly profileAvatar?: string;
+  readonly profileAvatar?: ProfileAvatar;
   readonly profileBanner?: ProfileBanner;
   readonly profileBio?: string;
   readonly profileDOB?: Date;

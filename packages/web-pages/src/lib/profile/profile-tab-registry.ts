@@ -1,8 +1,7 @@
 import type { ComponentType } from 'react';
-import { Settings, Users, UserRound, type LucideIcon } from 'lucide-react';
+import { Settings, UserRound, type LucideIcon } from 'lucide-react';
 import { ProfileTab } from './profile-tab.js';
 import { SettingsTab } from './settings-tab.js';
-import { FriendsTab } from './friends-tab.js';
 
 export interface ProfileTabContext {
   readonly isOwner: boolean;
@@ -20,7 +19,6 @@ export interface ProfileTabDefinition {
 export const PROFILE_TAB_REGISTRY: readonly ProfileTabDefinition[] = [
   { id: 'profile', label: 'Profile', icon: UserRound, component: ProfileTab, enabled: (context) => context.isOwner },
   { id: 'settings', label: 'Settings', icon: Settings, component: SettingsTab, enabled: (context) => context.isOwner },
-  { id: 'friends', label: 'Friends', icon: Users, component: FriendsTab }
 ];
 
 export const resolveActiveProfileTabs = (
