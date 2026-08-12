@@ -23,7 +23,7 @@ export const ProfileBannerDisplay: React.FC<ProfileBannerDisplayProps> = ({
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
 
   return (
-    <div className={cn('relative overflow-hidden rounded-md bg-muted', className)}>
+    <div className={cn('relative overflow-hidden bg-muted', className)}>
       {banner?.bannerType === 'image' && banner.bannerAssetRef ? (
         <img
           src={resolveAssetUrl(banner.bannerAssetRef)}

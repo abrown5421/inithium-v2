@@ -210,7 +210,7 @@ export const ProfilePage: PageLayoutComponent = () => {
         isEditable={isOwner}
         className="w-full h-60"
       />
-      <div className="relative mx-auto flex w-full flex-row md:flex-row gap-4 md:gap-8 p-4">
+      <div className="relative mx-auto flex w-full flex-col md:flex-row md:flex-row gap-4 md:gap-8 p-4">
         <div className='flex flex-col flex-2 items-center'>
           <ProfileAvatarDisplay
             userId={id}
@@ -226,7 +226,7 @@ export const ProfilePage: PageLayoutComponent = () => {
           {/* spacer leave blank */}
         </div>
       </div>
-      <div className="mx-auto flex w-full flex-row md:flex-row gap-4 md:gap-8 p-4">
+      <div className="mx-auto flex w-full flex-col md:flex-row gap-4 md:gap-8 p-4">
         <div className='flex flex-col flex-2'>
           <Card>
             <CardContent className="flex flex-col gap-4">
