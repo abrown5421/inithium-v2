@@ -1,19 +1,38 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import type { CreateProfileDTO, UpdateProfileDTO } from '@inithium/validators';
-import type { Profile } from '@inithium/models';
+import type { AssetWithUrl, Profile } from '@inithium/models';
 import { unwrappingBaseQuery } from './base-query.js';
 import { createCrudEndpoints } from './crud-endpoints.js';
+
+const buildBannerImageFormData = (file: File): FormData => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return formData;
+};
 
 export const profileApi = createApi({
   reducerPath: 'profileApi',
   baseQuery: unwrappingBaseQuery,
   tagTypes: ['Profile'],
-  endpoints: (builder) =>
-    createCrudEndpoints<Profile, CreateProfileDTO, UpdateProfileDTO, 'Profile', 'profileApi'>(
+  endpoints: (builder) => {
+    const crudEndpoints = createCrudEndpoints<Profile, CreateProfileDTO, UpdateProfileDTO, 'Profile', 'profileApi'>(
       builder,
       'profiles',
       'Profile'
-    )
+    );
+
+    return {
+      ...crudEndpoints,
+
+      uploadProfileBannerImage: builder.mutation<AssetWithUrl, File>({
+        query: (file) => ({ url: 'profiles/banner-image', method: 'POST', body: buildBannerImageFormData(file) })
+      }),
+
+      deleteProfileBannerImage: builder.mutation<{ key: string; deleted: boolean }, string>({
+        query: (key) => ({ url: `profiles/banner-image/${key}`, method: 'DELETE' })
+      })
+    };
+  }
 });
 
 export const {
@@ -25,5 +44,7 @@ export const {
   useUpdateOneMutation: useUpdateProfileMutation,
   useUpdateManyMutation: useUpdateProfilesMutation,
   useDeleteOneMutation: useDeleteProfileMutation,
-  useDeleteManyMutation: useDeleteProfilesMutation
+  useDeleteManyMutation: useDeleteProfilesMutation,
+  useUploadProfileBannerImageMutation,
+  useDeleteProfileBannerImageMutation
 } = profileApi;

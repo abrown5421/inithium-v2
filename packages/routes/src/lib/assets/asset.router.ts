@@ -35,7 +35,7 @@ const extractFilePayload = (file: Express.Multer.File | undefined, body: Record<
   mimeType: (file ? file.mimetype : body?.mimeType) as string | undefined
 });
 
-const buildUploadMiddleware = (maxUploadSizeMb: number): RequestHandler => {
+export const buildUploadMiddleware = (maxUploadSizeMb: number): RequestHandler => {
   const upload = multer({
     storage: multer.memoryStorage(),
     limits: { fileSize: maxUploadSizeMb * 1024 * 1024 }

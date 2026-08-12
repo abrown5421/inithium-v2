@@ -9,9 +9,28 @@ export interface Address {
   readonly country: string;
 }
 
+export const BANNER_TYPES = ['trianglify', 'image'] as const;
+
+export type BannerType = (typeof BANNER_TYPES)[number];
+
+export interface TrianglifyConfig {
+  readonly variance: number;
+  readonly cell_size: number;
+  readonly x_colors: readonly string[];
+  readonly y_colors: readonly string[];
+}
+
+export const DEFAULT_TRIANGLIFY_CONFIG: TrianglifyConfig = {
+  variance: 0.75,
+  cell_size: 40,
+  x_colors: ['#0f5066', '#115e7a', '#1e293b'],
+  y_colors: ['#1e293b', '#64748b', '#e2e8f0']
+};
+
 export interface ProfileBanner {
-  readonly assetUrl?: string;
-  readonly trianglifyConfig?: Record<string, unknown>;
+  readonly bannerType?: BannerType;
+  readonly trianglifyConfig?: TrianglifyConfig;
+  readonly bannerAssetRef?: string;
 }
 
 export type Gender =

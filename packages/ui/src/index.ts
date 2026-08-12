@@ -77,3 +77,4 @@ export * from './composites/AutoIncrementList/index.js';
 export * from './composites/SettingValueEditor/index.js';
 export * from './composites/SelectField/index.js';
 export * from './composites/TextareaField/index.js';
+export * from './composites/TrianglifyPattern/index.js';
