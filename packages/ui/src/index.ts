@@ -61,6 +61,7 @@ export * from './primitives/alert.js';
 
 // Composites
 export * from './composites/Navbar/index.js';
+export * from './composites/Presence/index.js';
 export * from './composites/AppShell/index.js';
 export * from './composites/Auth/index.js';
 export * from './composites/AlertToast/index.js';

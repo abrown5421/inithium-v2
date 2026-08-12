@@ -1,4 +1,5 @@
 import * as React from 'react';
+import type { PresenceStatus } from '@inithium/presence';
 
 export interface NavbarLinkComponentProps {
   readonly href: string;
@@ -41,6 +42,7 @@ export interface NavbarProps {
   readonly profileMenuItems: readonly NavbarMenuItem[];
   readonly isAuthenticated: boolean;
   readonly user?: NavbarUser;
+  readonly presenceStatus?: PresenceStatus;
   readonly onLoginClick?: () => void;
   readonly onLogoutClick?: () => void;
   readonly linkComponent?: NavbarLinkComponent;

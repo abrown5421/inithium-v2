@@ -191,6 +191,18 @@ export const UpdateAvatarDialog: React.FC<UpdateAvatarDialogProps> = ({
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto p-6">
+          <div className='flex flex-row justify-center items-center w-full mb-2'>
+            <UserAvatar
+              user={{
+                avatarFallback: '?',
+                ...resolveAvatarDisplay({
+                  avatarType: 'custom',
+                  customAvatarConfig: { backgroundColor, fontColor, font, shape }
+                })
+              }}
+              className="size-16"
+            />
+          </div>
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as AvatarType)}>
             <TabsList>
               <TabsTrigger value="custom">Custom</TabsTrigger>
@@ -198,16 +210,7 @@ export const UpdateAvatarDialog: React.FC<UpdateAvatarDialogProps> = ({
             </TabsList>
 
             <TabsContent value="custom" className="flex flex-col gap-4">
-              <UserAvatar
-                user={{
-                  avatarFallback: '?',
-                  ...resolveAvatarDisplay({
-                    avatarType: 'custom',
-                    customAvatarConfig: { backgroundColor, fontColor, font, shape }
-                  })
-                }}
-                className="size-16"
-              />
+              
 
               <div className="flex flex-col gap-1.5">
                 <Label>Background Color</Label>

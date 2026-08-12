@@ -14,6 +14,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   profileMenuItems,
   isAuthenticated,
   user,
+  presenceStatus,
   onLoginClick,
   onLogoutClick,
   linkComponent,
@@ -33,6 +34,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       <UserSlot
         isAuthenticated={isAuthenticated}
         user={user}
+        presenceStatus={presenceStatus}
         mainMenuItems={mainMenuItems}
         profileMenuItems={profileMenuItems}
         onLoginClick={onLoginClick}
