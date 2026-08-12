@@ -65,6 +65,9 @@
     },
     {
       "path": "./packages/cms-pages"
+    },
+    {
+      "path": "./packages/presence"
     }
   ],
   "compilerOptions": {}

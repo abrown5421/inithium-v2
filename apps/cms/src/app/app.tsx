@@ -33,9 +33,11 @@ import {
   Navbar,
   NavbarUser,
   Spinner,
+  TooltipProvider,
   parseCoreThemeColors,
   useApplyCoreThemeColors
 } from '@inithium/ui';
+import { PresenceProvider, usePresenceStatus } from '@inithium/presence/react';
 import {
   AssetManagementPage,
   CMS_ALLOWED_ROLES,
@@ -110,6 +112,7 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const myProfile = myProfileResult?.data?.[0];
 
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
+  const ownPresenceStatus = usePresenceStatus(currentUser?.id);
 
   const themeColors = React.useMemo(() => parseCoreThemeColors(settingsMap['site.theme']), [settingsMap]);
   useApplyCoreThemeColors(themeColors);
@@ -133,6 +136,7 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
           profileMenuItems={profileMenuItems}
           isAuthenticated={session.isAuthenticated}
           user={toNavbarUser(currentUser, myProfile)}
+          presenceStatus={ownPresenceStatus}
           linkComponent={RouterNavLink}
           onLoginClick={() => pageNavigate(config.loginRoute)}
           onLogoutClick={() => void logout()}
@@ -166,10 +170,14 @@ const App: React.FC = () => {
   );
 
   return (
-    <PageSessionProvider value={session}>
-      <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
-      <AlertViewport alerts={alerts} onClose={(id) => dispatch(closeAlert(id))} />
-    </PageSessionProvider>
+    <TooltipProvider>
+      <PresenceProvider>
+        <PageSessionProvider value={session}>
+          <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
+          <AlertViewport alerts={alerts} onClose={(id) => dispatch(closeAlert(id))} />
+        </PageSessionProvider>
+      </PresenceProvider>
+    </TooltipProvider>
   );
 };
 

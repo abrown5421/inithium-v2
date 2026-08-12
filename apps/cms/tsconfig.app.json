@@ -43,6 +43,9 @@
     },
     {
       "path": "../../packages/ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/presence/tsconfig.lib.json"
     }
   ]
 }
