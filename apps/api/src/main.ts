@@ -62,11 +62,7 @@ const bootstrap = async (): Promise<void> => {
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
-  const profileCollection = createProfileCollection(db, {
-    authenticate,
-    publicRoutes: [],
-    searchableFields: ['user_id']
-  });
+  const profileCollection = createProfileCollection(db, { authenticate });
 
   const userCollection = createUserCollection(db, {
     authenticate,

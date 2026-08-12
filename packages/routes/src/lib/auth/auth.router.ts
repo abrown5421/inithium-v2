@@ -68,5 +68,38 @@ export const createAuthRouter = (userService: UserService, config: AuthRouterCon
     handleResult(res, result);
   });
 
+  router.put('/me', config.authenticate, async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: createUnauthorizedError('Authentication required') });
+      return;
+    }
+
+    const result = await userService.updateSelf(req.user.id, req.body);
+    handleResult(res, result);
+  });
+
+  router.post('/verify-password', config.authenticate, async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: createUnauthorizedError('Authentication required') });
+      return;
+    }
+
+    const result = await userService.verifyPassword(req.user.id, req.body);
+    handleResult(res, result);
+  });
+
+  router.post('/change-password', config.authenticate, async (req: Request, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ success: false, error: createUnauthorizedError('Authentication required') });
+      return;
+    }
+
+    const result = await userService.changePassword(req.user.id, req.body);
+    if (result.isOk()) {
+      issueTokens(res, { sub: req.user.id, email: req.user.email, role: req.user.role });
+    }
+    handleResult(res, result);
+  });
+
   return router;
 };

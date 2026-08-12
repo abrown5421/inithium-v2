@@ -9,10 +9,16 @@ import {
   updateUserSchema,
   loginSchema,
   registerSchema,
+  updateSelfSchema,
+  verifyPasswordSchema,
+  changePasswordSchema,
   CreateUserDTO,
   UpdateUserDTO,
   LoginDTO,
   RegisterDTO,
+  UpdateSelfDTO,
+  VerifyPasswordDTO,
+  ChangePasswordDTO,
   validateDoc
 } from '@inithium/validators';
 
@@ -45,6 +51,9 @@ export interface UserService {
   ) => ResultAsync<readonly SanitizedUser[], AppError>;
   readonly deleteOne: (id: string) => ResultAsync<void, AppError>;
   readonly deleteMany: (ids: readonly string[]) => ResultAsync<number, AppError>;
+  readonly updateSelf: (userId: string, dto: UpdateSelfDTO) => ResultAsync<SanitizedUser, AppError>;
+  readonly verifyPassword: (userId: string, dto: VerifyPasswordDTO) => ResultAsync<{ readonly verified: true }, AppError>;
+  readonly changePassword: (userId: string, dto: ChangePasswordDTO) => ResultAsync<{ readonly changed: true }, AppError>;
 }
 
 export const createUserService = (repo: CrudRepository<User>, options: UserServiceOptions = {}): UserService => {
@@ -140,6 +149,49 @@ export const createUserService = (repo: CrudRepository<User>, options: UserServi
 
     deleteOne: (id) => repo.deleteOne(id),
 
-    deleteMany: (ids) => repo.deleteMany(ids)
+    deleteMany: (ids) => repo.deleteMany(ids),
+
+    updateSelf: (userId, dto) =>
+      validateDoc(updateSelfSchema)(dto).asyncAndThen((valid) => {
+        const checkEmailConflict = valid.email
+          ? repo.readAll(1, 1, { email: valid.email } as Filter<User>).andThen((existing) => {
+              const conflict = existing.data.find((user) => user._id !== userId);
+              return conflict
+                ? errAsync(createConflictError('An account with this email already exists'))
+                : okAsync(valid);
+            })
+          : okAsync(valid);
+
+        return checkEmailConflict.andThen((data) =>
+          repo.updateOne(userId, data as Partial<Omit<User, '_id' | 'createdAt' | 'updatedAt'>>).map(sanitize)
+        );
+      }),
+
+    verifyPassword: (userId, dto) =>
+      validateDoc(verifyPasswordSchema)(dto).asyncAndThen((valid) =>
+        repo.readOne(userId).andThen((user) =>
+          ResultAsync.fromSafePromise(comparePassword(valid.currentPassword, user.password)).andThen((matches) =>
+            matches
+              ? okAsync({ verified: true as const })
+              : errAsync(createUnauthorizedError('Current password is incorrect'))
+          )
+        )
+      ),
+
+    changePassword: (userId, dto) =>
+      validateDoc(changePasswordSchema)(dto).asyncAndThen((valid) =>
+        repo.readOne(userId).andThen((user) =>
+          ResultAsync.fromSafePromise(comparePassword(valid.currentPassword, user.password)).andThen((matches) => {
+            if (!matches) {
+              return errAsync(createUnauthorizedError('Current password is incorrect'));
+            }
+            return ResultAsync.fromSafePromise(hashPassword(valid.newPassword)).andThen((hashed) =>
+              repo
+                .updateOne(userId, { password: hashed } as Partial<Omit<User, '_id' | 'createdAt' | 'updatedAt'>>)
+                .map(() => ({ changed: true as const }))
+            );
+          })
+        )
+      )
   };
 };
