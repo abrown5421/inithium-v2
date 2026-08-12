@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BANNER_TYPES } from '@inithium/models';
 
 const E164_PHONE_PATTERN = /^\+[1-9]\d{1,14}$/;
 
@@ -11,9 +12,19 @@ const addressSchema = z.object({
   country: z.string().min(1)
 });
 
+const HEX_COLOR_PATTERN = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/;
+
+const trianglifyConfigSchema = z.object({
+  variance: z.number().min(0).max(1),
+  cell_size: z.number().positive(),
+  x_colors: z.array(z.string().regex(HEX_COLOR_PATTERN)).min(1),
+  y_colors: z.array(z.string().regex(HEX_COLOR_PATTERN)).min(1)
+});
+
 const profileBannerSchema = z.object({
-  assetUrl: z.string().url().optional(),
-  trianglifyConfig: z.record(z.string(), z.unknown()).optional()
+  bannerType: z.enum(BANNER_TYPES).optional(),
+  trianglifyConfig: trianglifyConfigSchema.optional(),
+  bannerAssetRef: z.string().optional()
 });
 
 const profileGenderSchema = z.discriminatedUnion('type', [

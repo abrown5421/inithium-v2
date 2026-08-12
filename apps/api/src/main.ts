@@ -20,7 +20,7 @@ import {
   ensureCollectionDefinitionIndices
 } from '@inithium/collections';
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
-import { createAuthRouter, createFilesRouter, createHealthRouter } from '@inithium/routes';
+import { createAuthRouter, createFilesRouter, createHealthRouter, createProfileBannerImageRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
 import { createSettingCollection, ensureDefaultSiteTheme, ensureDefaultSiteLogo } from '@inithium/collections';
@@ -189,6 +189,10 @@ const bootstrap = async (): Promise<void> => {
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
   app.use('/pages', pageCollection.router);
   app.use('/settings', settingCollection.router);
+  app.use(
+    '/profiles/banner-image',
+    createProfileBannerImageRouter(assetCollection.service, { authenticate, maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB })
+  );
   app.use('/profiles', profileCollection.router);
 // collection-generator:routes
 

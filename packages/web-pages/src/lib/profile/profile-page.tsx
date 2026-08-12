@@ -46,6 +46,7 @@ import {
 import { useProfileIdentity } from './profile-identity.js';
 import { extractSettingsMap, isProfileFieldActive, PROFILE_CONFIG_SETTING_NAME } from './profile-config.js';
 import { PROFILE_TAB_REGISTRY, resolveActiveProfileTabs, ProfileTabContext } from './profile-tab-registry.js';
+import { ProfileBannerDisplay } from './profile-banner-display.js';
 
 interface MinimalUserSpec {
   readonly first_name?: string | null;
@@ -248,9 +249,13 @@ export const ProfilePage: PageLayoutComponent = () => {
 
   return (
     <div className="flex flex-col">
-      <div className="w-full h-60 bg-emerald-500">
-        banner section
-      </div>
+      <ProfileBannerDisplay
+        userId={id}
+        profileId={profile?._id}
+        banner={profile?.profileBanner}
+        isEditable={isOwner}
+        className="w-full h-60"
+      />
       <div className="relative mx-auto flex w-full flex-row md:flex-row gap-4 md:gap-8 p-4">
         <div className='flex flex-col flex-2 items-center'>
           <UserAvatar user={mapToNavbarUser(profileUser)} />
