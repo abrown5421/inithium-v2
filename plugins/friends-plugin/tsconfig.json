@@ -1,0 +1,39 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": false,
+    "declarationMap": false,
+    "ignoreDeprecations": "6.0",
+    "emitDeclarationOnly": false,
+    "types": ["node"],
+    "jsx": "react-jsx",
+    "lib": ["es2022", "dom", "dom.iterable"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "references": [
+    {
+      "path": "../../packages/auth"
+    },
+    {
+      "path": "../../packages/db"
+    },
+    {
+      "path": "../../packages/types"
+    },
+    {
+      "path": "../../packages/pubsub"
+    },
+    {
+      "path": "../../packages/store"
+    },
+    {
+      "path": "../../packages/pages"
+    },
+    {
+      "path": "../../packages/ui"
+    },
+    {
+      "path": "../../packages/plugin-engine"
+    }
+  ]
+}
