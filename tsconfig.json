@@ -74,6 +74,9 @@
     },
     {
       "path": "./packages/analytics"
+    },
+    {
+      "path": "./packages/plugin-engine"
     }
   ],
   "compilerOptions": {}

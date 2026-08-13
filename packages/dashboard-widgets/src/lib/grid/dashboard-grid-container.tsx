@@ -8,7 +8,7 @@ import {
   useUpdateUserDashboardConfigMutation
 } from '@inithium/store';
 import type { WidgetLayoutItem } from '@inithium/models';
-import { getWidgetDefinition, type WidgetDefinition } from '../registry/index.js';
+import { useWidgetRegistry, type WidgetDefinition } from '../registry/index.js';
 import { AddWidgetDrawer } from '../drawer/add-widget-drawer.js';
 import { WidgetConfigDialog } from '../widget-config/widget-config-dialog.js';
 import { DashboardGrid } from './dashboard-grid.js';
@@ -16,6 +16,7 @@ import { generateWidgetId, useMyDashboardConfig } from './use-my-dashboard-confi
 
 export const DashboardGridContainer = () => {
   const dispatch = useAppDispatch();
+  const widgetRegistry = useWidgetRegistry();
   const { data: dashboardConfig, isLoading } = useMyDashboardConfig();
   const { data: reportableCollections } = useGetReportableCollectionsQuery();
   const [createConfig] = useCreateUserDashboardConfigMutation();
@@ -63,6 +64,9 @@ export const DashboardGridContainer = () => {
   const configuringWidget = configuringWidgetId
     ? widgets.find((widget) => widget.id === configuringWidgetId)
     : undefined;
+  const configuringWidgetDefinition = configuringWidget
+    ? (widgetRegistry[configuringWidget.widgetType] as unknown as WidgetDefinition<typeof configuringWidget.config> | undefined)
+    : undefined;
 
   return (
     <>
@@ -74,15 +78,13 @@ export const DashboardGridContainer = () => {
         onRemoveWidget={handleRemoveWidget}
       />
       <AddWidgetDrawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen} onSelectWidget={handleSelectWidget} />
-      {configuringWidget ? (
+      {configuringWidget && configuringWidgetDefinition ? (
         <WidgetConfigDialog
           open
           onOpenChange={(open) => {
             if (!open) setConfiguringWidgetId(undefined);
           }}
-          widgetDefinition={
-            getWidgetDefinition(configuringWidget.widgetType) as unknown as WidgetDefinition<typeof configuringWidget.config>
-          }
+          widgetDefinition={configuringWidgetDefinition}
           config={configuringWidget.config}
           onSave={(nextConfig) => handleSaveWidgetConfig(configuringWidget.id, nextConfig)}
         />

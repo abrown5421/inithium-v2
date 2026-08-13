@@ -1,0 +1,54 @@
+{
+  "name": "@inithium/plugin-engine",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "module": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@inithium/source": "./src/index.ts",
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js",
+      "default": "./dist/src/index.js"
+    },
+    "./server": {
+      "@inithium/source": "./src/server.ts",
+      "types": "./dist/src/server.d.ts",
+      "import": "./dist/src/server.js",
+      "default": "./dist/src/server.js"
+    },
+    "./client": {
+      "@inithium/source": "./src/client.ts",
+      "types": "./dist/src/client.d.ts",
+      "import": "./dist/src/client.js",
+      "default": "./dist/src/client.js"
+    },
+    "./vite": {
+      "@inithium/source": "./vite/inithium-plugin-discovery.ts",
+      "types": "./dist/vite/inithium-plugin-discovery.d.ts",
+      "import": "./dist/vite/inithium-plugin-discovery.js",
+      "default": "./dist/vite/inithium-plugin-discovery.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "neverthrow": "^8.2.0",
+    "zod": "^4.4.3",
+    "@inithium/types": "*",
+    "@inithium/crud-engine": "*",
+    "@inithium/models": "*",
+    "@inithium/validators": "*",
+    "@inithium/pages": "*",
+    "@inithium/pubsub": "*"
+  },
+  "devDependencies": {
+    "vite": "^8.0.0",
+    "vitest": "^4.0.0"
+  }
+}

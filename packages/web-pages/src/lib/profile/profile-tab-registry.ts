@@ -1,20 +1,14 @@
-import type { ComponentType } from 'react';
-import { Settings, UserRound, type LucideIcon } from 'lucide-react';
+import { UserRound, Settings } from 'lucide-react';
 import { ProfileTab } from './profile-tab.js';
 import { SettingsTab } from './settings-tab.js';
 
-export interface ProfileTabContext {
-  readonly isOwner: boolean;
-  readonly userId: string;
-}
-
-export interface ProfileTabDefinition {
-  readonly id: string;
-  readonly label: string;
-  readonly icon: LucideIcon;
-  readonly component: ComponentType<{ readonly context: ProfileTabContext }>;
-  readonly enabled?: (context: ProfileTabContext) => boolean;
-}
+/**
+ * `ProfileTabDefinition`/`ProfileTabContext` are now canonically owned by `@inithium/plugin-engine`
+ * — the exact contract shape plugins implement for the User Profile Tab Registry surface.
+ * Re-exported here so existing imports from `@inithium/web-pages` keep working unchanged.
+ */
+export type { ProfileTabDefinition, ProfileTabContext } from '@inithium/plugin-engine/client';
+import type { ProfileTabDefinition, ProfileTabContext } from '@inithium/plugin-engine/client';
 
 export const PROFILE_TAB_REGISTRY: readonly ProfileTabDefinition[] = [
   { id: 'profile', label: 'Profile', icon: UserRound, component: ProfileTab, enabled: (context) => context.isOwner },

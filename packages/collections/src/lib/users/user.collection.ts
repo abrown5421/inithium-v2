@@ -7,7 +7,7 @@ import { User } from '@inithium/models';
 
 export interface UserCollectionConfig {
   readonly authenticate: RequestHandler;
-  readonly onUserRegistered?: (userId: string) => void;
+  readonly onUserRegistered?: readonly ((userId: string) => void)[];
 }
 
 export interface UserCollection {

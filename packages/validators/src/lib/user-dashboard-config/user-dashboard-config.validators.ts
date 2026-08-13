@@ -1,23 +1,15 @@
 import { z } from 'zod';
-import { TIME_SERIES_BUCKETS } from '@inithium/types';
 
-const timeSeriesGraphWidgetConfigSchema = z
-  .object({
-    title: z.string().min(1).max(120),
-    targetCollection: z.string().min(1),
-    bucket: z.enum(TIME_SERIES_BUCKETS),
-    dateFrom: z.string().date(),
-    dateTo: z.string().date()
-  })
-  .refine((value) => value.dateFrom <= value.dateTo, { message: 'dateFrom must be on or before dateTo', path: ['dateTo'] });
-
-const timeSeriesGraphWidgetItemSchema = z.object({
+/**
+ * Persistence-level validation only checks the generic shape — `widgetType` is an open string
+ * (core and plugin-contributed types alike), so per-type config validation happens client-side via
+ * each `WidgetDefinition.configSchema` instead of a server-side discriminated union.
+ */
+const widgetLayoutItemSchema = z.object({
   id: z.string().min(1),
-  widgetType: z.literal('time-series-graph'),
-  config: timeSeriesGraphWidgetConfigSchema
+  widgetType: z.string().min(1),
+  config: z.record(z.string(), z.unknown())
 });
-
-const widgetLayoutItemSchema = z.discriminatedUnion('widgetType', [timeSeriesGraphWidgetItemSchema]);
 
 export const createUserDashboardConfigSchema = z.object({
   userId: z.string().optional(),

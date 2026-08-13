@@ -30,7 +30,7 @@ const sanitize = (user: User): SanitizedUser => {
 };
 
 export interface UserServiceOptions {
-  readonly onUserRegistered?: (userId: string) => void;
+  readonly onUserRegistered?: readonly ((userId: string) => void)[];
 }
 
 export interface UserService {
@@ -88,7 +88,7 @@ export const createUserService = (repo: CrudRepository<User>, options: UserServi
     register: (dto) =>
       validateDoc(registerSchema)(dto).asyncAndThen((valid) =>
         createWithHashedPassword({ ...valid, role: 'user' }).map((user) => {
-          options.onUserRegistered?.(user._id);
+          options.onUserRegistered?.forEach((hook) => hook(user._id));
           return sanitize(user);
         })
       ),

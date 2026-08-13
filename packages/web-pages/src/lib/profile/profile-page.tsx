@@ -1,5 +1,6 @@
 import React from 'react';
 import { PageLayoutComponent } from '@inithium/pages';
+import { usePluginClientRegistry, getProfileTabContributions, mergeRegistryLists } from '@inithium/plugin-engine/client';
 import { Card, CardContent, Heading, Separator, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@inithium/ui';
 import { useParams } from 'react-router-dom';
 import { resolveAvatarInitials, useReadAllProfilesQuery, useReadAllSettingsQuery, useReadUserQuery } from '@inithium/store';
@@ -199,7 +200,9 @@ export const ProfilePage: PageLayoutComponent = () => {
   const visibleRows = rows.filter((row) => row.active && row.content !== null);
 
   const tabContext: ProfileTabContext = { isOwner, userId: id };
-  const activeTabs = resolveActiveProfileTabs(PROFILE_TAB_REGISTRY, tabContext);
+  const pluginRegistry = usePluginClientRegistry();
+  const allTabs = mergeRegistryLists(PROFILE_TAB_REGISTRY, getProfileTabContributions(pluginRegistry));
+  const activeTabs = resolveActiveProfileTabs(allTabs, tabContext);
 
   return (
     <div className="flex flex-col">
