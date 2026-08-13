@@ -26,6 +26,13 @@ import { createApiPubSubServer } from './pubsub.js';
 import { createSettingCollection, ensureDefaultSiteTheme, ensureDefaultSiteLogo } from '@inithium/collections';
 import { createProfileCollection } from '@inithium/collections';
 import { createInitialProfile } from '@inithium/services';
+import { createUserDashboardConfigCollection, ensureUserDashboardConfigIndices } from '@inithium/collections';
+import {
+  createReportableCollectionsResolver,
+  createTimeSeriesAggregationService,
+  createAnalyticsRouter,
+  STATIC_REPORTABLE_COLLECTIONS
+} from '@inithium/analytics';
 // collection-generator:imports
 
 const bootstrap = async (): Promise<void> => {
@@ -147,6 +154,30 @@ const bootstrap = async (): Promise<void> => {
     generatorConfig: { fileManagerService: workspaceFileManagerService }
   });
 
+  const requireCmsRole = createRequireRoleMiddleware(['super-admin', 'admin', 'editor', 'writer']);
+
+  const reportableCollectionsResolver = createReportableCollectionsResolver({
+    staticCollections: STATIC_REPORTABLE_COLLECTIONS,
+    collectionDefinitionService: collectionDefinitionCollection.service
+  });
+  const timeSeriesService = createTimeSeriesAggregationService(db);
+  const analyticsRouter = createAnalyticsRouter({
+    authenticate,
+    requireCmsRole,
+    timeSeriesService,
+    reportableCollectionsResolver
+  });
+
+  const userDashboardConfigIndexResult = await ensureUserDashboardConfigIndices(db);
+  if (userDashboardConfigIndexResult.isErr()) {
+    console.error(userDashboardConfigIndexResult.error);
+    process.exit(1);
+  }
+  const userDashboardConfigCollection = createUserDashboardConfigCollection(db, {
+    authenticate,
+    reportableCollectionsResolver
+  });
+
   const pageIndexResult = await ensurePageIndices(db);
   if (pageIndexResult.isErr()) {
     console.error(pageIndexResult.error);
@@ -189,6 +220,8 @@ const bootstrap = async (): Promise<void> => {
   app.use('/files', createFilesRouter(fileManagerService, { authenticate, requireAdmin }));
   app.use('/pages', pageCollection.router);
   app.use('/settings', settingCollection.router);
+  app.use('/analytics', analyticsRouter);
+  app.use('/user-dashboard-configs', userDashboardConfigCollection.router);
   app.use(
     '/profiles/banner-image',
     createProfileImageUploadRouter(assetCollection.service, { authenticate, maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB })

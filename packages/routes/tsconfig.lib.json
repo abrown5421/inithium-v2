@@ -11,6 +11,9 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
+      "path": "../analytics/tsconfig.lib.json"
+    },
+    {
       "path": "../validators/tsconfig.lib.json"
     },
     {

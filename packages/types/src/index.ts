@@ -5,3 +5,4 @@ export * from './lib/permissions/index.js';
 export * from './lib/animation/animation.types.js'
 export * from './lib/navigation/index.js';
 export * from './lib/alert/index.js';
+export * from './lib/time-series/time-series.js';

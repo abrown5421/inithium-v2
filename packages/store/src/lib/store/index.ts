@@ -9,6 +9,8 @@ import { authReducer } from '../slices/auth.slice.js';
 import { alertReducer } from '../slices/alert.slice.js';
 import { settingApi } from '../api/setting.api.js';
 import { profileApi } from '../api/profile.api.js';
+import { userDashboardConfigApi } from '../api/user-dashboard-config.api.js';
+import { analyticsApi } from '../api/analytics.api.js';
 // collection-generator:imports
 
 export const store = configureStore({
@@ -22,6 +24,8 @@ export const store = configureStore({
     alert: alertReducer,
     [settingApi.reducerPath]: settingApi.reducer,
     [profileApi.reducerPath]: profileApi.reducer,
+    [userDashboardConfigApi.reducerPath]: userDashboardConfigApi.reducer,
+    [analyticsApi.reducerPath]: analyticsApi.reducer,
 // collection-generator:reducers
   },
   middleware: (getDefaultMiddleware) =>
@@ -33,6 +37,8 @@ export const store = configureStore({
       healthApi.middleware,
       settingApi.middleware,
       profileApi.middleware,
+      userDashboardConfigApi.middleware,
+      analyticsApi.middleware,
 // collection-generator:middleware
     )
 });

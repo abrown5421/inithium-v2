@@ -2,13 +2,11 @@ import { Router, Request, Response, RequestHandler } from 'express';
 import { err } from 'neverthrow';
 import { createCrudRouter, handleResult } from '@inithium/crud-engine';
 import { ProfileService } from '@inithium/services';
-import { AppError, UserRole, createForbiddenError } from '@inithium/types';
+import { AppError, CMS_ROLES, createForbiddenError } from '@inithium/types';
 
 export interface ProfileRouterConfig {
   readonly authenticate: RequestHandler;
 }
-
-const CMS_ROLES: readonly UserRole[] = ['super-admin', 'admin', 'editor', 'writer'];
 
 const checkOwnershipOrCmsRole = async (
   profileService: ProfileService,

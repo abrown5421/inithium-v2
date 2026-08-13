@@ -11,6 +11,9 @@
   "include": ["src/**/*.ts"],
   "references": [
     {
+      "path": "../analytics/tsconfig.lib.json"
+    },
+    {
       "path": "../collection-generator/tsconfig.lib.json"
     },
     {
