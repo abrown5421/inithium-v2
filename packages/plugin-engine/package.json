@@ -45,7 +45,8 @@
     "@inithium/models": "*",
     "@inithium/validators": "*",
     "@inithium/pages": "*",
-    "@inithium/pubsub": "*"
+    "@inithium/pubsub": "*",
+    "@inithium/store": "*"
   },
   "devDependencies": {
     "vite": "^8.0.0",

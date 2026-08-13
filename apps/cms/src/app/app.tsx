@@ -53,6 +53,7 @@ import {
   setEnabledPluginIds,
   resolveEnabledPluginIds,
   getPageLayoutContributions,
+  getBackgroundComponentContributions,
   mergeRegistryMaps,
   PluginClientRegistryProvider,
   type PluginClientModule
@@ -159,8 +160,16 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
     [pluginRegistry]
   );
 
+  const backgroundComponents = React.useMemo(
+    () => getBackgroundComponentContributions(pluginRegistry),
+    [pluginRegistry]
+  );
+
   return (
     <PluginClientRegistryProvider registry={pluginRegistry}>
+      {backgroundComponents.map((BackgroundComponent, index) => (
+        <BackgroundComponent key={index} />
+      ))}
       <AppShell
         navbar={
           <Navbar

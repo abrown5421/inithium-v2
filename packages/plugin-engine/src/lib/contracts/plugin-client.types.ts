@@ -47,4 +47,10 @@ export interface PluginClientModule extends PluginMeta {
   readonly pageLayouts?: PageLayoutRegistry;
   readonly profileTabs?: readonly ProfileTabDefinition[];
   readonly widgets?: Readonly<Record<string, WidgetDefinition<never>>>;
+  /**
+   * Rendered once, unconditionally, for the lifetime of the app — for things that must stay live
+   * regardless of which page is showing (e.g. a real-time notification listener). Each component
+   * receives no props and should render `null`; side effects happen via hooks.
+   */
+  readonly backgroundComponents?: readonly ComponentType[];
 }
