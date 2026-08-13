@@ -1,3 +1,4 @@
+import type { ComponentType } from 'react';
 import type { PageLayoutRegistry } from '@inithium/pages';
 import { listEnabledPluginsInOrder } from '../registry/state.js';
 import type { PluginRegistryState } from '../registry/state.js';
@@ -20,3 +21,7 @@ export const getWidgetDefinitionContributions = (
     (acc, plugin) => ({ ...acc, ...(plugin.widgets ?? {}) }),
     {}
   );
+
+export const getBackgroundComponentContributions = (
+  state: PluginRegistryState<PluginClientModule>
+): readonly ComponentType[] => listEnabledPluginsInOrder(state).flatMap((plugin) => plugin.backgroundComponents ?? []);

@@ -201,7 +201,8 @@ export const ProfilePage: PageLayoutComponent = () => {
 
   const tabContext: ProfileTabContext = { isOwner, userId: id };
   const pluginRegistry = usePluginClientRegistry();
-  const allTabs = mergeRegistryLists(PROFILE_TAB_REGISTRY, getProfileTabContributions(pluginRegistry));
+  // Plugin-contributed tabs (e.g. Friends) lead; the two core tabs always trail last.
+  const allTabs = mergeRegistryLists(getProfileTabContributions(pluginRegistry), PROFILE_TAB_REGISTRY);
   const activeTabs = resolveActiveProfileTabs(allTabs, tabContext);
 
   return (

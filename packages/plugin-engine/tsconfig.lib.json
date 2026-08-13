@@ -30,6 +30,9 @@
     },
     {
       "path": "../pubsub/tsconfig.lib.json"
+    },
+    {
+      "path": "../store/tsconfig.lib.json"
     }
   ]
 }
