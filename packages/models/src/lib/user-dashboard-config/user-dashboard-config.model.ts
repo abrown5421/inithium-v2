@@ -1,8 +1,7 @@
 import { BaseEntity, TimeSeriesBucket } from '@inithium/types';
 
-export const WIDGET_TYPES = ['time-series-graph'] as const;
-
-export type WidgetType = (typeof WIDGET_TYPES)[number];
+/** Open string, not a closed union — plugins register widget types the core model can't enumerate. */
+export type WidgetType = string;
 
 export interface TimeSeriesGraphWidgetConfig {
   readonly title: string;
@@ -12,13 +11,11 @@ export interface TimeSeriesGraphWidgetConfig {
   readonly dateTo: string;
 }
 
-export interface WidgetConfigByType {
-  readonly 'time-series-graph': TimeSeriesGraphWidgetConfig;
+export interface WidgetLayoutItem {
+  readonly id: string;
+  readonly widgetType: WidgetType;
+  readonly config: Record<string, unknown>;
 }
-
-export type WidgetLayoutItem = {
-  readonly [K in WidgetType]: { readonly id: string; readonly widgetType: K; readonly config: WidgetConfigByType[K] };
-}[WidgetType];
 
 export interface UserDashboardConfig extends BaseEntity {
   readonly userId: string;

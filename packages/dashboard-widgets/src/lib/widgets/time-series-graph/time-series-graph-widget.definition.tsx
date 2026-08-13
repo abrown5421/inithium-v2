@@ -1,10 +1,22 @@
+import { z } from 'zod';
 import { LineChart as LineChartIcon } from 'lucide-react';
+import { TIME_SERIES_BUCKETS } from '@inithium/types';
 import type { TimeSeriesGraphWidgetConfig } from '@inithium/models';
 import type { WidgetDefinition } from '../../registry/widget-types.js';
 import { TimeSeriesGraphWidgetContainer } from './time-series-graph-widget.container.js';
 import { TimeSeriesGraphWidgetConfigForm } from './time-series-graph-widget-config-form.js';
 
 const DEFAULT_DATE_RANGE_DAYS = 30;
+
+const timeSeriesGraphWidgetConfigSchema: z.ZodType<TimeSeriesGraphWidgetConfig> = z
+  .object({
+    title: z.string().min(1).max(120),
+    targetCollection: z.string().min(1),
+    bucket: z.enum(TIME_SERIES_BUCKETS),
+    dateFrom: z.string().date(),
+    dateTo: z.string().date()
+  })
+  .refine((value) => value.dateFrom <= value.dateTo, { message: 'dateFrom must be on or before dateTo', path: ['dateTo'] });
 
 const buildDefaultDateRange = (): { readonly dateFrom: string; readonly dateTo: string } => {
   const dateTo = new Date();
@@ -18,6 +30,7 @@ export const timeSeriesGraphWidgetDefinition: WidgetDefinition<TimeSeriesGraphWi
   displayName: 'Time-Series Graph',
   description: 'Plots document counts over time for a collection.',
   icon: LineChartIcon,
+  configSchema: timeSeriesGraphWidgetConfigSchema,
   getTitle: (config) => config.title,
   createDefaultConfig: ({ reportableCollections }) => ({
     title: 'Time-Series Graph',

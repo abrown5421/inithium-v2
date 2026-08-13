@@ -1,11 +1,23 @@
+import {
+  usePluginClientRegistry,
+  getWidgetDefinitionContributions,
+  mergeRegistryMaps
+} from '@inithium/plugin-engine/client';
 import type { WidgetType } from '@inithium/models';
 import type { WidgetDefinition } from './widget-types.js';
 import { timeSeriesGraphWidgetDefinition } from '../widgets/time-series-graph/time-series-graph-widget.definition.js';
 
-const WIDGET_REGISTRY: Readonly<Record<WidgetType, WidgetDefinition<never>>> = {
+const CORE_WIDGET_REGISTRY: Readonly<Record<string, WidgetDefinition<never>>> = {
   'time-series-graph': timeSeriesGraphWidgetDefinition as unknown as WidgetDefinition<never>
 };
 
-export const getWidgetDefinition = (widgetType: WidgetType): WidgetDefinition<never> => WIDGET_REGISTRY[widgetType];
+/** Core widgets merged with whatever the currently-enabled plugins contribute. */
+export const useWidgetRegistry = (): Readonly<Record<string, WidgetDefinition<never>>> => {
+  const pluginRegistry = usePluginClientRegistry();
+  return mergeRegistryMaps(CORE_WIDGET_REGISTRY, getWidgetDefinitionContributions(pluginRegistry));
+};
 
-export const listWidgetDefinitions = (): readonly WidgetDefinition<never>[] => Object.values(WIDGET_REGISTRY);
+export const useWidgetDefinition = (widgetType: WidgetType): WidgetDefinition<never> | undefined =>
+  useWidgetRegistry()[widgetType];
+
+export const useWidgetDefinitionList = (): readonly WidgetDefinition<never>[] => Object.values(useWidgetRegistry());

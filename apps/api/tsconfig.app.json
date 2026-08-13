@@ -41,6 +41,9 @@
     },
     {
       "path": "../../packages/config/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/plugin-engine/tsconfig.lib.json"
     }
   ]
 }

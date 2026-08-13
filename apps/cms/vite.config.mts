@@ -1,7 +1,9 @@
 /// <reference types='vitest' />
+import path from 'node:path';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
+import { inithiumPluginDiscovery } from '@inithium/plugin-engine/vite';
 
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -32,7 +34,11 @@ export default defineConfig(({ command, mode }) => {
       port: 8080,
       host: 'localhost',
     },
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      inithiumPluginDiscovery({ workspaceRoot: path.resolve(import.meta.dirname, '../..') }),
+    ],
     // Uncomment this if you are using workers.
     // worker: {
     //  plugins: [],

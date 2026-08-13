@@ -23,6 +23,9 @@
     },
     {
       "path": "../ui/tsconfig.lib.json"
+    },
+    {
+      "path": "../plugin-engine/tsconfig.lib.json"
     }
   ]
 }

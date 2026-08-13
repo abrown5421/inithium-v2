@@ -23,7 +23,12 @@ import { createFileRepository, createFileManagerService } from '@inithium/file-m
 import { createAuthRouter, createFilesRouter, createHealthRouter, createProfileImageUploadRouter } from '@inithium/routes';
 import { createPageCollection, ensurePageIndices } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
-import { createSettingCollection, ensureDefaultSiteTheme, ensureDefaultSiteLogo } from '@inithium/collections';
+import {
+  createSettingCollection,
+  ensureDefaultSiteTheme,
+  ensureDefaultSiteLogo,
+  ensureDefaultPluginsEnabled
+} from '@inithium/collections';
 import { createProfileCollection } from '@inithium/collections';
 import { createInitialProfile } from '@inithium/services';
 import { createUserDashboardConfigCollection, ensureUserDashboardConfigIndices } from '@inithium/collections';
@@ -33,7 +38,34 @@ import {
   createAnalyticsRouter,
   STATIC_REPORTABLE_COLLECTIONS
 } from '@inithium/analytics';
+import {
+  createPluginRegistry,
+  registerServerPlugins,
+  discoverInstalledServerPlugins,
+  getServerRouterContributions,
+  getOnUserRegisteredHooks,
+  initServerHooks,
+  toPluginPubSubHandle,
+  setEnabledPluginIds,
+  type PluginServerModule,
+  type PluginServerContext
+} from '@inithium/plugin-engine/server';
 // collection-generator:imports
+
+/** Paths already owned by core — plugin routers may not mount on or under these. */
+const RESERVED_CORE_PATH_PREFIXES = [
+  '/health',
+  '/auth',
+  '/users',
+  '/assets',
+  '/collection-definitions',
+  '/files',
+  '/pages',
+  '/settings',
+  '/analytics',
+  '/user-dashboard-configs',
+  '/profiles'
+] as const;
 
 const bootstrap = async (): Promise<void> => {
   const envResult = parseEnv(process.env);
@@ -43,6 +75,20 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const env = envResult.value;
+
+  const pluginNodeModulesDir = path.join(path.resolve(env.WORKSPACE_ROOT), 'node_modules');
+  const discoveredServerPlugins = await discoverInstalledServerPlugins(pluginNodeModulesDir);
+  const pluginRegistrationResult = registerServerPlugins(
+    createPluginRegistry<PluginServerModule>(),
+    discoveredServerPlugins,
+    RESERVED_CORE_PATH_PREFIXES
+  );
+  if (pluginRegistrationResult.isErr()) {
+    console.error(pluginRegistrationResult.error);
+    process.exit(1);
+  }
+  const pluginRegistry = pluginRegistrationResult.value;
+
   const dbResult = await connectToDatabase(env.MONGO_URI);
 
   if (dbResult.isErr()) {
@@ -69,15 +115,42 @@ const bootstrap = async (): Promise<void> => {
   const authenticate = createAuthenticateMiddleware(env.JWT_ACCESS_SECRET);
   const requireAdmin = createRequireRoleMiddleware(['admin', 'super-admin']);
 
+  const settingCollection = createSettingCollection(db, { authenticate });
+
+  const siteThemeSeedResult = await ensureDefaultSiteTheme(settingCollection.service);
+  if (siteThemeSeedResult.isErr()) {
+    console.error(siteThemeSeedResult.error);
+    process.exit(1);
+  }
+
+  const siteLogoSeedResult = await ensureDefaultSiteLogo(settingCollection.service);
+  if (siteLogoSeedResult.isErr()) {
+    console.error(siteLogoSeedResult.error);
+    process.exit(1);
+  }
+
+  const pluginsEnabledResult = await ensureDefaultPluginsEnabled(
+    settingCollection.service,
+    discoveredServerPlugins.map((plugin) => plugin.id)
+  );
+  if (pluginsEnabledResult.isErr()) {
+    console.error(pluginsEnabledResult.error);
+    process.exit(1);
+  }
+  const enabledPluginRegistry = setEnabledPluginIds(pluginRegistry, pluginsEnabledResult.value);
+
   const profileCollection = createProfileCollection(db, { authenticate });
 
   const userCollection = createUserCollection(db, {
     authenticate,
-    onUserRegistered: (userId) => {
-      void profileCollection.service.createOne(createInitialProfile(userId)).mapErr((error) => {
-        console.error(`Failed to create initial profile for user ${userId}`, error);
-      });
-    }
+    onUserRegistered: [
+      (userId) => {
+        void profileCollection.service.createOne(createInitialProfile(userId)).mapErr((error) => {
+          console.error(`Failed to create initial profile for user ${userId}`, error);
+        });
+      },
+      ...getOnUserRegisteredHooks(enabledPluginRegistry)
+    ]
   });
 
   const assetRootDir = path.resolve(env.APP_FILE_ROOT);
@@ -185,19 +258,6 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const pageCollection = createPageCollection(db, { authenticate });
-  const settingCollection = createSettingCollection(db, { authenticate });
-
-  const siteThemeSeedResult = await ensureDefaultSiteTheme(settingCollection.service);
-  if (siteThemeSeedResult.isErr()) {
-    console.error(siteThemeSeedResult.error);
-    process.exit(1);
-  }
-
-  const siteLogoSeedResult = await ensureDefaultSiteLogo(settingCollection.service);
-  if (siteLogoSeedResult.isErr()) {
-    console.error(siteLogoSeedResult.error);
-    process.exit(1);
-  }
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
@@ -237,11 +297,31 @@ const bootstrap = async (): Promise<void> => {
     console.log(`Application online on port ${env.PORT}`);
   });
 
-  createApiPubSubServer({
+  const pubsubServer = createApiPubSubServer({
     httpServer,
     jwtAccessSecret: env.JWT_ACCESS_SECRET,
     cors: createCorsOptions(env.CORS_ORIGINS)
   });
+
+  const pluginServerContext: PluginServerContext = {
+    db,
+    authenticate,
+    requireRole: createRequireRoleMiddleware,
+    pageService: pageCollection.service,
+    settingService: settingCollection.service,
+    pubsub: toPluginPubSubHandle(pubsubServer)
+  };
+
+  // Mounted after the pubsub server exists so a plugin's router can close over `ctx.pubsub`.
+  getServerRouterContributions(enabledPluginRegistry).forEach(({ path: routePath, createRouter }) => {
+    app.use(routePath, createRouter(pluginServerContext));
+  });
+
+  const pluginInitResult = await initServerHooks(enabledPluginRegistry, pluginServerContext);
+  if (pluginInitResult.isErr()) {
+    console.error(pluginInitResult.error);
+    process.exit(1);
+  }
 };
 
 bootstrap();

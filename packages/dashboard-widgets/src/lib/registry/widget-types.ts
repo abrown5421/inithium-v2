@@ -1,27 +1,11 @@
-import type { ComponentType, ReactElement } from 'react';
-import type { WidgetType } from '@inithium/models';
-
-export interface WidgetContainerProps<TConfig> {
-  readonly id: string;
-  readonly config: TConfig;
-}
-
-export interface WidgetConfigFormProps<TConfig> {
-  readonly config: TConfig;
-  readonly onChange: (config: TConfig) => void;
-}
-
-export interface CreateDefaultWidgetConfigParams {
-  readonly reportableCollections: readonly string[];
-}
-
-export interface WidgetDefinition<TConfig> {
-  readonly widgetType: WidgetType;
-  readonly displayName: string;
-  readonly description: string;
-  readonly icon: ComponentType<{ readonly className?: string }>;
-  readonly getTitle: (config: TConfig) => string;
-  readonly createDefaultConfig: (params: CreateDefaultWidgetConfigParams) => TConfig;
-  readonly renderContainer: (props: WidgetContainerProps<TConfig>) => ReactElement;
-  readonly renderConfigForm: (props: WidgetConfigFormProps<TConfig>) => ReactElement;
-}
+/**
+ * `WidgetDefinition` (and its supporting types) is now canonically owned by `@inithium/plugin-engine`
+ * — it's the exact contract shape plugins implement for the CMS Dashboard Widget Bank surface.
+ * Re-exported here so existing imports from `@inithium/dashboard-widgets` keep working unchanged.
+ */
+export type {
+  WidgetDefinition,
+  WidgetContainerProps,
+  WidgetConfigFormProps,
+  CreateDefaultWidgetConfigParams
+} from '@inithium/plugin-engine/client';

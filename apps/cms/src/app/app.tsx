@@ -47,8 +47,19 @@ import {
   SettingManagementPage,
   UserManagementPage
 } from '@inithium/cms-pages';
+import {
+  createPluginRegistry,
+  registerClientPlugins,
+  setEnabledPluginIds,
+  resolveEnabledPluginIds,
+  getPageLayoutContributions,
+  mergeRegistryMaps,
+  PluginClientRegistryProvider,
+  type PluginClientModule
+} from '@inithium/plugin-engine/client';
+import { plugins as discoveredClientPlugins } from 'virtual:inithium-plugins';
 
-const layouts = {
+const CORE_CMS_LAYOUTS = {
   default: DashboardPage,
   login: LoginPage,
   users: UserManagementPage,
@@ -56,6 +67,18 @@ const layouts = {
   assets: AssetManagementPage,
   settings: SettingManagementPage
 };
+
+// Registered once at module scope — `discoveredClientPlugins` is a static, build-time-resolved list.
+const basePluginRegistrationResult = registerClientPlugins(
+  createPluginRegistry<PluginClientModule>(),
+  discoveredClientPlugins
+);
+if (basePluginRegistrationResult.isErr()) {
+  console.error('Failed to register client plugins:', basePluginRegistrationResult.error);
+}
+const BASE_PLUGIN_REGISTRY = basePluginRegistrationResult.isOk()
+  ? basePluginRegistrationResult.value
+  : createPluginRegistry<PluginClientModule>();
 
 const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
 
@@ -125,32 +148,45 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
   const mainMenuItems = useNavbarMenuItems(useNavEntries(pages, 'cms', 'cms', config));
   const profileMenuItems = useNavbarMenuItems(useNavEntries(pages, 'cms', 'profile', config));
 
+  const pluginRegistry = React.useMemo(() => {
+    const discoveredIds = Object.keys(BASE_PLUGIN_REGISTRY.manifests);
+    const enabledIds = resolveEnabledPluginIds(discoveredIds, settingsMap['plugins.enabled']);
+    return setEnabledPluginIds(BASE_PLUGIN_REGISTRY, enabledIds);
+  }, [settingsMap]);
+
+  const layouts = React.useMemo(
+    () => mergeRegistryMaps(CORE_CMS_LAYOUTS, getPageLayoutContributions(pluginRegistry)),
+    [pluginRegistry]
+  );
+
   return (
-    <AppShell
-      navbar={
-        <Navbar
-          title={siteName}
-          logo={siteLogo}
-          homeHref="/"
-          mainMenuItems={mainMenuItems}
-          profileMenuItems={profileMenuItems}
-          isAuthenticated={session.isAuthenticated}
-          user={toNavbarUser(currentUser, myProfile)}
-          presenceStatus={ownPresenceStatus}
-          linkComponent={RouterNavLink}
-          onLoginClick={() => pageNavigate(config.loginRoute)}
-          onLogoutClick={() => void logout()}
-        />
-      }
-    >
-      {isLoading ? (
-        <div className="flex flex-1 items-center justify-center">
-          <Spinner />
-        </div>
-      ) : (
-        <DynamicRouterProvider pages={pages} app="cms" layouts={layouts} config={config} />
-      )}
-    </AppShell>
+    <PluginClientRegistryProvider registry={pluginRegistry}>
+      <AppShell
+        navbar={
+          <Navbar
+            title={siteName}
+            logo={siteLogo}
+            homeHref="/"
+            mainMenuItems={mainMenuItems}
+            profileMenuItems={profileMenuItems}
+            isAuthenticated={session.isAuthenticated}
+            user={toNavbarUser(currentUser, myProfile)}
+            presenceStatus={ownPresenceStatus}
+            linkComponent={RouterNavLink}
+            onLoginClick={() => pageNavigate(config.loginRoute)}
+            onLogoutClick={() => void logout()}
+          />
+        }
+      >
+        {isLoading ? (
+          <div className="flex flex-1 items-center justify-center">
+            <Spinner />
+          </div>
+        ) : (
+          <DynamicRouterProvider pages={pages} app="cms" layouts={layouts} config={config} />
+        )}
+      </AppShell>
+    </PluginClientRegistryProvider>
   );
 };
 
