@@ -68,6 +68,12 @@
     },
     {
       "path": "./packages/presence"
+    },
+    {
+      "path": "./packages/dashboard-widgets"
+    },
+    {
+      "path": "./packages/analytics"
     }
   ],
   "compilerOptions": {}

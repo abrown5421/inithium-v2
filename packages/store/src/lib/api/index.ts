@@ -7,3 +7,5 @@ export * from './auth.api.js';
 export * from './health.api.js';
 export * from './setting.api.js';
 export * from './profile.api.js';
+export * from './user-dashboard-config.api.js';
+export * from './analytics.api.js';

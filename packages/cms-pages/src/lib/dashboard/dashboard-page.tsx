@@ -1,8 +1,8 @@
 import { PageLayoutComponent } from '@inithium/pages';
-import { Heading } from '@inithium/ui';
+import { DashboardGridContainer } from '@inithium/dashboard-widgets';
 
 export const DashboardPage: PageLayoutComponent = ({ page }) => (
-  <div className="flex flex-1 items-center justify-center">
-    <Heading font='secondary' level={1}>{page.pageName}</Heading>
+  <div className="flex flex-1 flex-col gap-4">
+    <DashboardGridContainer />
   </div>
 );
