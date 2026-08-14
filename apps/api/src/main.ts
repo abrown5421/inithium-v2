@@ -32,6 +32,8 @@ import {
 import { createProfileCollection } from '@inithium/collections';
 import { createInitialProfile } from '@inithium/services';
 import { createUserDashboardConfigCollection, ensureUserDashboardConfigIndices } from '@inithium/collections';
+import { createErrorLogCollection, ensureErrorLogIndices } from '@inithium/collections';
+import { createIngestRateLimit } from '@inithium/routes';
 import {
   createReportableCollectionsResolver,
   createTimeSeriesAggregationService,
@@ -64,7 +66,8 @@ const RESERVED_CORE_PATH_PREFIXES = [
   '/settings',
   '/analytics',
   '/user-dashboard-configs',
-  '/profiles'
+  '/profiles',
+  '/error-logs'
 ] as const;
 
 const bootstrap = async (): Promise<void> => {
@@ -258,6 +261,18 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const pageCollection = createPageCollection(db, { authenticate });
+
+  const errorLogIndexResult = await ensureErrorLogIndices(db, env.ERROR_LOG_RETENTION_DAYS);
+  if (errorLogIndexResult.isErr()) {
+    console.error(errorLogIndexResult.error);
+    process.exit(1);
+  }
+
+  const errorLogCollection = createErrorLogCollection(db, {
+    authenticate,
+    requireCmsRole,
+    ingestRateLimit: createIngestRateLimit({ windowMs: 60_000, maxRequests: 30 })
+  });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
@@ -282,6 +297,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/settings', settingCollection.router);
   app.use('/analytics', analyticsRouter);
   app.use('/user-dashboard-configs', userDashboardConfigCollection.router);
+  app.use('/error-logs', errorLogCollection.router);
   app.use(
     '/profiles/banner-image',
     createProfileImageUploadRouter(assetCollection.service, { authenticate, maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB })

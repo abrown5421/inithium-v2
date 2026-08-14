@@ -20,6 +20,13 @@ export default defineConfig(({ command, mode }) => {
       // Left out of production builds so `vite build` keeps resolving to dist.
       conditions: command === 'serve' ? ['@inithium/source'] : [],
     },
+    optimizeDeps: {
+      // Vite's dependency scanner pre-bundles this workspace-linked package into a cached
+      // chunk under node_modules/.vite instead of resolving it as live source, so edits to it
+      // silently keep serving stale code until a forced re-optimize. Excluding it keeps dev
+      // resolution consistent with other @inithium/* workspace packages.
+      exclude: ['@inithium/error-capture'],
+    },
     server: {
       port: 5173,
       host: 'localhost',

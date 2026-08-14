@@ -15,7 +15,8 @@ export const envSchema = z.object({
   APP_FILE_ROOT: z.string().min(1),
   FILE_UPLOAD_MAX_SIZE_MB: z.string().default('10').transform((val) => parseInt(val, 10)),
   API_PUBLIC_ORIGIN: z.string().url(),
-  WORKSPACE_ROOT: z.string().min(1)
+  WORKSPACE_ROOT: z.string().min(1),
+  ERROR_LOG_RETENTION_DAYS: z.string().default('30').transform((val) => parseInt(val, 10))
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

@@ -6,9 +6,11 @@ import {
 import type { WidgetType } from '@inithium/models';
 import type { WidgetDefinition } from './widget-types.js';
 import { timeSeriesGraphWidgetDefinition } from '../widgets/time-series-graph/time-series-graph-widget.definition.js';
+import { errorLogWidgetDefinition } from '../widgets/error-log/error-log-widget.definition.js';
 
 const CORE_WIDGET_REGISTRY: Readonly<Record<string, WidgetDefinition<never>>> = {
-  'time-series-graph': timeSeriesGraphWidgetDefinition as unknown as WidgetDefinition<never>
+  'time-series-graph': timeSeriesGraphWidgetDefinition as unknown as WidgetDefinition<never>,
+  'error-log': errorLogWidgetDefinition as unknown as WidgetDefinition<never>
 };
 
 /** Core widgets merged with whatever the currently-enabled plugins contribute. */

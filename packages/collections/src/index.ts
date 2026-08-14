@@ -5,3 +5,4 @@ export * from './lib/page/index.js';
 export * from './lib/setting/index.js';
 export * from './lib/profile/index.js';
 export * from './lib/user-dashboard-config/index.js';
+export * from './lib/error-log/index.js';

@@ -11,6 +11,11 @@ export interface TimeSeriesGraphWidgetConfig {
   readonly dateTo: string;
 }
 
+export interface ErrorLogWidgetConfig {
+  readonly title: string;
+  readonly pageSize: number;
+}
+
 export interface WidgetLayoutItem {
   readonly id: string;
   readonly widgetType: WidgetType;
