@@ -10,6 +10,7 @@
     "@inithium/ui": "^0.0.1",
     "@inithium/pages": "^0.0.1",
     "@inithium/web-pages": "^0.0.1",
-    "@inithium/plugin-engine": "^0.0.1"
+    "@inithium/plugin-engine": "^0.0.1",
+    "@inithium/error-capture": "^0.0.1"
   }
 }

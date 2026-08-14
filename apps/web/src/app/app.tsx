@@ -39,6 +39,7 @@ import {
   useApplyCoreThemeColors
 } from '@inithium/ui';
 import { PresenceProvider, usePresenceStatus } from '@inithium/presence/react';
+import { reportError } from '@inithium/error-capture';
 import { DocumentationPage, HomePage, LoginPage, SignupPage, ProfilePage } from '@inithium/web-pages';
 import {
   createPluginRegistry,
@@ -68,6 +69,7 @@ const basePluginRegistrationResult = registerClientPlugins(
 );
 if (basePluginRegistrationResult.isErr()) {
   console.error('Failed to register client plugins:', basePluginRegistrationResult.error);
+  reportError(basePluginRegistrationResult.error);
 }
 const BASE_PLUGIN_REGISTRY = basePluginRegistrationResult.isOk()
   ? basePluginRegistrationResult.value
