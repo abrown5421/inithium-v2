@@ -8,3 +8,4 @@
 @source '../../../packages/pages/src';
 @source '../../../packages/cms-pages/src';
 @source '../../../packages/dashboard-widgets/src';
+@source '../../../plugins';
