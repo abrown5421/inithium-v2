@@ -1,12 +1,14 @@
 {
   "name": "@inithium/db",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -16,8 +18,12 @@
       "default": "./dist/index.js"
     }
   },
+  "peerDependencies": {
+    "mongodb": "~7.5"
+  },
   "dependencies": {
     "tslib": "^2.3.0",
+    "neverthrow": "^8.2.0",
     "@inithium/types": ">=0.1.0"
   }
 }

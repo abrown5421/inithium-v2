@@ -1,12 +1,14 @@
 {
   "name": "@inithium/file-manager",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -18,6 +20,8 @@
   },
   "dependencies": {
     "tslib": "^2.3.0",
+    "sharp": "^0.35.3",
+    "neverthrow": "^8.2.0",
     "@inithium/types": ">=0.1.0",
     "@inithium/validators": ">=0.1.0"
   }
