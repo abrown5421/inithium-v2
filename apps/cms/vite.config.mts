@@ -56,6 +56,16 @@ export default defineConfig(({ command, mode }) => {
       // @inithium/store (and the other dedupe-listed packages, for the same reason) directly
       // closes that path — there is then no way for the optimizer to produce a second copy of
       // any of them, regardless of what pulls them in.
+      //
+      // This list must cover every @inithium/* package reachable from client code, not just the
+      // ones a plugin happens to touch — app.tsx itself imports @inithium/presence and
+      // @inithium/notifications directly (for PresenceProvider/NotificationProvider), and missing
+      // either one here reproduces the exact same bug: the optimizer bundles that package's built
+      // dist/ output as a second copy, independent of the live-source instance everything else
+      // uses, and since both packages internally import @inithium/store, the second copy drags in
+      // a second, differently-optimized copy of react-redux — which is what broke
+      // use-sync-external-store's CJS/ESM interop (`does not provide an export named
+      // 'useSyncExternalStore'`) even after @inithium/store itself was already excluded.
       exclude: [
         '@inithium/blog-plugin',
         '@inithium/blog-plugin/client',
@@ -66,7 +76,12 @@ export default defineConfig(({ command, mode }) => {
         '@inithium/plugin-engine',
         '@inithium/ui',
         '@inithium/types',
-        '@inithium/models'
+        '@inithium/models',
+        '@inithium/presence',
+        '@inithium/presence/react',
+        '@inithium/notifications',
+        '@inithium/notifications/react',
+        '@inithium/pubsub'
       ],
     },
     server: {
