@@ -34,7 +34,21 @@ export default defineConfig(({ command, mode }) => {
       // chunk under node_modules/.vite instead of resolving it as live source, so edits to it
       // silently keep serving stale code until a forced re-optimize. Excluding it keeps dev
       // resolution consistent with other @inithium/* workspace packages.
-      exclude: ['@inithium/error-capture'],
+      //
+      // Installed plugins (@inithium/blog-plugin, @inithium/friends-plugin — real node_modules
+      // packages, not workspace source) hit the same underlying issue, with a worse symptom: the
+      // `dedupe` list above only controls *which file* a given import resolves to once something
+      // has already decided to bundle it — it doesn't stop the optimizer from pre-bundling a
+      // plugin as its own independent chunk in the first place. Confirmed via Vite's own
+      // deps/_metadata.json: even with dedupe covering @inithium/store, both plugins still showed
+      // up under "optimized" as separate entries. Once pre-bundled that way, a plugin's own
+      // `import ... from '@inithium/store'` resolves through esbuild's scan (which does not honor
+      // the `@inithium/source` condition below) instead of the live workspace source this app's
+      // own code resolves to — landing on a second, genuinely separate module instance with its
+      // own copy of module-level state (e.g. the apiBaseUrl set by setApiBaseUrl() in main.tsx).
+      // Excluding the plugin here forces it through the same live-source resolution path as
+      // everything else, so it shares the exact same @inithium/store instance.
+      exclude: ['@inithium/error-capture', '@inithium/blog-plugin', '@inithium/blog-plugin/client', '@inithium/friends-plugin', '@inithium/friends-plugin/client'],
     },
     server: {
       port: 5173,
