@@ -1,11 +1,12 @@
 {
   "name": "@inithium/crud-engine",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist"],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -16,6 +17,8 @@
     }
   },
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "@inithium/types": ">=0.1.0",
+    "@inithium/validators": ">=0.1.0"
   }
 }

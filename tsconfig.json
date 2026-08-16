@@ -80,6 +80,9 @@
     },
     {
       "path": "./packages/plugin-engine"
+    },
+    {
+      "path": "./packages/notifications"
     }
   ],
   "compilerOptions": {}

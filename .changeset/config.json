@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.1.4/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@inithium/api",
+    "@inithium/cms",
+    "@inithium/web",
+    "@inithium/analytics",
+    "@inithium/cms-pages",
+    "@inithium/collection-generator",
+    "@inithium/collections",
+    "@inithium/config",
+    "@inithium/dashboard-widgets",
+    "@inithium/error-capture",
+    "@inithium/routes",
+    "@inithium/web-pages"
+  ]
+}

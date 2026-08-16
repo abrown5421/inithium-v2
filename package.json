@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "devDependencies": {
+    "@changesets/cli": "^2.31.1",
     "@nx/esbuild": "23.1.0",
     "@nx/js": "23.1.0",
     "@nx/node": "^23.1.0",

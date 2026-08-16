@@ -7,6 +7,7 @@ import type { Page, Setting } from '@inithium/models';
 import type { CreatePageDTO, UpdatePageDTO, CreateSettingDTO, UpdateSettingDTO } from '@inithium/validators';
 import type { PubSubServer } from '@inithium/pubsub/server';
 import type { EventRegistry, AuthenticatedIdentity } from '@inithium/pubsub';
+import type { NotificationPublisher } from '@inithium/notifications';
 import type { PluginMeta } from './plugin-meta.types.js';
 
 /** The untyped pub/sub handle every plugin receives; narrow it with `createPluginPubSubHandle<TEvents>()`. */
@@ -19,6 +20,8 @@ export interface PluginServerContext {
   readonly pageService: CrudService<Page, CreatePageDTO, UpdatePageDTO>;
   readonly settingService: CrudService<Setting, CreateSettingDTO, UpdateSettingDTO>;
   readonly pubsub: PluginPubSubHandle;
+  /** Lets a plugin push a persisted, real-time notification into a user's notification center. */
+  readonly notifications: NotificationPublisher;
 }
 
 /** Returned by `onServerInit` for anything a plugin attached to a live object (e.g. a pubsub subscription). */

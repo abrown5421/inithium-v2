@@ -12,6 +12,7 @@ import { profileApi } from '../api/profile.api.js';
 import { userDashboardConfigApi } from '../api/user-dashboard-config.api.js';
 import { analyticsApi } from '../api/analytics.api.js';
 import { errorLogApi } from '../api/error-log.api.js';
+import { notificationApi } from '../api/notification.api.js';
 // collection-generator:imports
 
 export const store = configureStore({
@@ -28,6 +29,7 @@ export const store = configureStore({
     [userDashboardConfigApi.reducerPath]: userDashboardConfigApi.reducer,
     [analyticsApi.reducerPath]: analyticsApi.reducer,
     [errorLogApi.reducerPath]: errorLogApi.reducer,
+    [notificationApi.reducerPath]: notificationApi.reducer,
 // collection-generator:reducers
   },
   middleware: (getDefaultMiddleware) =>
@@ -42,6 +44,7 @@ export const store = configureStore({
       userDashboardConfigApi.middleware,
       analyticsApi.middleware,
       errorLogApi.middleware,
+      notificationApi.middleware,
 // collection-generator:middleware
     )
 });

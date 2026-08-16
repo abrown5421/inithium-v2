@@ -8,7 +8,7 @@ import {
   createCollectionDefinitionSchema,
   updateCollectionDefinitionSchema
 } from '@inithium/validators';
-import { scaffoldCollection, rescaffoldCollection, unscaffoldCollection, CollectionGeneratorConfig } from '@inithium/collection-generator';
+import { scaffoldCollection, rescaffoldCollection, unscaffoldCollection, CollectionGeneratorConfig } from '../scaffold.service/scaffold.service.js';
 
 export type CollectionDefinitionService = CrudService<CollectionDefinition, CreateCollectionDefinitionDTO, UpdateCollectionDefinitionDTO>;
 

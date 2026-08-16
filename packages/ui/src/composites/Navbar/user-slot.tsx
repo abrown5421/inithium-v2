@@ -3,6 +3,8 @@ import { Menu } from 'lucide-react';
 import type { PresenceStatus } from '@inithium/presence';
 import { Button } from '../../primitives/button.js';
 import { AvatarWithPresence } from '../Presence/avatar-with-presence.js';
+import { NotificationCenter } from '../NotificationCenter/notification-center.js';
+import type { NotificationCenterItem } from '../NotificationCenter/notification-center.types.js';
 import { NavDrawer } from './nav-drawer.js';
 import { NavbarLinkComponent, NavbarMenuItem, NavbarUser } from './navbar.types.js';
 
@@ -15,6 +17,10 @@ export interface UserSlotProps {
   readonly onLoginClick?: () => void;
   readonly onLogoutClick?: () => void;
   readonly linkComponent?: NavbarLinkComponent;
+  readonly notifications?: readonly NotificationCenterItem[];
+  readonly unreadNotificationCount?: number;
+  readonly isNotificationsLoading?: boolean;
+  readonly onNotificationClick?: (notification: NotificationCenterItem) => void;
 }
 
 export const UserSlot: React.FC<UserSlotProps> = ({
@@ -25,19 +31,31 @@ export const UserSlot: React.FC<UserSlotProps> = ({
   profileMenuItems,
   onLoginClick,
   onLogoutClick,
-  linkComponent
+  linkComponent,
+  notifications,
+  unreadNotificationCount,
+  isNotificationsLoading,
+  onNotificationClick
 }) => (
   <div className="flex items-center">
-    <div className="flex items-center lg:hidden">
+    <div className="flex items-center gap-1 lg:hidden">
       {isAuthenticated ? (
-        <NavDrawer
-          trigger={<AvatarWithPresence user={user} status={presenceStatus ?? 'offline'} />}
-          triggerLabel="Account menu"
-          sections={[{ items: mainMenuItems }, { items: profileMenuItems }]}
-          footerAction={{ label: 'Log Out', onClick: onLogoutClick, color: 'destructive' }}
-          linkComponent={linkComponent}
-          userName={user?.firstName}
-        />
+        <>
+          <NotificationCenter
+            notifications={notifications ?? []}
+            unreadCount={unreadNotificationCount ?? 0}
+            isLoading={isNotificationsLoading}
+            onNotificationClick={onNotificationClick ?? (() => undefined)}
+          />
+          <NavDrawer
+            trigger={<AvatarWithPresence user={user} status={presenceStatus ?? 'offline'} />}
+            triggerLabel="Account menu"
+            sections={[{ items: mainMenuItems }, { items: profileMenuItems }]}
+            footerAction={{ label: 'Log Out', onClick: onLogoutClick, color: 'destructive' }}
+            linkComponent={linkComponent}
+            userName={user?.firstName}
+          />
+        </>
       ) : (
         <NavDrawer
           trigger={<Menu />}
@@ -49,16 +67,24 @@ export const UserSlot: React.FC<UserSlotProps> = ({
       )}
     </div>
 
-    <div className="hidden lg:flex lg:items-center">
+    <div className="hidden lg:flex lg:items-center lg:gap-1">
       {isAuthenticated ? (
-        <NavDrawer
-          trigger={<AvatarWithPresence user={user} status={presenceStatus ?? 'offline'} />}
-          triggerLabel="Account menu"
-          sections={[{ items: profileMenuItems }]}
-          footerAction={{ label: 'Log Out', onClick: onLogoutClick, color: 'destructive' }}
-          linkComponent={linkComponent}
-          userName={user?.firstName}
-        />
+        <>
+          <NotificationCenter
+            notifications={notifications ?? []}
+            unreadCount={unreadNotificationCount ?? 0}
+            isLoading={isNotificationsLoading}
+            onNotificationClick={onNotificationClick ?? (() => undefined)}
+          />
+          <NavDrawer
+            trigger={<AvatarWithPresence user={user} status={presenceStatus ?? 'offline'} />}
+            triggerLabel="Account menu"
+            sections={[{ items: profileMenuItems }]}
+            footerAction={{ label: 'Log Out', onClick: onLogoutClick, color: 'destructive' }}
+            linkComponent={linkComponent}
+            userName={user?.firstName}
+          />
+        </>
       ) : (
         <Button onClick={onLoginClick}>Log In</Button>
       )}

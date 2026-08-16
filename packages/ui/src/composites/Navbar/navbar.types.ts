@@ -1,5 +1,6 @@
 import * as React from 'react';
 import type { PresenceStatus } from '@inithium/presence';
+import type { NotificationCenterItem } from '../NotificationCenter/notification-center.types.js';
 
 export interface NavbarLinkComponentProps {
   readonly href: string;
@@ -47,4 +48,8 @@ export interface NavbarProps {
   readonly onLogoutClick?: () => void;
   readonly linkComponent?: NavbarLinkComponent;
   readonly className?: string;
+  readonly notifications?: readonly NotificationCenterItem[];
+  readonly unreadNotificationCount?: number;
+  readonly isNotificationsLoading?: boolean;
+  readonly onNotificationClick?: (notification: NotificationCenterItem) => void;
 }

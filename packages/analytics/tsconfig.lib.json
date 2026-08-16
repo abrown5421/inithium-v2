@@ -17,7 +17,7 @@
       "path": "../crud-engine/tsconfig.lib.json"
     },
     {
-      "path": "../services/tsconfig.lib.json"
+      "path": "../collection-generator/tsconfig.lib.json"
     },
     {
       "path": "../types/tsconfig.lib.json"

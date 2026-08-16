@@ -1,11 +1,12 @@
 {
   "name": "@inithium/plugin-engine",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "type": "module",
   "main": "./dist/src/index.js",
   "module": "./dist/src/index.js",
   "types": "./dist/src/index.d.ts",
+  "files": ["dist"],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -40,13 +41,14 @@
     "tslib": "^2.3.0",
     "neverthrow": "^8.2.0",
     "zod": "^4.4.3",
-    "@inithium/types": "*",
-    "@inithium/crud-engine": "*",
-    "@inithium/models": "*",
-    "@inithium/validators": "*",
-    "@inithium/pages": "*",
-    "@inithium/pubsub": "*",
-    "@inithium/store": "*"
+    "@inithium/types": ">=0.1.0",
+    "@inithium/crud-engine": ">=0.1.0",
+    "@inithium/models": ">=0.1.0",
+    "@inithium/validators": ">=0.1.0",
+    "@inithium/pages": ">=0.1.0",
+    "@inithium/pubsub": ">=0.1.0",
+    "@inithium/store": ">=0.1.0",
+    "@inithium/notifications": ">=0.1.0"
   },
   "devDependencies": {
     "vite": "^8.0.0",

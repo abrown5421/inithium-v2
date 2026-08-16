@@ -49,6 +49,9 @@
     },
     {
       "path": "../../packages/plugin-engine/tsconfig.lib.json"
+    },
+    {
+      "path": "../../packages/notifications/tsconfig.lib.json"
     }
   ]
 }

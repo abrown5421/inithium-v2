@@ -1,6 +1,6 @@
 import { ResultAsync } from 'neverthrow';
 import { AppError } from '@inithium/types';
-import { CollectionDefinitionService } from '@inithium/services';
+import { CollectionDefinitionService } from '@inithium/collection-generator';
 
 export const STATIC_REPORTABLE_COLLECTIONS = ['users', 'assets', 'pages'] as const;
 

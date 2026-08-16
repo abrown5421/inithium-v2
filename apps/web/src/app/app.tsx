@@ -39,6 +39,7 @@ import {
   useApplyCoreThemeColors
 } from '@inithium/ui';
 import { PresenceProvider, usePresenceStatus } from '@inithium/presence/react';
+import { NotificationsProvider, useNotificationCenter } from '@inithium/notifications/react';
 import { reportError } from '@inithium/error-capture';
 import { DocumentationPage, HomePage, LoginPage, SignupPage, ProfilePage } from '@inithium/web-pages';
 import {
@@ -122,6 +123,7 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
 
   const settingsMap = React.useMemo(() => extractSettingsMap(settingsData), [settingsData]);
   const ownPresenceStatus = usePresenceStatus(currentUser?.id);
+  const notificationCenter = useNotificationCenter();
 
   const themeColors = React.useMemo(() => parseCoreThemeColors(settingsMap['site.theme']), [settingsMap]);
   useApplyCoreThemeColors(themeColors);
@@ -171,6 +173,13 @@ const AppChrome: React.FC<AppShellWithNavProps> = ({ pages, isLoading }) => {
             linkComponent={RouterNavLink}
             onLoginClick={() => pageNavigate(config.loginRoute)}
             onLogoutClick={() => void logout()}
+            notifications={notificationCenter.notifications}
+            unreadNotificationCount={notificationCenter.unreadCount}
+            isNotificationsLoading={notificationCenter.isLoading}
+            onNotificationClick={(notification) => {
+              notificationCenter.markAsRead(notification._id);
+              if (notification.link) pageNavigate(notification.link);
+            }}
           />
         }
       >
@@ -203,10 +212,12 @@ const App: React.FC = () => {
   return (
     <TooltipProvider>
       <PresenceProvider>
-        <PageSessionProvider value={session}>
-          <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
-          <AlertViewport alerts={alerts} onClose={(id) => dispatch(closeAlert(id))} />
-        </PageSessionProvider>
+        <NotificationsProvider>
+          <PageSessionProvider value={session}>
+            <AppShellWithNav pages={data?.data ?? []} isLoading={isLoading} />
+            <AlertViewport alerts={alerts} onClose={(id) => dispatch(closeAlert(id))} />
+          </PageSessionProvider>
+        </NotificationsProvider>
       </PresenceProvider>
     </TooltipProvider>
   );
