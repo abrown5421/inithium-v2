@@ -29,6 +29,22 @@ export default defineConfig(({ command, mode }) => {
       // Left out of production builds so `vite build` keeps resolving to dist.
       conditions: command === 'serve' ? ['@inithium/source'] : [],
     },
+    optimizeDeps: {
+      // Installed plugins (@inithium/blog-plugin, @inithium/friends-plugin — real node_modules
+      // packages, not workspace source) get pre-bundled by Vite's dependency optimizer as their
+      // own independent chunks — `dedupe` above only controls *which file* a given import
+      // resolves to once something has already decided to bundle it, it doesn't stop the
+      // optimizer from pre-bundling a plugin in the first place (confirmed via Vite's own
+      // deps/_metadata.json: both plugins still showed up under "optimized" even with dedupe
+      // covering @inithium/store). Once pre-bundled that way, a plugin's own
+      // `import ... from '@inithium/store'` resolves through esbuild's scan (which does not
+      // honor the `@inithium/source` condition above) instead of the live workspace source this
+      // app's own code resolves to — landing on a second, separate module instance with its own
+      // copy of module-level state (e.g. the apiBaseUrl set by setApiBaseUrl() in main.tsx).
+      // Excluding the plugin here forces it through the same live-source resolution path as
+      // everything else, so it shares the exact same @inithium/store instance.
+      exclude: ['@inithium/blog-plugin', '@inithium/blog-plugin/client', '@inithium/friends-plugin', '@inithium/friends-plugin/client'],
+    },
     server: {
       port: 8080,
       host: 'localhost',
