@@ -48,7 +48,32 @@ export default defineConfig(({ command, mode }) => {
       // own copy of module-level state (e.g. the apiBaseUrl set by setApiBaseUrl() in main.tsx).
       // Excluding the plugin here forces it through the same live-source resolution path as
       // everything else, so it shares the exact same @inithium/store instance.
-      exclude: ['@inithium/error-capture', '@inithium/blog-plugin', '@inithium/blog-plugin/client', '@inithium/friends-plugin', '@inithium/friends-plugin/client'],
+      //
+      // That alone wasn't sufficient: with the plugin itself excluded, Vite's dev server serves
+      // it unbundled — but when it then encounters the plugin's *own* `import ... from
+      // '@inithium/store'`, it still separately optimizes @inithium/store as a dependency reached
+      // through that unbundled code, producing a *different* pre-bundled chunk than the one
+      // main.tsx's own (unbundled, `@inithium/source`-resolved) import resolves to. Confirmed by
+      // diffing the actual served output: main.tsx imports @inithium/store from
+      // `/packages/store/src/index.ts`; the plugin's served bundle imported getApiBaseUrl from
+      // `/node_modules/.vite/apps/cms/deps/<hash>.js` — two different files, two module
+      // instances, two separate copies of the apiBaseUrl module-level variable. Excluding
+      // @inithium/store (and the other dedupe-listed packages, for the same reason) directly
+      // closes that path — there is then no way for the optimizer to produce a second copy of
+      // any of them, regardless of what pulls them in.
+      exclude: [
+        '@inithium/error-capture',
+        '@inithium/blog-plugin',
+        '@inithium/blog-plugin/client',
+        '@inithium/friends-plugin',
+        '@inithium/friends-plugin/client',
+        '@inithium/store',
+        '@inithium/pages',
+        '@inithium/plugin-engine',
+        '@inithium/ui',
+        '@inithium/types',
+        '@inithium/models'
+      ],
     },
     server: {
       port: 5173,
