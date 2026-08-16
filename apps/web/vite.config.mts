@@ -13,7 +13,16 @@ export default defineConfig(({ command, mode }) => {
     root: import.meta.dirname,
     cacheDir: '../../node_modules/.vite/apps/web',
     resolve: {
-      dedupe: ['react', 'react-dom'],
+      // react/react-dom/react-router-dom: standard singleton requirement for any React app.
+      // @inithium/* packages: an installed plugin (real node_modules package, e.g.
+      // @inithium/blog-plugin) gets pre-bundled by Vite's dependency optimizer independently of
+      // this app's own (unbundled, workspace-source) imports of the same @inithium/* packages —
+      // without deduping, that produces a *second* module instance of e.g. @inithium/store, with
+      // its own copy of module-level state like the apiBaseUrl set by setApiBaseUrl() in main.tsx.
+      // A plugin calling getApiBaseUrl() then reads the never-updated default ('/api', resolved
+      // by the browser relative to whatever page it's on) instead of the real API origin — every
+      // fetch a plugin makes through @inithium/store silently goes to the wrong URL and 404s.
+      dedupe: ['react', 'react-dom', 'react-router-dom', '@inithium/store', '@inithium/pages', '@inithium/plugin-engine', '@inithium/ui', '@inithium/types', '@inithium/models'],
       // Resolve workspace packages to their TS source during dev so edits
       // trigger HMR immediately, instead of the stale `dist/` build output
       // (see each package.json's "@inithium/source" export condition).
