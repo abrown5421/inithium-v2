@@ -33,7 +33,9 @@ import { createProfileCollection } from '@inithium/collections';
 import { createInitialProfile } from '@inithium/services';
 import { createUserDashboardConfigCollection, ensureUserDashboardConfigIndices } from '@inithium/collections';
 import { createErrorLogCollection, ensureErrorLogIndices } from '@inithium/collections';
+import { createNotificationCollection, ensureNotificationIndices } from '@inithium/collections';
 import { createIngestRateLimit } from '@inithium/routes';
+import { createNotificationPublisher } from '@inithium/notifications/server';
 import {
   createReportableCollectionsResolver,
   createTimeSeriesAggregationService,
@@ -67,7 +69,8 @@ const RESERVED_CORE_PATH_PREFIXES = [
   '/analytics',
   '/user-dashboard-configs',
   '/profiles',
-  '/error-logs'
+  '/error-logs',
+  '/notifications'
 ] as const;
 
 const bootstrap = async (): Promise<void> => {
@@ -273,6 +276,14 @@ const bootstrap = async (): Promise<void> => {
     requireCmsRole,
     ingestRateLimit: createIngestRateLimit({ windowMs: 60_000, maxRequests: 30 })
   });
+
+  const notificationIndexResult = await ensureNotificationIndices(db);
+  if (notificationIndexResult.isErr()) {
+    console.error(notificationIndexResult.error);
+    process.exit(1);
+  }
+
+  const notificationCollection = createNotificationCollection(db, { authenticate });
 // collection-generator:instances
 
   app.use('/health', createHealthRouter());
@@ -298,6 +309,7 @@ const bootstrap = async (): Promise<void> => {
   app.use('/analytics', analyticsRouter);
   app.use('/user-dashboard-configs', userDashboardConfigCollection.router);
   app.use('/error-logs', errorLogCollection.router);
+  app.use('/notifications', notificationCollection.router);
   app.use(
     '/profiles/banner-image',
     createProfileImageUploadRouter(assetCollection.service, { authenticate, maxUploadSizeMb: env.FILE_UPLOAD_MAX_SIZE_MB })
@@ -319,13 +331,17 @@ const bootstrap = async (): Promise<void> => {
     cors: createCorsOptions(env.CORS_ORIGINS)
   });
 
+  const pluginPubSubHandle = toPluginPubSubHandle(pubsubServer);
+  const notificationPublisher = createNotificationPublisher(notificationCollection.service, pluginPubSubHandle);
+
   const pluginServerContext: PluginServerContext = {
     db,
     authenticate,
     requireRole: createRequireRoleMiddleware,
     pageService: pageCollection.service,
     settingService: settingCollection.service,
-    pubsub: toPluginPubSubHandle(pubsubServer)
+    pubsub: pluginPubSubHandle,
+    notifications: notificationPublisher
   };
 
   // Mounted after the pubsub server exists so a plugin's router can close over `ctx.pubsub`.

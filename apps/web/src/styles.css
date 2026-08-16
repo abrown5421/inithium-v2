@@ -4,6 +4,7 @@
 
 /* Tailwind's v4 auto-detection skips node_modules, so explicitly point it at
    the workspace-linked @inithium/ui and @inithium/pages source for class scanning. */
+@source inline("h-64");
 @source '../../../packages/ui/src';
 @source '../../../packages/pages/src';
 @source '../../../packages/web-pages/src';

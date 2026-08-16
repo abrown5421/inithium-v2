@@ -1,0 +1,43 @@
+{
+  "name": "@inithium/notifications",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "@inithium/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "@inithium/source": "./src/server.ts",
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "default": "./dist/server.js"
+    },
+    "./react": {
+      "@inithium/source": "./src/react.ts",
+      "types": "./dist/react.d.ts",
+      "import": "./dist/react.js",
+      "default": "./dist/react.js"
+    }
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "tslib": "^2.3.0",
+    "neverthrow": "^8.2.0",
+    "@inithium/pubsub": ">=0.1.0",
+    "@inithium/store": ">=0.1.0",
+    "@inithium/models": ">=0.1.0",
+    "@inithium/types": ">=0.1.0"
+  }
+}

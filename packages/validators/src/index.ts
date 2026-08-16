@@ -7,3 +7,4 @@ export * from './lib/profile/index.js';
 export * from './lib/user-dashboard-config/index.js';
 export * from './lib/analytics/index.js';
 export * from './lib/error-log/index.js';
+export * from './lib/notification/index.js';

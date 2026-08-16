@@ -5,8 +5,7 @@ import { AppError } from '@inithium/types';
 import { createRepository, CrudRouterOptions, createCrudRouter } from '@inithium/crud-engine';
 import { ensureIndex } from '@inithium/db';
 import { CollectionDefinition } from '@inithium/models';
-import { createCollectionDefinitionService } from '@inithium/services';
-import { CollectionGeneratorConfig } from '@inithium/collection-generator';
+import { createCollectionDefinitionService, CollectionGeneratorConfig } from '@inithium/collection-generator';
 
 export interface CollectionDefinitionCollectionConfig extends CrudRouterOptions {
   readonly generatorConfig: CollectionGeneratorConfig;

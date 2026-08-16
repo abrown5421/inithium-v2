@@ -18,7 +18,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLoginClick,
   onLogoutClick,
   linkComponent,
-  className
+  className,
+  notifications,
+  unreadNotificationCount,
+  isNotificationsLoading,
+  onNotificationClick
 }) => (
   <header className={cn('flex items-center justify-between border-b border-border bg-background px-4 py-3', className)}>
     <LogoSlot
@@ -40,6 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({
         onLoginClick={onLoginClick}
         onLogoutClick={onLogoutClick}
         linkComponent={linkComponent}
+        notifications={notifications}
+        unreadNotificationCount={unreadNotificationCount}
+        isNotificationsLoading={isNotificationsLoading}
+        onNotificationClick={onNotificationClick}
       />
     </div>
   </header>

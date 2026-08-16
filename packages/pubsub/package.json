@@ -1,11 +1,12 @@
 {
   "name": "@inithium/pubsub",
-  "version": "0.0.1",
-  "private": true,
+  "version": "0.1.0",
+  "private": false,
   "type": "module",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": ["dist"],
   "exports": {
     "./package.json": "./package.json",
     ".": {
@@ -33,6 +34,6 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "ioredis": "^5.4.2",
-    "@inithium/types": "*"
+    "@inithium/types": ">=0.1.0"
   }
 }

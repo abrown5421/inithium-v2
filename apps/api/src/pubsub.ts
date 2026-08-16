@@ -17,13 +17,14 @@ import type {
   PresenceServerToClientEvents,
   PresenceStatus
 } from '@inithium/presence';
+import type { NotificationServerToClientEvents } from '@inithium/notifications';
 
 export interface ApiIdentity extends AuthenticatedIdentity {
   readonly email: string;
   readonly role: JwtPayload['role'];
 }
 
-interface ApiServerToClientEvents extends EventPayloadMap, PresenceServerToClientEvents {
+interface ApiServerToClientEvents extends EventPayloadMap, PresenceServerToClientEvents, NotificationServerToClientEvents {
   readonly 'server:welcome': { readonly message: string; readonly socketId: string };
   readonly pong: { readonly echo: unknown; readonly at: number };
   readonly 'chat:message': { readonly from: string; readonly message: unknown; readonly at: number };

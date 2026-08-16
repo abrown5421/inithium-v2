@@ -10,3 +10,4 @@ export * from './profile.api.js';
 export * from './user-dashboard-config.api.js';
 export * from './analytics.api.js';
 export * from './error-log.api.js';
+export * from './notification.api.js';
