@@ -89,6 +89,20 @@ export default defineConfig(({ command, mode }) => {
         '@inithium/notifications/react',
         '@inithium/pubsub'
       ],
+      // @tiptap/react (blog-plugin's rich-text editor) is reached only through
+      // @inithium/blog-plugin's excluded/unbundled code, so Vite's dependency *scanner* never
+      // discovers it the normal way (the scanner walks static imports starting from real entry
+      // points; it doesn't crawl into excluded packages the same way). Left undiscovered,
+      // @tiptap/react's own `import { useSyncExternalStore } from 'use-sync-external-store/shim'`
+      // falls through to Vite's raw /@fs/ file serving, which only applies a lightweight,
+      // best-effort CJS→ESM interop — and that shim file's `module.exports` is behind an
+      // `if (NODE_ENV === 'production')` conditional, which the lightweight interop can't
+      // statically resolve, so it never synthesizes the `useSyncExternalStore` named export
+      // (`does not provide an export named 'useSyncExternalStore'`). `include` forces the real
+      // optimizer to find and properly pre-bundle it regardless of how it's reached, the same way
+      // `exclude` above forces @inithium/* packages through the live-source path — opposite
+      // problem, opposite fix.
+      include: ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-link', '@tiptap/extension-image'],
     },
     server: {
       port: 5173,
