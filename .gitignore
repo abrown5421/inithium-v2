@@ -52,3 +52,7 @@ vite.config.*.timestamp*
 
 .env
 *.zip
+
+# APP_FILE_ROOT: runtime file storage (system fonts/logo self-seeded on boot, plus user uploads) —
+# never checked in, so a fresh clone's empty DB and empty file store stay in sync.
+/apps/api/assets/

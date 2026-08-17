@@ -1,0 +1,66 @@
+[
+  {
+    "_id": {
+      "$oid": "6a835bd9d7a198136c45bf04"
+    },
+    "email": "super-admin@inithium.com",
+    "password": "$2b$12$4uuEig/7mMO7fw3LmnBw1.h21GrJyuikLIzzm0E5zqIIKd1DI5YUy",
+    "first_name": "Super-Admin",
+    "last_name": "User",
+    "role": "super-admin",
+    "createdAt": {
+      "$date": "2026-08-17T19:07:05.779Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:13:37.842Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a835d5701e8a0a10d91a06e"
+    },
+    "email": "admin@inithium.com",
+    "password": "$2b$12$0PktHj6ebGIuDB4pgL8bw.GmUDmRk1J1iuDtT8qaEnVPNzLTAgUYe",
+    "first_name": "Admin",
+    "last_name": "User",
+    "role": "admin",
+    "createdAt": {
+      "$date": "2026-08-17T19:13:27.424Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:13:27.424Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a835d7501e8a0a10d91a06f"
+    },
+    "email": "editor@inithium.com",
+    "password": "$2b$12$t3FTQD5h6cJfTHRMAjtjhOsahX2sH2TI5p7Px6CtTKuTAHy/4o.7e",
+    "first_name": "Editor",
+    "last_name": "User",
+    "role": "editor",
+    "createdAt": {
+      "$date": "2026-08-17T19:13:57.816Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:13:57.816Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a835d8b01e8a0a10d91a070"
+    },
+    "email": "writer@inithium.com",
+    "password": "$2b$12$3i2awe83FdI4mT3KIDshE.T82ZKtV80YlOOLHk5QN8FI/VuiJc8/m",
+    "first_name": "Writer",
+    "last_name": "User",
+    "role": "writer",
+    "createdAt": {
+      "$date": "2026-08-17T19:14:19.328Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:14:19.328Z"
+    }
+  }
+]

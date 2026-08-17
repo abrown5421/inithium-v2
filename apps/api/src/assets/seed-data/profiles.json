@@ -1,0 +1,116 @@
+[
+  {
+    "_id": {
+      "$oid": "6a83568bb59cbc4669fbbd13"
+    },
+    "user_id": "6a83568bb59cbc4669fbbd12",
+    "profileAvatar": {
+      "avatarType": "custom",
+      "customAvatarConfig": {
+        "backgroundColor": "#0f5066",
+        "fontColor": "#ffffff",
+        "font": "primary",
+        "shape": "round"
+      }
+    },
+    "profileBanner": {
+      "bannerType": "trianglify",
+      "trianglifyConfig": {
+        "variance": 0.75,
+        "cell_size": 40,
+        "x_colors": [
+          "#0f5066",
+          "#115e7a",
+          "#1e293b"
+        ],
+        "y_colors": [
+          "#1e293b",
+          "#64748b",
+          "#e2e8f0"
+        ]
+      }
+    },
+    "createdAt": {
+      "$date": "2026-08-17T18:44:27.727Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T18:44:27.727Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a835bd9d7a198136c45bf05"
+    },
+    "user_id": "6a835bd9d7a198136c45bf04",
+    "profileAvatar": {
+      "avatarType": "custom",
+      "customAvatarConfig": {
+        "backgroundColor": "#0f5066",
+        "fontColor": "#ffffff",
+        "font": "primary",
+        "shape": "round"
+      }
+    },
+    "profileBanner": {
+      "bannerType": "trianglify",
+      "trianglifyConfig": {
+        "variance": 0.75,
+        "cell_size": 40,
+        "x_colors": [
+          "#0f5066",
+          "#115e7a",
+          "#1e293b"
+        ],
+        "y_colors": [
+          "#1e293b",
+          "#64748b",
+          "#e2e8f0"
+        ]
+      }
+    },
+    "createdAt": {
+      "$date": "2026-08-17T19:07:05.840Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:07:05.840Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a835dd201e8a0a10d91a072"
+    },
+    "user_id": "6a835dd201e8a0a10d91a071",
+    "profileAvatar": {
+      "avatarType": "custom",
+      "customAvatarConfig": {
+        "backgroundColor": "#0f5066",
+        "fontColor": "#ffffff",
+        "font": "primary",
+        "shape": "round"
+      }
+    },
+    "profileBanner": {
+      "bannerType": "trianglify",
+      "trianglifyConfig": {
+        "variance": 0.75,
+        "cell_size": 40,
+        "x_colors": [
+          "#0f5066",
+          "#115e7a",
+          "#1e293b"
+        ],
+        "y_colors": [
+          "#1e293b",
+          "#64748b",
+          "#e2e8f0"
+        ]
+      }
+    },
+    "createdAt": {
+      "$date": "2026-08-17T19:15:30.097Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-17T19:15:30.097Z"
+    }
+  }
+]
