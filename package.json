@@ -38,8 +38,7 @@
   },
   "workspaces": [
     "packages/*",
-    "apps/*",
-    "plugins/*"
+    "apps/*"
   ],
   "dependencies": {
     "@inithium/blog-plugin": "^0.2.0",
