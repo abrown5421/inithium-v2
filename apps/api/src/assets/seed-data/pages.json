@@ -1,0 +1,511 @@
+[
+  {
+    "_id": {
+      "$oid": "6a6b5acf9d2df5e11a17b61c"
+    },
+    "id": "web-home",
+    "pageName": "Home",
+    "route": "/",
+    "app": "web",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": false,
+      "anonymousOnly": false,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Home",
+      "description": "Welcome to the site.",
+      "layout": "default"
+    },
+    "navigation": [
+      {
+        "label": "Home",
+        "location": "main",
+        "order": 0
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-07-30T14:08:15.371Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T14:08:15.371Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a6b5b5d9d2df5e11a17b61d"
+    },
+    "id": "cms-home",
+    "pageName": "Dashboard",
+    "route": "/",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Dashboard",
+      "description": "CMS control panel home.",
+      "layout": "default"
+    },
+    "navigation": [
+      {
+        "label": "Dashboard",
+        "location": "cms",
+        "order": 0
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-07-30T14:10:37.846Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T14:10:37.846Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a6b60f8a3f47c22d145eb42"
+    },
+    "id": "web-login",
+    "pageName": "Log In",
+    "route": "/login",
+    "app": "web",
+    "theme": {
+      "backgroundColor": "foreground",
+      "foregroundColor": "background"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": false,
+      "anonymousOnly": true,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Log In",
+      "description": "Sign in to your account.",
+      "layout": "login"
+    },
+    "navigation": [
+      {
+        "label": "Log In",
+        "location": "profile",
+        "order": 0,
+        "isButton": true
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a6b60f8a3f47c22d145eb43"
+    },
+    "id": "web-signup",
+    "pageName": "Sign Up",
+    "route": "/signup",
+    "app": "web",
+    "theme": {
+      "backgroundColor": "foreground",
+      "foregroundColor": "background"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": false,
+      "anonymousOnly": true,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Sign Up",
+      "description": "Create your account.",
+      "layout": "signup"
+    },
+    "navigation": [
+      {
+        "label": "Sign Up",
+        "location": "profile",
+        "order": 1,
+        "isButton": true
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a6b60f8a3f47c22d145eb44"
+    },
+    "id": "cms-login",
+    "pageName": "Log In",
+    "route": "/login",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "foreground",
+      "foregroundColor": "background"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": false,
+      "anonymousOnly": true,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Log In",
+      "description": "Sign in to the CMS.",
+      "layout": "login"
+    },
+    "createdAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T14:34:32.192Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a6b677f519fa2d3548b3caa"
+    },
+    "id": "docs-page",
+    "pageName": "Documentation Page",
+    "route": "/documentation",
+    "app": "web",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": false,
+      "anonymousOnly": false,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": false
+    },
+    "metadata": {
+      "title": "Documentation",
+      "description": "Documentation page",
+      "layout": "documentation"
+    },
+    "navigation": [
+      {
+        "label": "Docs",
+        "location": "main",
+        "order": 1,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-07-30T15:02:23.023Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-30T15:02:23.023Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a70bdd67366eaf4de4e48ee"
+    },
+    "id": "cms-users-page",
+    "pageName": "Users",
+    "route": "/cms-users",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": [
+        "super-admin",
+        "admin",
+        "editor",
+        "writer"
+      ]
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Users",
+      "description": "Edit application users",
+      "layout": "users"
+    },
+    "navigation": [
+      {
+        "label": "Users",
+        "location": "cms",
+        "order": 3,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-03T16:12:06.691Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-03T16:12:06.691Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a70d7752263650f1207302a"
+    },
+    "id": "cms-assets-page",
+    "pageName": "Assets",
+    "route": "/cms-assets",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": [
+        "super-admin",
+        "admin",
+        "editor",
+        "writer"
+      ]
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Assets",
+      "description": "Edit application assets",
+      "layout": "assets"
+    },
+    "navigation": [
+      {
+        "label": "Assets",
+        "location": "cms",
+        "order": 1,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-03T18:01:25.545Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-03T18:01:25.545Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a70d7752263650f1207302b"
+    },
+    "id": "cms-pages-page",
+    "pageName": "Pages",
+    "route": "/cms-pages",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": [
+        "super-admin",
+        "admin",
+        "editor",
+        "writer"
+      ]
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Pages",
+      "description": "Edit application pages",
+      "layout": "pages"
+    },
+    "navigation": [
+      {
+        "label": "Pages",
+        "location": "cms",
+        "order": 2,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-03T18:01:25.545Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-03T18:01:25.545Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7376612c040111e12bae55"
+    },
+    "id": "cms-settings-page",
+    "pageName": "Settings",
+    "route": "/cms-settings",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": [
+        "super-admin",
+        "admin"
+      ]
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Settings",
+      "description": "Edit application settings",
+      "layout": "settings"
+    },
+    "navigation": [
+      {
+        "label": "Settings",
+        "location": "cms",
+        "order": 4,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-05T17:44:01.624Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-05T17:44:01.624Z"
+    }
+  },
+  {
+    "_id": {
+      "$oid": "6a7b632b48c9f09f618d2ed4"
+    },
+    "id": "profile-page",
+    "pageName": "Profile",
+    "route": "/profile/:id",
+    "app": "web",
+    "theme": {
+      "backgroundColor": "background",
+      "foregroundColor": "foreground"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": []
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": true
+    },
+    "metadata": {
+      "title": "Profile",
+      "description": "Edit profile",
+      "layout": "profile"
+    },
+    "navigation": [
+      {
+        "label": "Profile",
+        "location": "profile",
+        "order": 0,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-11T18:00:11.631Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-11T18:00:11.631Z"
+    }
+  }
+]

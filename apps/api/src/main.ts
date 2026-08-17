@@ -21,7 +21,7 @@ import {
 } from '@inithium/collections';
 import { createFileRepository, createFileManagerService } from '@inithium/file-manager';
 import { createAuthRouter, createFilesRouter, createHealthRouter, createProfileImageUploadRouter } from '@inithium/routes';
-import { createPageCollection, ensurePageIndices } from '@inithium/collections';
+import { createPageCollection, ensurePageIndices, ensureInitialSeed, loadSeedFixtures } from '@inithium/collections';
 import { createApiPubSubServer } from './pubsub.js';
 import {
   createSettingCollection,
@@ -264,6 +264,18 @@ const bootstrap = async (): Promise<void> => {
   }
 
   const pageCollection = createPageCollection(db, { authenticate });
+
+  // Module-relative (not cwd-relative), same reasoning as systemFontsDir/systemLogoDir above. Runs
+  // after ensureCollectionDefinitionIndices/ensurePageIndices so the unique indices they create are
+  // already in place as a backstop before the one-time raw insert below.
+  const seedDataDir = path.join(__dirname, 'assets', 'seed-data');
+  const seedFixtures = await loadSeedFixtures(seedDataDir);
+  const initialSeedResult = await ensureInitialSeed(db, seedFixtures);
+  if (initialSeedResult.isErr()) {
+    console.error(initialSeedResult.error);
+    process.exit(1);
+  }
+  console.log(initialSeedResult.value);
 
   const errorLogIndexResult = await ensureErrorLogIndices(db, env.ERROR_LOG_RETENTION_DAYS);
   if (errorLogIndexResult.isErr()) {
