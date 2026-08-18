@@ -1,5 +1,5 @@
 import { CrudRepository, CrudService, createService } from '@inithium/crud-engine';
-import { DEFAULT_TRIANGLIFY_CONFIG, Profile } from '@inithium/models';
+import { DEFAULT_CUSTOM_AVATAR_CONFIG, DEFAULT_TRIANGLIFY_CONFIG, Profile } from '@inithium/models';
 import { CreateProfileDTO, UpdateProfileDTO, createProfileSchema, updateProfileSchema } from '@inithium/validators';
 
 export type ProfileService = CrudService<Profile, CreateProfileDTO, UpdateProfileDTO>;
@@ -15,6 +15,12 @@ export const createInitialProfile = (userId: string): CreateProfileDTO => ({
       ...DEFAULT_TRIANGLIFY_CONFIG,
       x_colors: [...DEFAULT_TRIANGLIFY_CONFIG.x_colors],
       y_colors: [...DEFAULT_TRIANGLIFY_CONFIG.y_colors]
+    }
+  },
+  profileAvatar: {
+    avatarType: 'custom',
+    customAvatarConfig: {
+      ...DEFAULT_CUSTOM_AVATAR_CONFIG
     }
   }
 });

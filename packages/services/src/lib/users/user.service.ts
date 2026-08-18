@@ -79,7 +79,11 @@ export const createUserService = (repo: CrudRepository<User>, options: UserServi
         return errAsync(createConflictError('An account with this email already exists'));
       }
       return ResultAsync.fromSafePromise(hashPassword(dto.password)).andThen((hashed) =>
-        repo.createOne({ ...dto, password: hashed } as Omit<User, '_id' | 'createdAt' | 'updatedAt'>)
+        repo.createOne({
+          ...dto,
+          password: hashed,
+          mustChangePassword: false
+        } as Omit<User, '_id' | 'createdAt' | 'updatedAt'>)
       );
     });
   };
@@ -115,7 +119,7 @@ export const createUserService = (repo: CrudRepository<User>, options: UserServi
 
       return ResultAsync.fromSafePromise(Promise.all(valid.map((v) => hashPassword(v.password)))).andThen(
         (hashed) => {
-          const payloads = valid.map((v, idx) => ({ ...v, password: hashed[idx] }));
+          const payloads = valid.map((v, idx) => ({ ...v, password: hashed[idx], mustChangePassword: false }));
           return repo
             .createMany(payloads as readonly Omit<User, '_id' | 'createdAt' | 'updatedAt'>[])
             .map((users) => users.map(sanitize));
@@ -187,7 +191,10 @@ export const createUserService = (repo: CrudRepository<User>, options: UserServi
             }
             return ResultAsync.fromSafePromise(hashPassword(valid.newPassword)).andThen((hashed) =>
               repo
-                .updateOne(userId, { password: hashed } as Partial<Omit<User, '_id' | 'createdAt' | 'updatedAt'>>)
+                .updateOne(userId, {
+                  password: hashed,
+                  mustChangePassword: false
+                } as Partial<Omit<User, '_id' | 'createdAt' | 'updatedAt'>>)
                 .map(() => ({ changed: true as const }))
             );
           })

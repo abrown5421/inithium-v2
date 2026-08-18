@@ -8,6 +8,7 @@
     "first_name": "Super-Admin",
     "last_name": "User",
     "role": "super-admin",
+    "mustChangePassword": true,
     "createdAt": {
       "$date": "2026-08-17T19:07:05.779Z"
     },
@@ -24,6 +25,7 @@
     "first_name": "Admin",
     "last_name": "User",
     "role": "admin",
+    "mustChangePassword": true,
     "createdAt": {
       "$date": "2026-08-17T19:13:27.424Z"
     },
@@ -40,6 +42,7 @@
     "first_name": "Editor",
     "last_name": "User",
     "role": "editor",
+    "mustChangePassword": true,
     "createdAt": {
       "$date": "2026-08-17T19:13:57.816Z"
     },
@@ -56,6 +59,7 @@
     "first_name": "Writer",
     "last_name": "User",
     "role": "writer",
+    "mustChangePassword": true,
     "createdAt": {
       "$date": "2026-08-17T19:14:19.328Z"
     },

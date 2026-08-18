@@ -42,6 +42,7 @@ import { NotificationsProvider, useNotificationCenter } from '@inithium/notifica
 import {
   AssetManagementPage,
   CMS_ALLOWED_ROLES,
+  ChangePasswordPage,
   DashboardPage,
   LoginPage,
   PageManagementPage,
@@ -67,7 +68,8 @@ const CORE_CMS_LAYOUTS = {
   users: UserManagementPage,
   pages: PageManagementPage,
   assets: AssetManagementPage,
-  settings: SettingManagementPage
+  settings: SettingManagementPage,
+  'update-pw': ChangePasswordPage
 };
 
 // Registered once at module scope — `discoveredClientPlugins` is a static, build-time-resolved list.
@@ -82,7 +84,7 @@ const BASE_PLUGIN_REGISTRY = basePluginRegistrationResult.isOk()
   ? basePluginRegistrationResult.value
   : createPluginRegistry<PluginClientModule>();
 
-const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/' };
+const config = { loginRoute: '/login', defaultAuthenticatedRoute: '/', forcePasswordChangeRoute: '/change-password' };
 
 interface PaginatedSettings {
   readonly data?: readonly Setting[];
@@ -219,8 +221,8 @@ const App: React.FC = () => {
   const dispatch = useAppDispatch();
 
   const session: PageSession = React.useMemo(
-    () => ({ isAuthenticated, role: currentUser?.role }),
-    [isAuthenticated, currentUser?.role]
+    () => ({ isAuthenticated, role: currentUser?.role, mustChangePassword: currentUser?.mustChangePassword }),
+    [isAuthenticated, currentUser?.role, currentUser?.mustChangePassword]
   );
 
   return (

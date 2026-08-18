@@ -38,7 +38,8 @@ export const authApi = createApi({
     }),
 
     changePassword: builder.mutation<{ changed: true }, ChangePasswordDTO>({
-      query: (body) => ({ url: 'auth/change-password', method: 'POST', body })
+      query: (body) => ({ url: 'auth/change-password', method: 'POST', body }),
+      invalidatesTags: ['Session']
     })
   })
 });

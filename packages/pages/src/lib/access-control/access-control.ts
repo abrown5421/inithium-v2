@@ -12,6 +12,8 @@ export interface AccessEvaluationConfig {
   readonly loginRoute: string;
   readonly defaultAuthenticatedRoute: string;
   readonly onRoleMismatch?: 'not-found' | 'forbidden';
+  /** When set, an authenticated session with `mustChangePassword` is redirected here from every other route. */
+  readonly forcePasswordChangeRoute?: string;
 }
 
 export const isRoleAllowed = (role: UserRole | undefined, allowedRoles: readonly UserRole[]): boolean => {
@@ -28,6 +30,14 @@ export const evaluateAccess = (page: Page, session: PageSession, config: AccessE
 
   if (page.accessControl.authenticated && !session.isAuthenticated) {
     return { kind: 'redirect', to: config.loginRoute };
+  }
+
+  if (
+    config.forcePasswordChangeRoute &&
+    session.mustChangePassword &&
+    page.route !== config.forcePasswordChangeRoute
+  ) {
+    return { kind: 'redirect', to: config.forcePasswordChangeRoute };
   }
 
   if (page.accessControl.anonymousOnly && session.isAuthenticated) {

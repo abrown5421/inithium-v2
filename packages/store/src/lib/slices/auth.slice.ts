@@ -11,6 +11,7 @@ export interface AuthUser {
   readonly role: UserRole;
   readonly first_name?: string;
   readonly last_name?: string;
+  readonly mustChangePassword: boolean;
 }
 
 export interface AuthState {
@@ -28,7 +29,8 @@ const fromSanitizedUser = (user: SanitizedUser): AuthUser => ({
   email: user.email,
   role: user.role,
   first_name: user.first_name,
-  last_name: user.last_name
+  last_name: user.last_name,
+  mustChangePassword: user.mustChangePassword
 });
 
 const authSlice = createSlice({
