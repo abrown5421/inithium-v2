@@ -507,5 +507,56 @@
     "updatedAt": {
       "$date": "2026-08-11T18:00:11.631Z"
     }
+  },
+  {
+    "_id": {
+      "$oid": "6a848cd7bf62339aa5f6e899"
+    },
+    "id": "change-password",
+    "pageName": "Change Password",
+    "route": "/change-password",
+    "app": "cms",
+    "theme": {
+      "backgroundColor": "#ffffff",
+      "foregroundColor": "#000000"
+    },
+    "animations": {
+      "entrance": "fadeIn",
+      "exit": "fadeOut"
+    },
+    "accessControl": {
+      "authenticated": true,
+      "anonymousOnly": false,
+      "roles": [
+        "super-admin",
+        "admin",
+        "editor",
+        "writer"
+      ]
+    },
+    "flags": {
+      "isActive": true,
+      "isSystem": false
+    },
+    "metadata": {
+      "title": "Change Password",
+      "description": "Provide your current password and a new password to update the password used to login to your account",
+      "layout": "update-pw"
+    },
+    "navigation": [
+      {
+        "label": "Change My Password",
+        "location": "profile",
+        "order": 1,
+        "isButton": false,
+        "resolveNavPath": null
+      }
+    ],
+    "createdAt": {
+      "$date": "2026-08-18T16:48:23.403Z"
+    },
+    "updatedAt": {
+      "$date": "2026-08-18T16:48:23.403Z"
+    }
   }
 ]
