@@ -1,6 +1,11 @@
 import React from 'react';
 import { PageLayoutComponent } from '@inithium/pages';
-import { usePluginClientRegistry, getProfileTabContributions, mergeRegistryLists } from '@inithium/plugin-engine/client';
+import {
+  usePluginClientRegistry,
+  getProfileTabContributions,
+  getProfileInfoWidgetContributions,
+  mergeRegistryLists
+} from '@inithium/plugin-engine/client';
 import { Card, CardContent, Heading, Separator, Skeleton, Tabs, TabsContent, TabsList, TabsTrigger, Text } from '@inithium/ui';
 import { useParams } from 'react-router-dom';
 import { resolveAvatarInitials, useReadAllProfilesQuery, useReadAllSettingsQuery, useReadUserQuery } from '@inithium/store';
@@ -204,6 +209,9 @@ export const ProfilePage: PageLayoutComponent = () => {
   // Plugin-contributed tabs (e.g. Friends) lead; the two core tabs always trail last.
   const allTabs = mergeRegistryLists(getProfileTabContributions(pluginRegistry), PROFILE_TAB_REGISTRY);
   const activeTabs = resolveActiveProfileTabs(allTabs, tabContext);
+  const activeInfoWidgets = getProfileInfoWidgetContributions(pluginRegistry).filter((widget) =>
+    widget.enabled ? widget.enabled(tabContext) : true
+  );
 
   return (
     <div className="flex flex-col">
@@ -249,6 +257,18 @@ export const ProfilePage: PageLayoutComponent = () => {
               )}
 
               <Separator />
+
+              {activeInfoWidgets.length > 0 ? (
+                <>
+                  <div className="flex flex-col gap-4">
+                    {activeInfoWidgets.map((widget) => {
+                      const WidgetComponent = widget.component;
+                      return <WidgetComponent key={widget.id} context={tabContext} />;
+                    })}
+                  </div>
+                  <Separator />
+                </>
+              ) : null}
 
               {isProfileFetching ? (
                 <div className="flex flex-col gap-3">

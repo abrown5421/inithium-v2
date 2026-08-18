@@ -16,6 +16,12 @@ export interface ProfileTabDefinition {
   readonly enabled?: (context: ProfileTabContext) => boolean;
 }
 
+export interface ProfileInfoWidgetDefinition {
+  readonly id: string;
+  readonly component: ComponentType<{ readonly context: ProfileTabContext }>;
+  readonly enabled?: (context: ProfileTabContext) => boolean;
+}
+
 export interface WidgetContainerProps<TConfig> {
   readonly id: string;
   readonly config: TConfig;
@@ -46,6 +52,7 @@ export interface WidgetDefinition<TConfig> {
 export interface PluginClientModule extends PluginMeta {
   readonly pageLayouts?: PageLayoutRegistry;
   readonly profileTabs?: readonly ProfileTabDefinition[];
+  readonly profileInfoWidgets?: readonly ProfileInfoWidgetDefinition[];
   readonly widgets?: Readonly<Record<string, WidgetDefinition<never>>>;
   /**
    * Rendered once, unconditionally, for the lifetime of the app — for things that must stay live

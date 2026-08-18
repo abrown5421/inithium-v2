@@ -2,7 +2,12 @@ import type { ComponentType } from 'react';
 import type { PageLayoutRegistry } from '@inithium/pages';
 import { listEnabledPluginsInOrder } from '../registry/state.js';
 import type { PluginRegistryState } from '../registry/state.js';
-import type { PluginClientModule, ProfileTabDefinition, WidgetDefinition } from '../contracts/plugin-client.types.js';
+import type {
+  PluginClientModule,
+  ProfileInfoWidgetDefinition,
+  ProfileTabDefinition,
+  WidgetDefinition
+} from '../contracts/plugin-client.types.js';
 
 export const getPageLayoutContributions = (state: PluginRegistryState<PluginClientModule>): PageLayoutRegistry =>
   listEnabledPluginsInOrder(state).reduce<Record<string, PageLayoutRegistry[string]>>(
@@ -13,6 +18,11 @@ export const getPageLayoutContributions = (state: PluginRegistryState<PluginClie
 export const getProfileTabContributions = (
   state: PluginRegistryState<PluginClientModule>
 ): readonly ProfileTabDefinition[] => listEnabledPluginsInOrder(state).flatMap((plugin) => plugin.profileTabs ?? []);
+
+export const getProfileInfoWidgetContributions = (
+  state: PluginRegistryState<PluginClientModule>
+): readonly ProfileInfoWidgetDefinition[] =>
+  listEnabledPluginsInOrder(state).flatMap((plugin) => plugin.profileInfoWidgets ?? []);
 
 export const getWidgetDefinitionContributions = (
   state: PluginRegistryState<PluginClientModule>
