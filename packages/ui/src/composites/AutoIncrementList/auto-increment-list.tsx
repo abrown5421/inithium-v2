@@ -10,27 +10,6 @@ interface UncontrolledRow {
 
 const DEFAULT_ROW_CONTENT_CLASS_NAME = 'min-w-0 flex-1';
 
-/**
- * Vertical row list with add/remove affordances: the last row always shows only an increment
- * ("+") button, every row above it shows only a decrement ("-") button, and remove buttons are
- * always styled `destructive` (red) so add/remove read apart from each other at a glance. Two
- * modes:
- *
- * - Uncontrolled (`item` only, the original API): the list owns its own row count internally —
- *   `item` is the same node re-rendered per row, each mounting its own independent state, with no
- *   way for the caller to read the rows' contents back out.
- * - Controlled (`values`/`onValuesChange`/`createItem`/`renderItem`): the caller owns the row data
- *   as a plain array and this component only renders it and reports add/remove/edit back up —
- *   needed for anything (like a nested/recursive value editor) whose rows carry real state the
- *   caller must read, and whose row identity must stay stable independent of row position (via
- *   `getRowKey`), since re-keying by index would remount every row after an edit or removal.
- *
- * Each row uses `items-start` rather than centering, and the +/- button sits right after that
- * row's own content (see `getRowContentClassName`) rather than always being stretched to the
- * list's far edge — both matter once rows can be taller than one line (e.g. a "key + type" header
- * with an indented nested list below it): centering/stretching would otherwise land the button
- * somewhere in the middle of unrelated content instead of beside the row it actually acts on.
- */
 export function AutoIncrementList<T = unknown>({
   item,
   values,
@@ -87,7 +66,7 @@ export function AutoIncrementList<T = unknown>({
                 })}
               </div>
               <div className="flex shrink-0 items-center gap-1">
-                {isLastRow ? (
+                {isLastRow && (
                   <Button
                     type="button"
                     size="icon"
@@ -96,17 +75,16 @@ export function AutoIncrementList<T = unknown>({
                   >
                     <Plus className="size-4" />
                   </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    color="destructive"
-                    size="icon"
-                    aria-label="Remove row"
-                    onClick={() => onListChange(list.filter((_, i) => i !== index))}
-                  >
-                    <Minus className="size-4" />
-                  </Button>
                 )}
+                <Button
+                  type="button"
+                  color="destructive"
+                  size="icon"
+                  aria-label="Remove row"
+                  onClick={() => onListChange(list.filter((_, i) => i !== index))}
+                >
+                  <Minus className="size-4" />
+                </Button>
               </div>
             </div>
           );
@@ -135,7 +113,7 @@ export function AutoIncrementList<T = unknown>({
           >
             <div className={DEFAULT_ROW_CONTENT_CLASS_NAME}>{item}</div>
             <div className="flex shrink-0 items-center gap-1">
-              {isLastRow ? (
+              {isLastRow && (
                 <Button
                   type="button"
                   size="icon"
@@ -144,17 +122,16 @@ export function AutoIncrementList<T = unknown>({
                 >
                   <Plus className="size-4" />
                 </Button>
-              ) : (
-                <Button
-                  type="button"
-                  color="destructive"
-                  size="icon"
-                  aria-label="Remove row"
-                  onClick={() => handleDecrement(row.id)}
-                >
-                  <Minus className="size-4" />
-                </Button>
               )}
+              <Button
+                type="button"
+                color="destructive"
+                size="icon"
+                aria-label="Remove row"
+                onClick={() => handleDecrement(row.id)}
+              >
+                <Minus className="size-4" />
+              </Button>
             </div>
           </div>
         );
